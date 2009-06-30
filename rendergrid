@@ -24,9 +24,11 @@ from datagrid.core import DataGrid
 def main():
 
     # Configure & Parse Command-Line args
-    parser = OptionParser('Usage: %prog [OPTIONS] datafile.csv')
-    parser.add_option('-c', '--column', action='append') 
-    parser.add_option('--autocolumn', default=False)
+    parser = OptionParser('Usage: %prog [OPTIONS] DATAFILE')
+    parser.add_option('-c', '--column', action='append',
+            help='Set the column header') 
+    parser.add_option('-a', '--autocolumn', action='store_true',
+            help='Derive column headers from DATAFILE')
     options, args = parser.parse_args()
 
     try:
