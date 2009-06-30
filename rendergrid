@@ -23,13 +23,24 @@ from datagrid.core import DataGrid
 
 def main():
 
-    parser = OptionParser( 'Usage: %prog datafile.csv' )
+    # Configure & Parse Command-Line args
+    parser = OptionParser('Usage: %prog [OPTIONS] datafile.csv')
+    parser.add_option('-c', '--column', action='append') 
+    parser.add_option('--autocolumn', default=False)
     options, args = parser.parse_args()
 
-    grid = DataGrid(list(csv.reader(open(args[0]))))
+    try:
+        data = csv.reader(open(args[0]))    # load data file
+        columns = data.next() if options.autocolumn else options.column
+    except IndexError:
+        parser.error("No file was supplied")
+    except IOError:
+        parser.error("%s does not exist, or is inaccessable" % args[0])
+
+    grid = DataGrid(data,columns)
     print(grid.render())
 
 
-# Run in called directly
+# Run if called directly
 if __name__ == '__main__': main()
 
