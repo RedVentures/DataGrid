@@ -19,7 +19,7 @@
 
 import csv
 from optparse import OptionParser
-from datagrid import DataGrid
+from datagrid.core import DataGrid
 
 def main():
 
