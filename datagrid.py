@@ -1,4 +1,3 @@
-#!/bin/env python
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
@@ -17,8 +16,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-import json
-import cPickle
 import sys
 from functools import partial
 
@@ -27,28 +24,27 @@ class DataGrid(object):
     data = []
     aggregate = []
     totalAggLevels = 0
-    columns = None
+    columns = []
 
     tableFormat = """
-        <!--<script type="text/javascript" src="/global_js/jQuery/jQuery.1.2.3.js"></script>
-        <script type='text/javascript' src='/global_js/helper/datagrid.js'></script>-->
-        <link rel='stylesheet' type='text/css' href='/global_js/helper/datagrid.css' />
-        <table class='helper-gridview'>
-            <tbody>{body}</tbody>
-        </table>
+        <link rel='stylesheet' type='text/css' href='datagrid.css' />
+        <table class='helper-gridview'><tbody>{body}</tbody></table>
         """
     rowFormat = "<tr class='l-{level}'>{cells}</tr>"
-    aggRowFormat = "<tr class='l-{level}'>\
-            <td class='f' style='padding-left: {indent}px; padding-top: {level}px;'>\
-            <i>{aggname}:</i><span>{aggvalue}</span></td>{cells}</tr>"
+    aggRowFormat = """
+        <tr class='l-{level}'>
+            <td class='f' style='padding-left: {indent}px; 
+                    padding-top: {level}px;'>
+                <i>{aggname}:</i><span>{aggvalue}</span>
+            </td>
+            {cells}
+        </tr>
+        """
     cellFormat = "<td>{data}</td>"
 
-    def __init__(self, data, aggregate=[]):
-        # capture column names
-        self.columns = data[0].keys()
-
+    def __init__(self, data, columns=[], aggregate=[]):
         # convert data to tuple
-        self.data = [tuple(x.values()) for x in data]
+        self.data = data
 
         # save aggregation
         self.aggregate = aggregate
@@ -62,11 +58,13 @@ class DataGrid(object):
     def render_body(self,data,aggregate=[]):
         aggregateLen = len(aggregate)
 
-        # reference render_row method (use _agg version for aggregated reports)
-        render_method = self.render_row_agg if self.totalAggLevels else self.render_row
+        # reference render_row method
+        render_method = self.render_row_agg \
+            if self.totalAggLevels else self.render_row
         render_row = partial(render_method, aggregateLevel=aggregateLen)
-        rowArgs = {'aggname': '', 'aggvalue': '', 'indent': (self.totalAggLevels-aggregateLen+1)*20} \
-                if self.totalAggLevels else {}
+        rowArgs = {'aggname': '', 'aggvalue': '', 
+                'indent': (self.totalAggLevels-aggregateLen+1)*20} \
+            if self.totalAggLevels else {}
 
         if aggregateLen:
             # get unique values for aggregation requested
@@ -93,14 +91,6 @@ class DataGrid(object):
 
     def render_row_agg(self,data,aggregateLevel, **kargs):
         cells = ''.join(self.cellFormat.format(data=str(x)) for x in data)
-        return self.aggRowFormat.format(cells=cells, level=aggregateLevel, **kargs)
-        
-if __name__ == '__main__':
-    try:
-        grid = cPickle.load(file(sys.argv[1] + '.pickle','rb'))
-    except IOError:
-        grid = DataGrid(json.load(file(sys.argv[1])), ['MarketingCategoryName','MatchType'])
-        cPickle.dump(grid,file(sys.argv[1] + '.pickle','wb'),2)
-
-    print(grid.render())
+        return self.aggRowFormat.format(cells=cells, \
+                level=aggregateLevel, **kargs)
 
