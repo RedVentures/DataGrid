@@ -2,4 +2,4 @@ DataGrid
 ========
 Tabular Data Rendering Library
 
-_See render.py for usage information._
+_See rendergrid for usage information._
