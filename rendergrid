@@ -18,6 +18,7 @@
 #------------------------------------------------------------------------#
 
 import csv
+import sys
 from optparse import OptionParser
 from datagrid.core import DataGrid
 
@@ -29,8 +30,25 @@ def main():
             help='Set the column header') 
     parser.add_option('-a', '--autocolumn', action='store_true',
             help='Derive column headers from DATAFILE')
+    parser.add_option('--html', action='store_const', 
+            const='datagrid.html', dest='renderer',
+            help='Render HTML table')
+    parser.add_option('--text', action='store_const',
+            const='datagrid.ascii', dest='renderer',
+            help='Render Text (ASCII) table')
+    parser.add_option('--renderer', dest='renderer', 
+            default='datagrid.html', help='Use custom table renderer')
     options, args = parser.parse_args()
 
+    # Load table renderer
+    try:
+        __import__(options.renderer)
+        renderer = sys.modules[options.renderer]
+    except ImportError:
+        parser.error("%s table renderer could not be found" 
+                % options.renderer)
+
+    # Attempt to load datafile
     try:
         data = csv.reader(open(args[0]))    # load data file
         columns = data.next() if options.autocolumn else options.column
@@ -39,9 +57,8 @@ def main():
     except IOError:
         parser.error("%s does not exist, or is inaccessable" % args[0])
 
-    import datagrid.html
-
-    grid = DataGrid(data,datagrid.html,columns)
+    # Create datagrid instance and render to stdout
+    grid = DataGrid(data,renderer,columns)
     print(grid.render())
 
 
