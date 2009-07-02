@@ -39,7 +39,9 @@ def main():
     except IOError:
         parser.error("%s does not exist, or is inaccessable" % args[0])
 
-    grid = DataGrid(data,columns)
+    import datagrid.html
+
+    grid = DataGrid(data,datagrid.html,columns)
     print(grid.render())
 
 

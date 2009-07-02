@@ -25,26 +25,14 @@ class DataGrid(object):
     aggregate = []
     totalAggLevels = 0
     columns = []
+    renderer = None
 
-    tableFormat = """
-        <link rel='stylesheet' type='text/css' href='datagrid.css' />
-        <table class='helper-gridview'><tbody>{body}</tbody></table>
-        """
-    rowFormat = "<tr class='l-{level}'>{cells}</tr>"
-    aggRowFormat = """
-        <tr class='l-{level}'>
-            <td class='f' style='padding-left: {indent}px; 
-                    padding-top: {level}px;'>
-                <i>{aggname}:</i><span>{aggvalue}</span>
-            </td>
-            {cells}
-        </tr>
-        """
-    cellFormat = "<td>{data}</td>"
-
-    def __init__(self, data, columns=[], aggregate=[]):
+    def __init__(self, data, renderer, columns=[], aggregate=[]):
         # convert data to tuple
         self.data = data
+
+        # save renderer
+        self.renderer = renderer
 
         # save aggregation
         self.aggregate = aggregate
@@ -52,19 +40,11 @@ class DataGrid(object):
 
     def render(self):
         # render table and return
-        return self.tableFormat.format(
-                body=self.render_body(self.data, self.aggregate))
+        return self.renderer.table(
+                self.render_body(self.data, self.aggregate))
 
     def render_body(self,data,aggregate=[]):
         aggregateLen = len(aggregate)
-
-        # reference render_row method
-        render_method = self.render_row_agg \
-            if self.totalAggLevels else self.render_row
-        render_row = partial(render_method, aggregateLevel=aggregateLen)
-        rowArgs = {'aggname': '', 'aggvalue': '', 
-                'indent': (self.totalAggLevels-aggregateLen+1)*20} \
-            if self.totalAggLevels else {}
 
         if aggregateLen:
             # get unique values for aggregation requested
@@ -75,22 +55,17 @@ class DataGrid(object):
             output = []
             for value in values:
                 # update row args (agg name & value)
-                rowArgs.update(aggname=aggregate[0], aggvalue=value)
+                rowArgs = dict(aggname=aggregate[0], aggvalue=value)
                 subData = [x for x in data if x[idx] == value]
-                output.append(render_row(subData[0], **rowArgs))
+                output.append(self.render_row(subData[0], **rowArgs))
 
                 # render remainder of rows beneath aggregation level
                 output.append(self.render_body(subData, aggregate[1:]))
             return ''.join(output)
         else:
-            return '\n'.join(render_row(row, **rowArgs) for row in data)
+            return '\n'.join(self.render_row(row) for row in data)
     
-    def render_row(self,data,aggregateLevel):
-        cells = ''.join(self.cellFormat.format(data=str(x)) for x in data)
-        return self.rowFormat.format(cells=cells, level=aggregateLevel)
-
-    def render_row_agg(self,data,aggregateLevel, **kargs):
-        cells = ''.join(self.cellFormat.format(data=str(x)) for x in data)
-        return self.aggRowFormat.format(cells=cells, \
-                level=aggregateLevel, **kargs)
+    def render_row(self, data, aggregateLevel = 0, **kargs):
+        cells = ''.join(self.renderer.cell(str(x)) for x in data)
+        return self.renderer.row(cells, aggregateLevel, **kargs)
 
