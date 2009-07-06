@@ -16,32 +16,28 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-"""HTML Table Rendering Module"""
+"""Base Renderer Class"""
 
-import datagrid.renderer
+from abc import ABCMeta, abstractmethod
 
-class Renderer(datagrid.renderer.Renderer):
+class Renderer(object):
+    __metaclass__ = ABCMeta
 
-    def table(self, body):
-        return """
-            <table class='helper-gridview'><tbody>{0}</tbody></table>
-            """.format(body)
+    columns = None
+    aggregation = None
+    
+    @abstractmethod
+    def table(self, body): pass
 
-    def row(self, cells, level, name=None, value=None):
-        indent = ((len(self.aggregation) - level) * 5) + 2
-        return """
-        <tr class='l-{0}'>
-            <td class='f' style='padding-left: {1}em; 
-                    padding-top: {0}px;'>
-                <i>{2}:</i><span>{3}</span>
-            </td>
-            {4}
-        </tr>
-        """.format(level, indent, name, value, cells)
+    @abstractmethod
+    def row(self, level, name=None, value=None): pass
 
-    def cell(self, data, maxwidth): return "<td>{0}</td>".format(data)
+    @abstractmethod
+    def cell(self, data, maxwidth): pass
 
-    def head(self): return ''
+    @abstractmethod
+    def head(self): pass
 
-    def tail(self): return ''
+    @abstractmethod
+    def tail(self): pass
 
