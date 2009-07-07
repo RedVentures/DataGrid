@@ -30,7 +30,7 @@ class Renderer(object):
     def table(self, body): pass
 
     @abstractmethod
-    def row(self, level, name=None, value=None): pass
+    def row(self, cells, level, name=None, value=None): pass
 
     @abstractmethod
     def cell(self, data, maxwidth): pass
@@ -39,5 +39,5 @@ class Renderer(object):
     def head(self): pass
 
     @abstractmethod
-    def tail(self): pass
+    def tail(self, cells): pass
 

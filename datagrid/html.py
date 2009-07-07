@@ -57,15 +57,13 @@ class Renderer(datagrid.renderer.Renderer):
         <thead><tr><th>Heading</th></tr></thead>
         """
         return "<thead><tr>{0}</tr></thead>".format(
-                ''.join("<th>{0}</th>".format(x) for x in self.columns)
-                )
-        
+                ''.join("<th>{0}</th>".format(x) for x in self.columns) )
 
-    def tail(self):
+    def tail(self, cells):
         """
         >>> r = Renderer()
-        >>> r.columns = ('Heading',)
-        >>> print r.head()
+        >>> print r.tail("<td></td>")
         <tfoot><tr><td></td></tr></tfoot>
         """
-        return ''
+        return "<tfoot><tr>{0}</tr></tfoot>".format(cells)
+
