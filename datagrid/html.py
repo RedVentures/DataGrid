@@ -24,8 +24,10 @@ class Renderer(datagrid.renderer.Renderer):
 
     def table(self, body):
         return """
-            <table class='helper-gridview'><tbody>{0}</tbody></table>
-            """.format(body)
+            <table class='helper-gridview' cols='{1}'>
+                <tbody>{0}</tbody>
+            </table>
+            """.format(body, len(self.columns))
 
     def row(self, cells, level, name=None, value=None):
         indent = ((len(self.aggregation) - level) * 5) + 2
@@ -39,7 +41,8 @@ class Renderer(datagrid.renderer.Renderer):
         </tr>
         """.format(level, indent, name, value, cells)
 
-    def cell(self, data, maxwidth): return "<td>{0}</td>".format(data)
+    def cell(self, data, maxwidth): 
+        return "<td>{0}</td>".format(data, maxwidth)
 
     def head(self): return ''
 

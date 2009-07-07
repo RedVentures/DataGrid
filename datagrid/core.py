@@ -30,10 +30,13 @@ class DataGrid(object):
     renderer = None
 
     def __init__(self, data, renderer, columns=[], aggregate=[]):
+        # cement data
+        data = tuple(data)
+
         # setup renderer
         renderer.aggregation = tuple(aggregate)
         try: renderer.columns = tuple(columns)
-        except TypeError: renderer.columns = tuple()
+        except TypeError: renderer.columns = tuple(range(len(data[0])))
 
         # set instance vars
         self.data = list(data)
