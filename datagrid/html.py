@@ -32,13 +32,13 @@ class Renderer(datagrid.renderer.Renderer):
     def row(self, cells, level, name=None, value=None):
         indent = ((len(self.aggregation) - level) * 5) + 2
         return """
-        <tr class='l-{0}'>
-            <td class='f' style='padding-left: {1}em; 
-                    padding-top: {0}px;'>
-                <i>{2}:</i><span>{3}</span>
-            </td>
-            {4}
-        </tr>
+            <tr class='l-{0}'>
+                <td class='f' style='padding-left: {1}em; 
+                        padding-top: {0}px;'>
+                    <i>{2}:</i><span>{3}</span>
+                </td>
+                {4}
+            </tr>
         """.format(level, indent, name, value, cells)
 
     def cell(self, data, maxwidth): 
@@ -56,7 +56,10 @@ class Renderer(datagrid.renderer.Renderer):
         >>> print r.head()
         <thead><tr><th>Heading</th></tr></thead>
         """
-        return ''
+        return "<thead><tr>{0}</tr></thead>".format(
+                ''.join("<th>{0}</th>".format(x) for x in self.columns)
+                )
+        
 
     def tail(self):
         """
