@@ -25,20 +25,27 @@ def table(config, body):
         </table>
         """.format(body, len(config.columns))
 
-def row(config, cells, level, name=None, value=None):
-    indent = ((len(config.aggregate) - level) * 5) + 2
-    return """
-        <tr class='l-{0}'>
-            <td class='f' style='padding-left: {1}em; 
-                    padding-top: {0}px;'>
-                <i>{2}:</i><span>{3}</span>
-            </td>
-            {4}
-        </tr>
-    """.format(level, indent, name, value, cells)
+def row(config, cells, level=0, name=None, value=None):
+    """
+    Generate table row segment
+    
+    Example (flat table):
+    >>> from collections import namedtuple
+    >>> cfg = namedtuple('Cfg', 'aggregate')([])
+    >>> print row(cfg, '<td></td>')
+    <tr><td></td></tr>
+    """
+    if config.aggregate:
+        indent = ((len(config.aggregate) - level) * 5) + 2
+        return "<tr class='l-{0}'><td><i>{2}:</i><span>{3}</span></td>{4}</tr>".format(
+                level, indent, name, value, cells)
+    else: return "<tr>{0}</tr>".format(cells)
 
 def cell(config, data, maxwidth): 
     """
+    Generate table cell segment
+
+    Example:
     >>> print cell(None,'foo',2)
     <td>foo</td>
     """
@@ -46,16 +53,22 @@ def cell(config, data, maxwidth):
 
 def head(config):
     """
+    Generate table head segment
+
+    Example:
     >>> from collections import namedtuple
     >>> cfg = namedtuple('Cfg', 'columns')(('Heading',))
     >>> print head(cfg)
     <thead><tr><th>Heading</th></tr></thead>
     """
-    return "<thead><tr>{0}</tr></thead>".format(
-            ''.join("<th>{0}</th>".format(x) for x in config.columns) )
+    cells = ''.join("<th>{0}</th>".format(x) for x in config.columns)
+    return "<thead><tr>{0}</tr></thead>".format(cells)
 
 def tail(config, cells):
     """
+    Generate table tail segment
+
+    Example:
     >>> print tail(None,"<td></td>")
     <tfoot><tr><td></td></tr></tfoot>
     """
