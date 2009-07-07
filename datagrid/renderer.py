@@ -23,8 +23,8 @@ from abc import ABCMeta, abstractmethod
 class Renderer(object):
     __metaclass__ = ABCMeta
 
-    columns = None
-    aggregation = None
+    columns = tuple()
+    aggregation = tuple()
     
     @abstractmethod
     def table(self, body): pass
