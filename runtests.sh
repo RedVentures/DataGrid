@@ -1,2 +1,2 @@
 #!/bin/env bash
-python -m doctest -v datagrid/*.py
+python -m doctest datagrid/*.py && echo "All tests passed"
