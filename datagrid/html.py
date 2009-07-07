@@ -42,9 +42,27 @@ class Renderer(datagrid.renderer.Renderer):
         """.format(level, indent, name, value, cells)
 
     def cell(self, data, maxwidth): 
+        """
+        >>> r = Renderer();
+        >>> print r.cell('foo',2)
+        <td>foo</td>
+        """
         return "<td>{0}</td>".format(data, maxwidth)
 
-    def head(self): return ''
+    def head(self):
+        """
+        >>> r = Renderer()
+        >>> r.columns = ('Heading',)
+        >>> print r.head()
+        <thead><tr><th>Heading</th></tr></thead>
+        """
+        return ''
 
-    def tail(self): return ''
-
+    def tail(self):
+        """
+        >>> r = Renderer()
+        >>> r.columns = ('Heading',)
+        >>> print r.head()
+        <tfoot><tr><td></td></tr></tfoot>
+        """
+        return ''
