@@ -65,7 +65,7 @@ class Renderer(datagrid.renderer.Renderer):
         """
         >>> r = Renderer()
         >>> r.columns = ('Heading',)
-        >>> print r.head()
+        >>> print r.tail()
         <tfoot><tr><td></td></tr></tfoot>
         """
         return ''
