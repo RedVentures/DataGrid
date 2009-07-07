@@ -33,11 +33,6 @@ class DataGrid(object):
         # cement data
         data = tuple(data)
 
-        # setup renderer
-        renderer.aggregation = tuple(aggregate)
-        try: renderer.columns = tuple(columns)
-        except TypeError: renderer.columns = tuple(range(len(data[0])))
-
         # set instance vars
         self.data = list(data)
         self.renderer = renderer
@@ -48,7 +43,7 @@ class DataGrid(object):
 
     def render(self):
         # render table and return
-        return self.renderer.table(
+        return self.renderer.table(self,
                 self.render_body(self.data, self.aggregate))
 
     def render_body(self,data,aggregate=[]):
@@ -74,9 +69,9 @@ class DataGrid(object):
             return '\n'.join(self.render_row(row) for row in data)
     
     def render_row(self, data, aggregateLevel = 0, **kargs):
-        cells = ''.join(self.renderer.cell(str(v), self.column_width(k)) 
+        cells = ''.join(self.renderer.cell(self, str(v), self.column_width(k)) 
                 for k, v in enumerate(data))
-        return self.renderer.row(cells, aggregateLevel, **kargs)
+        return self.renderer.row(self, cells, aggregateLevel, **kargs)
 
     def column_width(self, i):
         try: return self.columnWidths[i]

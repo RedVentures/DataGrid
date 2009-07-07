@@ -18,52 +18,46 @@
 
 """HTML Table Rendering Module"""
 
-import datagrid.renderer
+def table(config, body):
+    return """
+        <table class='helper-gridview' cols='{1}'>
+            <tbody>{0}</tbody>
+        </table>
+        """.format(body, len(config.columns))
 
-class Renderer(datagrid.renderer.Renderer):
+def row(config, cells, level, name=None, value=None):
+    indent = ((len(config.aggregate) - level) * 5) + 2
+    return """
+        <tr class='l-{0}'>
+            <td class='f' style='padding-left: {1}em; 
+                    padding-top: {0}px;'>
+                <i>{2}:</i><span>{3}</span>
+            </td>
+            {4}
+        </tr>
+    """.format(level, indent, name, value, cells)
 
-    def table(self, body):
-        return """
-            <table class='helper-gridview' cols='{1}'>
-                <tbody>{0}</tbody>
-            </table>
-            """.format(body, len(self.columns))
+def cell(config, data, maxwidth): 
+    """
+    >>> print cell(None,'foo',2)
+    <td>foo</td>
+    """
+    return "<td>{0}</td>".format(data, maxwidth)
 
-    def row(self, cells, level, name=None, value=None):
-        indent = ((len(self.aggregation) - level) * 5) + 2
-        return """
-            <tr class='l-{0}'>
-                <td class='f' style='padding-left: {1}em; 
-                        padding-top: {0}px;'>
-                    <i>{2}:</i><span>{3}</span>
-                </td>
-                {4}
-            </tr>
-        """.format(level, indent, name, value, cells)
+def head(config):
+    """
+    >>> from collections import namedtuple
+    >>> cfg = namedtuple('Cfg', 'columns')(('Heading',))
+    >>> print head(cfg)
+    <thead><tr><th>Heading</th></tr></thead>
+    """
+    return "<thead><tr>{0}</tr></thead>".format(
+            ''.join("<th>{0}</th>".format(x) for x in config.columns) )
 
-    def cell(self, data, maxwidth): 
-        """
-        >>> r = Renderer();
-        >>> print r.cell('foo',2)
-        <td>foo</td>
-        """
-        return "<td>{0}</td>".format(data, maxwidth)
-
-    def head(self):
-        """
-        >>> r = Renderer()
-        >>> r.columns = ('Heading',)
-        >>> print r.head()
-        <thead><tr><th>Heading</th></tr></thead>
-        """
-        return "<thead><tr>{0}</tr></thead>".format(
-                ''.join("<th>{0}</th>".format(x) for x in self.columns) )
-
-    def tail(self, cells):
-        """
-        >>> r = Renderer()
-        >>> print r.tail("<td></td>")
-        <tfoot><tr><td></td></tr></tfoot>
-        """
-        return "<tfoot><tr>{0}</tr></tfoot>".format(cells)
+def tail(config, cells):
+    """
+    >>> print tail(None,"<td></td>")
+    <tfoot><tr><td></td></tr></tfoot>
+    """
+    return "<tfoot><tr>{0}</tr></tfoot>".format(cells)
 

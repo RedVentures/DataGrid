@@ -58,7 +58,7 @@ def main():
         parser.error("%s does not exist, or is inaccessable" % args[0])
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer.Renderer(),columns)
+    grid = DataGrid(data,renderer,columns)
     print(grid.render())
 
 
