@@ -66,7 +66,7 @@ class DataGrid(object):
                 output.append(self.render_body(subData, aggregate[1:]))
             return ''.join(output)
         else:
-            return '\n'.join(self.render_row(row) for row in data)
+            return ''.join(self.render_row(row) for row in data)
     
     def render_row(self, data, aggregateLevel = 0, **kargs):
         cells = ''.join(self.renderer.cell(self, str(v), self.column_width(k)) 

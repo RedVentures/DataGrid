@@ -32,8 +32,8 @@ def row(config, cells, level=0, name=None, value=None):
     Example (flat table):
     >>> from collections import namedtuple
     >>> cfg = namedtuple('Cfg', 'aggregate')([])
-    >>> print row(cfg, '<td></td>')
-    <tr><td></td></tr>
+    >>> row(cfg, '<td></td>')
+    '<tr><td></td></tr>'
     """
     if config.aggregate:
         indent = ((len(config.aggregate) - level) * 5) + 2
@@ -46,8 +46,8 @@ def cell(config, data, maxwidth):
     Generate table cell segment
 
     Example:
-    >>> print cell(None,'foo',2)
-    <td>foo</td>
+    >>> cell(None,'foo',2)
+    '<td>foo</td>'
     """
     return "<td>{0}</td>".format(data, maxwidth)
 
@@ -58,8 +58,8 @@ def head(config):
     Example:
     >>> from collections import namedtuple
     >>> cfg = namedtuple('Cfg', 'columns')(('Heading',))
-    >>> print head(cfg)
-    <thead><tr><th>Heading</th></tr></thead>
+    >>> head(cfg)
+    '<thead><tr><th>Heading</th></tr></thead>'
     """
     cells = ''.join("<th>{0}</th>".format(x) for x in config.columns)
     return "<thead><tr>{0}</tr></thead>".format(cells)
@@ -69,8 +69,8 @@ def tail(config, cells):
     Generate table tail segment
 
     Example:
-    >>> print tail(None,"<td></td>")
-    <tfoot><tr><td></td></tr></tfoot>
+    >>> tail(None,"<td></td>")
+    '<tfoot><tr><td></td></tr></tfoot>'
     """
     return "<tfoot><tr>{0}</tr></tfoot>".format(cells)
 
