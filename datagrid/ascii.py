@@ -64,5 +64,16 @@ def head(config):
     return heading + '\n' + border
 
 def tail(config, cells):
-    return ''
+    """
+    Generate the Footer Row
+
+    Example:
+    >>> from collections import namedtuple
+    >>> cfg = namedtuple('Cfg', ('maxwidths',))((10,))
+    >>> tail(cfg,'My Data')
+    '=============\\nMy Data'
+    """
+    maxwidth = sum(config.maxwidths) + len(config.maxwidths)*3
+    border = '=' * maxwidth
+    return border + '\n' + cells
 
