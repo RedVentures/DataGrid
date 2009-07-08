@@ -18,15 +18,15 @@
 
 """ASCII Table Rendering Module"""
 
-def table(config, body):
+def table(config, head, body, tail):
     """
     Generate ASCII table
 
     Example:
-    >>> table(None, 'table body')
-    'table body'
+    >>> table(None, 'head', 'body', 'tail')
+    'headbodytail'
     """
-    return body
+    return head + body + tail
 
 def row(config, cells, level=0, name=None, value=None):
     """
@@ -54,14 +54,14 @@ def head(config):
 
     Example:
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', ('columns', 'maxwidths'))(('Heading',), (10,))
+    >>> cfg = namedtuple('Cfg', ('columns', 'columnWidths'))(('Heading',), (10,))
     >>> head(cfg)
-    'Heading   \\n============='
+    'Heading      \\n=============\\n'
     """
-    maxwidth = sum(config.maxwidths) + len(config.maxwidths)*3
-    heading = ''.join(v.ljust(config.maxwidths[k]) for k, v in enumerate(config.columns))
+    maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
+    heading = ''.join(v.ljust(config.columnWidths[k] + 3) for k, v in enumerate(config.columns))
     border = '=' * maxwidth
-    return heading + '\n' + border
+    return heading + '\n' + border + '\n'
 
 def tail(config, cells):
     """
@@ -69,11 +69,11 @@ def tail(config, cells):
 
     Example:
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', ('maxwidths',))((10,))
+    >>> cfg = namedtuple('Cfg', ('columnWidths',))((10,))
     >>> tail(cfg,'My Data')
     '=============\\nMy Data'
     """
-    maxwidth = sum(config.maxwidths) + len(config.maxwidths)*3
+    maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
     border = '=' * maxwidth
     return border + '\n' + cells
 

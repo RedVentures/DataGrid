@@ -18,12 +18,13 @@
 
 """HTML Table Rendering Module"""
 
-def table(config, body):
+def table(config, head, body, tail):
     return """
-        <table class='helper-gridview' cols='{1}'>
-            <tbody>{0}</tbody>
+        <table class='helper-gridview' cols='{2}'>
+            {0}
+            <tbody>{1}</tbody>
         </table>
-        """.format(body, len(config.columns))
+        """.format(head, body, len(config.columns))
 
 def row(config, cells, level=0, name=None, value=None):
     """

@@ -35,6 +35,7 @@ class DataGrid(object):
 
         # set instance vars
         self.data = list(data)
+        self.columns = columns if columns is not None else []
         self.renderer = renderer
         self.aggregate = aggregate
         self.totalAggLevels = len(aggregate)
@@ -44,7 +45,10 @@ class DataGrid(object):
     def render(self):
         # render table and return
         return self.renderer.table(self,
-                self.render_body(self.data, self.aggregate))
+                self.renderer.head(self),
+                self.render_body(self.data, self.aggregate),
+                self.renderer.tail(self, '')
+                )
 
     def render_body(self,data,aggregate=[]):
         aggregateLen = len(aggregate)
