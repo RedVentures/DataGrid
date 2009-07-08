@@ -49,7 +49,19 @@ def cell(config, data, maxwidth):
     return data.ljust(maxwidth+3)
 
 def head(config):
-    return ''
+    """
+    Generate the Header Row
+
+    Example:
+    >>> from collections import namedtuple
+    >>> cfg = namedtuple('Cfg', ('columns', 'maxwidths'))(('Heading',), (10,))
+    >>> head(cfg)
+    'Heading   \\n============='
+    """
+    maxwidth = sum(config.maxwidths) + len(config.maxwidths)*3
+    heading = ''.join(v.ljust(config.maxwidths[k]) for k, v in enumerate(config.columns))
+    border = '=' * maxwidth
+    return heading + '\n' + border
 
 def tail(config, cells):
     return ''
