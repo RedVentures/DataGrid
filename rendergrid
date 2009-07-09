@@ -28,7 +28,9 @@ def main():
     parser = OptionParser('Usage: %prog [OPTIONS] DATAFILE')
     parser.add_option('-c', '--column', action='append',
             help='Set the column header') 
-    parser.add_option('-a', '--autocolumn', action='store_true',
+    parser.add_option('-a', '--aggregate', action='append',
+            help='Set the report aggregation', default=[])
+    parser.add_option('-A', '--autocolumn', action='store_true',
             help='Derive column headers from DATAFILE')
     parser.add_option('--html', action='store_const', 
             const='datagrid.html', dest='renderer',
@@ -58,7 +60,7 @@ def main():
         parser.error("%s does not exist, or is inaccessable" % args[0])
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns)
+    grid = DataGrid(data,renderer,columns,options.aggregate)
     print(grid.render())
 
 
