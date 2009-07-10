@@ -61,7 +61,7 @@ class DataGrid(object):
             output = []
             for value in values:
                 # update row args (agg name & value)
-                rowArgs = dict(aggname=aggregate[0], aggvalue=value)
+                rowArgs = dict(name=aggregate[0], value=value)
                 subData = [x for x in data if x[idx] == value]
                 output.append(self.render_row(subData[0], **rowArgs))
 
