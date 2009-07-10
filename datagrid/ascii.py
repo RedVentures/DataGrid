@@ -35,8 +35,15 @@ class Renderer(datagrid.renderer.Renderer):
         Complete setup tasks for a successful render
         """
         self.config = config
-        self.columnwidths = tuple(max(len(data) for data in vals) 
-                for vals in izip(*config.data))
+        columnwidths = [max(len(data) for data in vals) 
+                for vals in izip(*config.data)]
+
+        # Check for longer columns in header row
+        for idx, width in enumerate(columnwidths):
+            columnwidths[idx] = max((len(config.columns[idx]), width))
+
+        # Save found max in instance
+        self.columnwidths = tuple(columnwidths)
 
     def table(self, config, head, body, tail):
         """
