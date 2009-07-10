@@ -46,6 +46,9 @@ def main():
     try:
         __import__(options.renderer)
         renderer = sys.modules[options.renderer]
+
+        # Check for 'Renderer' class, otherwise use loaded module
+        if hasattr(renderer, 'Renderer'): renderer = renderer.Renderer()
     except ImportError:
         parser.error("%s table renderer could not be found" 
                 % options.renderer)

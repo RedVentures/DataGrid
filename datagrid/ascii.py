@@ -18,62 +18,77 @@
 
 """ASCII Table Rendering Module"""
 
-def table(config, head, body, tail):
-    """
-    Generate ASCII table
+import datagrid.renderer
 
-    Example:
-    >>> table(None, 'head', 'body', 'tail')
-    'headbodytail'
+class Renderer(datagrid.renderer.Renderer):
     """
-    return head + body + tail
+    ASCII/Text Table Renderer
+    """
 
-def row(config, cells, level=0, name=None, value=None):
-    """
-    Generate ASCII Table Row
+    # Calculated max str-lens of each table column
+    max_column_widths = tuple()
 
-    Example:
-    >>> row(None, 'table cells')
-    'table cells\\n'
-    """
-    return cells + '\n'
+    def table(self, config, head, body, tail):
+        """
+        Generate ASCII table
 
-def cell(config, data, maxwidth):
-    """
-    Generate ASCII Table Cell
-    
-    Example:
-    >>> cell(None, 'cell data', 10)
-    'cell data    '
-    """
-    return data.ljust(maxwidth+3)
+        Example:
+        >>> r = Renderer()
+        >>> r.table(None, 'head', 'body', 'tail')
+        'headbodytail'
+        """
+        return head + body + tail
 
-def head(config):
-    """
-    Generate the Header Row
+    def row(self, config, cells, level=0, name=None, value=None):
+        """
+        Generate ASCII Table Row
 
-    Example:
-    >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', ('columns', 'columnWidths'))(('Heading',), (10,))
-    >>> head(cfg)
-    'Heading      \\n=============\\n'
-    """
-    maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
-    heading = ''.join(v.ljust(config.columnWidths[k] + 3) for k, v in enumerate(config.columns))
-    border = '=' * maxwidth
-    return heading + '\n' + border + '\n'
+        Example:
+        >>> r = Renderer()
+        >>> r.row(None, 'table cells')
+        'table cells\\n'
+        """
+        return cells + '\n'
 
-def tail(config, cells):
-    """
-    Generate the Footer Row
+    def cell(self, config, data, maxwidth):
+        """
+        Generate ASCII Table Cell
+        
+        Example:
+        >>> r = Renderer()
+        >>> r.cell(None, 'cell data', 10)
+        'cell data    '
+        """
+        return data.ljust(maxwidth+3)
 
-    Example:
-    >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', ('columnWidths',))((10,))
-    >>> tail(cfg,'My Data')
-    '=============\\nMy Data'
-    """
-    maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
-    border = '=' * maxwidth
-    return border + '\n' + cells
+    def head(self, config):
+        """
+        Generate the Header Row
+
+        Example:
+        >>> from collections import namedtuple
+        >>> cfg = namedtuple('Cfg', ('columns', 'columnWidths'))(('Heading',), (10,))
+        >>> r = Renderer()
+        >>> r.head(cfg)
+        'Heading      \\n=============\\n'
+        """
+        maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
+        heading = ''.join(v.ljust(config.columnWidths[k] + 3) for k, v in enumerate(config.columns))
+        border = '=' * maxwidth
+        return heading + '\n' + border + '\n'
+
+    def tail(self, config, cells):
+        """
+        Generate the Footer Row
+
+        Example:
+        >>> from collections import namedtuple
+        >>> cfg = namedtuple('Cfg', ('columnWidths',))((10,))
+        >>> r = Renderer()
+        >>> r.tail(cfg,'My Data')
+        '=============\\nMy Data'
+        """
+        maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
+        border = '=' * maxwidth
+        return border + '\n' + cells
 
