@@ -23,6 +23,10 @@ from abc import ABCMeta, abstractmethod
 class Renderer(object):
     __metaclass__ = ABCMeta
 
+    def setup(self):
+        """Optional setup method"""
+        pass
+
     @abstractmethod
     def table(self, config, head, body, tail): 
         """Generate table's outer display"""
@@ -34,7 +38,7 @@ class Renderer(object):
         pass
 
     @abstractmethod
-    def cell(self, config, data, maxwidth): 
+    def cell(self, config, data, column): 
         """Generate table cell"""
         pass
 

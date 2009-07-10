@@ -18,6 +18,7 @@
 
 """ASCII Table Rendering Module"""
 
+from itertools import izip
 import datagrid.renderer
 
 class Renderer(datagrid.renderer.Renderer):
@@ -26,7 +27,14 @@ class Renderer(datagrid.renderer.Renderer):
     """
 
     # Calculated max str-lens of each table column
-    max_column_widths = tuple()
+    columnwidths = tuple()
+
+    def setup(self, config):
+        """
+        Complete setup tasks for a successful render
+        """
+        self.columnwidths = tuple(max(len(data) for data in vals) 
+                for vals in izip(*config.data))
 
     def table(self, config, head, body, tail):
         """
@@ -50,16 +58,17 @@ class Renderer(datagrid.renderer.Renderer):
         """
         return cells + '\n'
 
-    def cell(self, config, data, maxwidth):
+    def cell(self, config, data, column):
         """
         Generate ASCII Table Cell
         
         Example:
         >>> r = Renderer()
-        >>> r.cell(None, 'cell data', 10)
+        >>> r.columnwidths = (10,)
+        >>> r.cell(None, 'cell data', 0)
         'cell data    '
         """
-        return data.ljust(maxwidth+3)
+        return data.ljust(self.column_width(column)+3)
 
     def head(self, config):
         """
@@ -67,13 +76,15 @@ class Renderer(datagrid.renderer.Renderer):
 
         Example:
         >>> from collections import namedtuple
-        >>> cfg = namedtuple('Cfg', ('columns', 'columnWidths'))(('Heading',), (10,))
+        >>> cfg = namedtuple('Cfg', ('columns',))(('Heading',))
         >>> r = Renderer()
+        >>> r.columnwidths = (10,)
         >>> r.head(cfg)
         'Heading      \\n=============\\n'
         """
-        maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
-        heading = ''.join(v.ljust(config.columnWidths[k] + 3) for k, v in enumerate(config.columns))
+        maxwidth = sum(self.columnwidths) + len(self.columnwidths)*3
+        heading = ''.join(v.ljust(self.columnwidths[k] + 3) 
+                for k, v in enumerate(config.columns))
         border = '=' * maxwidth
         return heading + '\n' + border + '\n'
 
@@ -82,13 +93,19 @@ class Renderer(datagrid.renderer.Renderer):
         Generate the Footer Row
 
         Example:
-        >>> from collections import namedtuple
-        >>> cfg = namedtuple('Cfg', ('columnWidths',))((10,))
         >>> r = Renderer()
-        >>> r.tail(cfg,'My Data')
+        >>> r.columnwidths = (10,)
+        >>> r.tail(None,'My Data')
         '=============\\nMy Data'
         """
-        maxwidth = sum(config.columnWidths) + len(config.columnWidths)*3
+        maxwidth = sum(self.columnwidths) + len(self.columnwidths)*3
         border = '=' * maxwidth
         return border + '\n' + cells
 
+    def column_width(self, i):
+        """
+        Return column width for requested column
+        """
+        try: return self.columnwidths[i]
+        except IndexError: return 0
+        

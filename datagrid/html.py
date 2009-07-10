@@ -38,11 +38,11 @@ def row(config, cells, level=0, name=None, value=None):
     """
     if config.aggregate:
         indent = ((len(config.aggregate) - level) * 5) + 2
-        return "<tr class='l-{0}'><td><i>{2}:</i><span>{3}</span></td>{4}</tr>".format(
-                level, indent, name, value, cells)
+        row = "<tr class='l-{0}'><td><i>{2}:</i><span>{3}</span></td>{4}</tr>"
+        return row.format(level, indent, name, value, cells)
     else: return "<tr>{0}</tr>".format(cells)
 
-def cell(config, data, maxwidth): 
+def cell(config, data, column): 
     """
     Generate table cell segment
 
@@ -50,7 +50,7 @@ def cell(config, data, maxwidth):
     >>> cell(None,'foo',2)
     '<td>foo</td>'
     """
-    return "<td>{0}</td>".format(data, maxwidth)
+    return "<td>{0}</td>".format(data)
 
 def head(config):
     """

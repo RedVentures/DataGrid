@@ -18,7 +18,6 @@
 
 import sys
 from functools import partial
-from itertools import izip
 
 class DataGrid(object):
     
@@ -26,7 +25,6 @@ class DataGrid(object):
     aggregate = []
     totalAggLevels = 0
     columns = []
-    columnWidths = []
     renderer = None
 
     def __init__(self, data, renderer, columns=[], aggregate=[]):
@@ -39,8 +37,9 @@ class DataGrid(object):
         self.renderer = renderer
         self.aggregate = aggregate
         self.totalAggLevels = len(aggregate)
-        self.columnWidths = tuple(max(len(data) for data in vals) 
-                for vals in izip(*self.data))
+
+        # call render-setup (if we have one)
+        if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
 
     def render(self):
         # render table and return
@@ -73,11 +72,7 @@ class DataGrid(object):
             return ''.join(self.render_row(row) for row in data)
     
     def render_row(self, data, aggregateLevel = 0, **kargs):
-        cells = ''.join(self.renderer.cell(self, str(v), self.column_width(k)) 
+        cells = ''.join(self.renderer.cell(self, str(v), k) 
                 for k, v in enumerate(data))
         return self.renderer.row(self, cells, aggregateLevel, **kargs)
-
-    def column_width(self, i):
-        try: return self.columnWidths[i]
-        except IndexError: return 0
 
