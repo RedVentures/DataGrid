@@ -28,11 +28,13 @@ class Renderer(datagrid.renderer.Renderer):
 
     # Calculated max str-lens of each table column
     columnwidths = tuple()
+    config = None
 
     def setup(self, config):
         """
         Complete setup tasks for a successful render
         """
+        self.config = config
         self.columnwidths = tuple(max(len(data) for data in vals) 
                 for vals in izip(*config.data))
 
@@ -52,11 +54,19 @@ class Renderer(datagrid.renderer.Renderer):
         Generate ASCII Table Row
 
         Example:
+        >>> from collections import namedtuple
+        >>> cfg = namedtuple('Cfg', 'aggregate')(tuple())
         >>> r = Renderer()
-        >>> r.row(None, 'table cells')
+        >>> r.row(cfg, 'table cells')
         'table cells\\n'
         """
-        return cells + '\n'
+        if config.aggregate:
+            levels = len(config.aggregate)
+            indent = ((levels - level) * '|').ljust(levels + 1) + ' '
+            row = indent + cells + '\n'
+            if level > 0: return indent + name + ': ' + value + '\n' + row
+            else: return row
+        else: return cells + '\n'
 
     def cell(self, config, data, column):
         """
@@ -76,8 +86,9 @@ class Renderer(datagrid.renderer.Renderer):
 
         Example:
         >>> from collections import namedtuple
-        >>> cfg = namedtuple('Cfg', ('columns',))(('Heading',))
+        >>> cfg = namedtuple('Cfg', 'columns aggregate')(('Heading',),tuple())
         >>> r = Renderer()
+        >>> r.config = cfg
         >>> r.columnwidths = (10,)
         >>> r.head(cfg)
         'Heading      \\n=============\\n'
@@ -86,26 +97,38 @@ class Renderer(datagrid.renderer.Renderer):
         heading = ''.join(v.ljust(self.columnwidths[k] + 3) 
                 for k, v in enumerate(config.columns))
         border = '=' * maxwidth
-        return heading + '\n' + border + '\n'
+        indent = self.aggregate_indent()
+        return indent + heading + '\n' + indent + border + '\n'
 
     def tail(self, config, cells):
         """
         Generate the Footer Row
 
         Example:
+        >>> from collections import namedtuple
+        >>> Cfg = namedtuple('Cfg', 'aggregate')
         >>> r = Renderer()
+        >>> r.config = Cfg(tuple())
         >>> r.columnwidths = (10,)
         >>> r.tail(None,'My Data')
         '=============\\nMy Data'
         """
         maxwidth = sum(self.columnwidths) + len(self.columnwidths)*3
         border = '=' * maxwidth
-        return border + '\n' + cells
+        indent = self.aggregate_indent()
+        return indent + border + '\n' + indent + cells
 
     def column_width(self, i):
-        """
-        Return column width for requested column
-        """
+        "Return column width for requested column"
         try: return self.columnwidths[i]
         except IndexError: return 0
         
+    def aggregate_indent(self, level=None):
+        "Get aggregate row prefix"
+        levels = len(self.config.aggregate)
+        if levels:
+            try:
+                return ((levels - level) * '|').ljust(levels + 1) + ' '
+            except: return ' ' * (levels + 2)
+        else: return ''
+
