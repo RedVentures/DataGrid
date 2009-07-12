@@ -38,6 +38,17 @@ class Renderer(datagrid.renderer.Renderer):
     def setup(self, config):
         """
         Complete setup tasks for a successful render
+
+        Example:
+        >>> from collections import namedtuple
+        >>> Cfg = namedtuple('Cfg', 'columns data')
+        >>> r = Renderer()
+        >>> r.setup(Cfg(['Col'], [['a'],['b']]))
+        >>> r.columnwidths
+        (3,)
+        >>> r.setup(Cfg([], [['a'],['b']]))
+        >>> r.columnwidths
+        (1,)
         """
         self.config = config
         columnwidths = [max(len(data) for data in vals) 
@@ -45,7 +56,9 @@ class Renderer(datagrid.renderer.Renderer):
 
         # Check for longer columns in header row
         for idx, width in enumerate(columnwidths):
-            columnwidths[idx] = max((len(config.columns[idx]), width))
+            try:
+                columnwidths[idx] = max((len(config.columns[idx]), width))
+            except: pass
 
         # Save found max in instance
         self.columnwidths = tuple(columnwidths)
