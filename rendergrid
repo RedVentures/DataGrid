@@ -17,29 +17,40 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-import csv
-import sys
-from optparse import OptionParser
+import sys, csv
+from optparse import OptionParser, OptionGroup
 from datagrid.core import DataGrid
 
 def main():
+    """Command-line interface main method"""
 
     # Configure & Parse Command-Line args
     parser = OptionParser('Usage: %prog [OPTIONS] DATAFILE')
-    parser.add_option('-c', '--column', action='append',
-            help='Set the column header') 
-    parser.add_option('-a', '--aggregate', action='append',
-            help='Set the report aggregation', default=[])
-    parser.add_option('-A', '--autocolumn', action='store_true',
-            help='Derive column headers from DATAFILE')
+
+    # Ordinary (or generic) options
     parser.add_option('--html', action='store_const', 
             const='datagrid.html', dest='renderer',
             help='Render HTML table')
     parser.add_option('--text', action='store_const',
             const='datagrid.ascii', dest='renderer',
-            help='Render Text (ASCII) table')
+            help='Render Text (ASCII) table [default]')
     parser.add_option('--renderer', dest='renderer', 
-            default='datagrid.html', help='Use custom table renderer')
+            default='datagrid.ascii', help='Use custom table renderer')
+    
+    # Report data options
+    datagroup = OptionGroup(parser, 'Data defination and manipulation options')
+    datagroup.add_option('-A', '--autocolumn', action='store_true',
+            help='Derive column headers from DATAFILE')
+    datagroup.add_option('-c', '--column', action='append',
+            help='Set the column header') 
+    datagroup.add_option('-a', '--aggregate', action='append',
+            help='Set the report aggregation', default=[])
+    datagroup.add_option('--aggregatemethod', action='append',
+            help='Set the aggregation method for a given column.  '\
+                    'Example: --aggregatemethod="column|sum"')
+
+    # Parse options
+    parser.add_option_group(datagroup)
     options, args = parser.parse_args()
 
     # Load table renderer
