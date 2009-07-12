@@ -40,18 +40,20 @@ class DataGrid(object):
         self.columns = columns if columns is not None else tuple()
         self.renderer = renderer
         self.aggregate = tuple(aggregate)
-        self.aggregatemethods = aggregatemethods
+        self.aggregatemethods = dict(
+                (self.columns.index(k), v) for k, v in aggregatemethods.items())
 
         # call render-setup (if we have one)
         if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
 
     def render(self):
+        head = self.renderer.head(self)
+        body = self.render_body(self.data, self.aggregate)
+        tail = self.renderer.tail(
+                self, self.render_row(self.generate_aggregate_row(self.data)))
+        
         # render table and return
-        return self.renderer.table(self,
-                self.renderer.head(self),
-                self.render_body(self.data, self.aggregate),
-                self.renderer.tail(self, '')
-                )
+        return self.renderer.table(self, head, body, tail)
 
     def render_body(self,data,aggregate=[]):
         aggregateLen = len(aggregate)
@@ -67,7 +69,10 @@ class DataGrid(object):
                 # update row args (agg name & value)
                 rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
                 subData = [x for x in data if x[idx] == value]
-                output.append(self.render_row(subData[0], **rowArgs))
+                rowData = self.generate_aggregate_row(subData)
+
+                # add aggregate row
+                output.append(self.render_row(rowData, **rowArgs))
 
                 # render remainder of rows beneath aggregation level
                 output.append(self.render_body(subData, aggregate[1:]))
@@ -79,4 +84,16 @@ class DataGrid(object):
         cells = ''.join(self.renderer.cell(self, str(v), k) 
                 for k, v in enumerate(data))
         return self.renderer.row(self, cells, **kargs)
+
+    def generate_aggregate_row(self, data):
+        # prepopulate with empty data
+        rowData = ['' for x in self.columns]
+
+        # generate aggregate-row values
+        if len(self.aggregatemethods):
+            columnValues = zip(*data)
+            for i, m in self.aggregatemethods.items():
+                rowData[i] = str(m(int(v) for v in columnValues[i]))
+
+        return rowData
 

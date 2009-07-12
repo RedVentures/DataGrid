@@ -77,11 +77,15 @@ def main():
     # Parse aggregate methods
     try:
         aggregatemethods = dict(m.split('|') for m in options.aggregatemethod)
+
+        # materialize methods
+        for key, method in aggregatemethods.items():
+            aggregatemethods[key] = vars(__builtins__)[method]
     except ValueError:
         parser.error("Invalid format supplied for --aggregatemethod option")
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns,options.aggregate)
+    grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods)
     print(grid.render())
 
 
