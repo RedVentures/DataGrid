@@ -20,11 +20,12 @@
 
 def table(config, head, body, tail):
     return """
-        <table class='helper-gridview' cols='{2}'>
+        <table class='helper-gridview' cols='{3}'>
             {0}
             <tbody>{1}</tbody>
+            {2}
         </table>
-        """.format(head, body, len(config.columns))
+        """.format(head, body, tail, len(config.columns))
 
 def row(config, cells, level=0, name=None, value=None):
     """
@@ -38,8 +39,11 @@ def row(config, cells, level=0, name=None, value=None):
     """
     if config.aggregate:
         indent = ((len(config.aggregate) - level) * 5) + 2
-        row = "<tr class='l-{0}'><td><i>{2}:</i><span>{3}</span></td>{4}</tr>"
-        return row.format(level, indent, name, value, cells)
+        if name is None:
+            return "<tr class='l={0}'><td></td>{1}</tr>".format(level, cells)
+        else:
+            row = "<tr class='l-{0}'><td><i>{1}:</i><span>{2}</span></td>{3}</tr>"
+            return row.format(level, name, value, cells)
     else: return "<tr>{0}</tr>".format(cells)
 
 def cell(config, data, column): 
@@ -58,20 +62,26 @@ def head(config):
 
     Example:
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'columns')(('Heading',))
+    >>> cfg = namedtuple('Cfg', 'columns aggregate')(('Heading',), [])
     >>> head(cfg)
     '<thead><tr><th>Heading</th></tr></thead>'
     """
     cells = ''.join("<th>{0}</th>".format(x) for x in config.columns)
-    return "<thead><tr>{0}</tr></thead>".format(cells)
+    headformat = "<thead><tr>{0}</tr></thead>" if not config.aggregate else \
+                 "<thead><tr><th></th>{0}</tr></thead>"
+    return headformat.format(cells)
 
 def tail(config, cells):
     """
     Generate table tail segment
 
     Example:
-    >>> tail(None,"<td></td>")
+    >>> from collections import namedtuple
+    >>> cfg = namedtuple('Cfg', 'aggregate')([])
+    >>> tail(cfg,"<td></td>")
     '<tfoot><tr><td></td></tr></tfoot>'
     """
-    return "<tfoot><tr>{0}</tr></tfoot>".format(cells)
+    tailformat = "<tfoot><tr>{0}</tr></tfoot>" if not config.aggregate else \
+                 "<tfoot><tr><td></td>{0}</tr></tfoot>"
+    return tailformat.format(cells)
 
