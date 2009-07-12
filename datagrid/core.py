@@ -18,25 +18,29 @@
 
 import sys
 from functools import partial
+from collections import Mapping
 
 class DataGrid(object):
     
-    data = []
-    aggregate = []
-    totalAggLevels = 0
-    columns = []
+    data = tuple()
+    aggregate = tuple()
+    aggregatemethods = {}
+    columns = tuple()
     renderer = None
 
-    def __init__(self, data, renderer, columns=[], aggregate=[]):
-        # cement data
-        data = tuple(data)
+    def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
+            aggregatemethods={}):
+
+        # check supplied args
+        if not isinstance(aggregatemethods, Mapping):
+            raise TypeError('aggregatemethods must be a Mapping object (ie dict)')
 
         # set instance vars
-        self.data = list(data)
-        self.columns = columns if columns is not None else []
+        self.data = tuple(data)
+        self.columns = columns if columns is not None else tuple()
         self.renderer = renderer
-        self.aggregate = aggregate
-        self.totalAggLevels = len(aggregate)
+        self.aggregate = tuple(aggregate)
+        self.aggregatemethods = aggregatemethods
 
         # call render-setup (if we have one)
         if hasattr(self.renderer, 'setup'): self.renderer.setup(self)

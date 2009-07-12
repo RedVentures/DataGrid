@@ -47,7 +47,8 @@ def main():
             help='Set the report aggregation', default=[])
     datagroup.add_option('--aggregatemethod', action='append',
             help='Set the aggregation method for a given column.  '\
-                    'Example: --aggregatemethod="column|sum"')
+                    'Example: --aggregatemethod="column|sum"',
+            default=[])
 
     # Parse options
     parser.add_option_group(datagroup)
@@ -72,6 +73,12 @@ def main():
         parser.error("No file was supplied")
     except IOError:
         parser.error("%s does not exist, or is inaccessable" % args[0])
+
+    # Parse aggregate methods
+    try:
+        aggregatemethods = dict(m.split('|') for m in options.aggregatemethod)
+    except ValueError:
+        parser.error("Invalid format supplied for --aggregatemethod option")
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,options.aggregate)
