@@ -28,7 +28,12 @@ class Renderer(datagrid.renderer.Renderer):
 
     # Calculated max str-lens of each table column
     columnwidths = tuple()
+
+    # Reference to datagrid.core.DataGrid object that is using renderer 
     config = None
+    
+    # Cell padding 
+    padding = ' ' * 3
 
     def setup(self, config):
         """
@@ -85,7 +90,7 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.cell(None, 'cell data', 0)
         'cell data    '
         """
-        return data.ljust(self.column_width(column)+3)
+        return data.ljust(self.column_width(column)) + self.padding
 
     def head(self, config):
         """
@@ -100,8 +105,9 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.head(cfg)
         'Heading      \\n=============\\n'
         """
-        maxwidth = sum(self.columnwidths) + len(self.columnwidths)*3
-        heading = ''.join(v.ljust(self.columnwidths[k] + 3) 
+        maxwidth = sum(self.columnwidths) + \
+                len(self.columnwidths) * len(self.padding)
+        heading = ''.join(v.ljust(self.columnwidths[k]) + self.padding 
                 for k, v in enumerate(config.columns))
         border = '=' * maxwidth
         indent = self.aggregate_indent()
@@ -120,18 +126,40 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.tail(None,'My Data')
         '=============\\nMy Data'
         """
-        maxwidth = sum(self.columnwidths) + len(self.columnwidths)*3
+        maxwidth = sum(self.columnwidths) + \
+                len(self.columnwidths) * len(self.padding)
         border = '=' * maxwidth
         indent = self.aggregate_indent()
         return indent + border + '\n' + indent + cells
 
     def column_width(self, i):
-        "Return column width for requested column"
+        """
+        Return column width for requested column
+
+        Example:
+        >>> r = Renderer()
+        >>> r.columnwidths = tuple([5])
+        >>> r.column_width(0)
+        5
+        >>> r.column_width(1)
+        0
+        """
         try: return self.columnwidths[i]
         except IndexError: return 0
         
     def aggregate_indent(self, level=None):
-        "Get aggregate row prefix"
+        """
+        Get aggregate row prefix
+        
+        >>> from collections import namedtuple
+        >>> Cfg = namedtuple('Cfg', 'aggregate')
+        >>> r = Renderer()
+        >>> r.config = Cfg((1,2))
+        >>> r.aggregate_indent()
+        '    '
+        >>> r.aggregate_indent(1)
+        '|   '
+        """
         levels = len(self.config.aggregate)
         if levels:
             try:
