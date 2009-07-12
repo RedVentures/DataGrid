@@ -50,7 +50,7 @@ class DataGrid(object):
         head = self.renderer.head(self)
         body = self.render_body(self.data, self.aggregate)
         tail = self.renderer.tail(
-                self, self.render_row(self.generate_aggregate_row(self.data)))
+                self, self.render_cells(self.generate_aggregate_row(self.data)))
         
         # render table and return
         return self.renderer.table(self, head, body, tail)
@@ -80,10 +80,12 @@ class DataGrid(object):
         else:
             return ''.join(self.render_row(row) for row in data)
     
-    def render_row(self, data, **kargs):
-        cells = ''.join(self.renderer.cell(self, str(v), k) 
+    def render_cells(self, data):
+        return ''.join(self.renderer.cell(self, str(v), k) 
                 for k, v in enumerate(data))
-        return self.renderer.row(self, cells, **kargs)
+
+    def render_row(self, data, **kargs):
+        return self.renderer.row(self, self.render_cells(data), **kargs)
 
     def generate_aggregate_row(self, data):
         # prepopulate with empty data
