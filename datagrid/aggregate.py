@@ -20,7 +20,7 @@
 
 from __builtin__ import sum, len, min, max
 
-def count(iter): return __builtins__.len(iter)
+def count(iter): return len(iter)
 
 def avg(iter): return sum(iter) / count(iter)
 
