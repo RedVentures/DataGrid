@@ -7,3 +7,5 @@ testverbose:
 clean:
 	@find . -name '*.pyc' | xargs rm -f
 
+server:
+	@python -c 'from datagrid.server.core import HTTPServer;server = HTTPServer();server.run()'
