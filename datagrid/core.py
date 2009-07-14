@@ -37,7 +37,7 @@ class DataGrid(object):
 
         # set instance vars
         self.data = tuple(data)
-        self.columns = columns if columns is not None else tuple()
+        self.columns = columns or tuple()
         self.renderer = renderer
         self.aggregate = tuple(aggregate)
         self.aggregatemethods = dict(
