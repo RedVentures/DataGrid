@@ -18,6 +18,8 @@
 
 import SocketServer
 import SimpleHTTPServer
+import threading
+from time import sleep
 
 class HTTPServer:
     """
@@ -32,8 +34,13 @@ class HTTPServer:
                 ('localhost', self.port), self.handler)
         print "serving at http://localhost:", self.port
         try:
-            self.server.serve_forever()
+            server_thread = threading.Thread(target=self.server.serve_forever)
+            server_thread.setDaemon(True)
+            server_thread.start()
+            while True:
+                sleep(10)
         except KeyboardInterrupt:
+            print "\nshutting down..."
             self.server.shutdown()
 
 class DefaultHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
@@ -41,10 +48,11 @@ class DefaultHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     The DefaultHandler serves up DataGrid results using native classes
     """
     def do_GET(self):
-        if self.path=='/exit':
-            exit()
-        elif self.path=='/hello':
+        if self.path == '/hello':
             self.request.send('Hello World!')
+        elif self.path == '/favicon.ico':
+            with open('extras/favicon.ico','r') as ico:
+                self.request.send(ico.read())
         else:
             # serve files, and directory listings by following self.path from
             # current working directory
