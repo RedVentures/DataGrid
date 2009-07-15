@@ -9,3 +9,7 @@ clean:
 
 server:
 	@python -c 'from datagrid.server.core import HTTPServer;server = HTTPServer();server.run()'
+
+phpdemo:
+	@cd extras/bindings;php demo.php
+
