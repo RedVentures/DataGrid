@@ -50,9 +50,6 @@ class DefaultHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/hello':
             self.request.send('Hello World!')
-        elif self.path == '/favicon.ico':
-            with open('extras/favicon.ico','r') as ico:
-                self.request.send(ico.read())
         else:
             # serve files, and directory listings by following self.path from
             # current working directory
