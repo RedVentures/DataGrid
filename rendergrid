@@ -84,9 +84,16 @@ def main():
             
             # materialize methods
             for key, method in aggregatemethods.items():
+                if key not in columns:
+                    parser.error("aggregate column %s not found in column-list" % key)
                 aggregatemethods[key] = vars(datagrid.aggregate)[method]
     except ValueError:
         parser.error("Invalid format supplied for --aggregatemethod option")
+
+    # Verify aggregate are defined columns
+    for aggregate in options.aggregate:
+        if aggregate not in columns:
+            parser.error("aggregate column %s not found in column-list" % aggregate)
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods)
