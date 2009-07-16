@@ -27,9 +27,10 @@ class DataGrid(object):
     aggregatemethods = {}
     columns = tuple()
     renderer = None
+    suppressdetail = False
 
     def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
-            aggregatemethods={}):
+            aggregatemethods={}, suppressdetail=False):
 
         # check supplied args
         if not isinstance(aggregatemethods, Mapping):
@@ -39,6 +40,7 @@ class DataGrid(object):
         self.data = tuple(data)
         self.columns = columns or tuple()
         self.renderer = renderer
+        self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
         self.aggregatemethods = dict(
                 (self.columns.index(k), v) for k, v in aggregatemethods.items())
@@ -70,12 +72,17 @@ class DataGrid(object):
                 rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
                 subData = [x for x in data if x[idx] == value]
                 rowData = self.generate_aggregate_row(subData)
+                rowData[self.columns.index(aggregate[0])] = value
+
+                # if details are suppressed, decrement out agg-level
+                if self.suppressdetail: rowArgs['level'] -= 1
 
                 # add aggregate row
                 output.append(self.render_row(rowData, **rowArgs))
 
                 # render remainder of rows beneath aggregation level
-                output.append(self.render_body(subData, aggregate[1:]))
+                if rowArgs['level'] > 0:
+                    output.append(self.render_body(subData, aggregate[1:]))
             return ''.join(output)
         else:
             return ''.join(self.render_row(row) for row in data)

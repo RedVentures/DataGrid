@@ -49,6 +49,8 @@ def main():
             help='Set the aggregation method for a given column.  '\
                     'Example: --aggregatemethod="column|sum"',
             default=[])
+    datagroup.add_option('--suppressdetail', action='store_true',
+            help='Suppress detail rows (requires aggregration)')
 
     # Parse options
     parser.add_option_group(datagroup)
@@ -85,7 +87,8 @@ def main():
             # materialize methods
             for key, method in aggregatemethods.items():
                 if key not in columns:
-                    parser.error("aggregate column %s not found in column-list" % key)
+                    parser.error("aggregate column %s not found in column-list" 
+                            % key)
                 aggregatemethods[key] = vars(datagrid.aggregate)[method]
     except ValueError:
         parser.error("Invalid format supplied for --aggregatemethod option")
@@ -93,10 +96,17 @@ def main():
     # Verify aggregate are defined columns
     for aggregate in options.aggregate:
         if aggregate not in columns:
-            parser.error("aggregate column %s not found in column-list" % aggregate)
+            parser.error("aggregate column %s not found in column-list" 
+                    % aggregate)
+
+    # Validate suppress-detail selection
+    if options.suppressdetail:
+        if not len(options.aggregate):
+            parser.error("Cannot suppress if no aggregation is declared")
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods)
+    grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods,
+            options.suppressdetail)
     print(grid.render())
 
 
