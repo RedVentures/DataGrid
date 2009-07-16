@@ -22,12 +22,18 @@
  * Demo PHP Bindings
  *
  * @author Adam Wagner <awagner@redventures.com>
- * @since Wed 15 Jul 2009 12:36:31 PM EDT
  */
 
 require 'datagrid.php';
 
+// point to datagrid executable
+//      (this step is not required if datagrid has been installed)
 DataGrid::$executable = '../../rendergrid';
+
+// create new instance and set some configurations
 $grid = DataGrid::createFromFile('../bank-data.csv', true);
+$grid->aggregate( array('married', 'mortgage') );
+
+// output rendered grid
 print $grid->render();
 

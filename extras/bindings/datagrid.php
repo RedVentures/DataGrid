@@ -26,6 +26,13 @@
 
 class DataGrid {
 
+    /* -- Class Constants -- */
+
+    const OPT_AGGREGATE = 'aggregate';
+    const OPT_AUTOCOLUMN = 'autocolumn';
+    const OPT_RENDERER = 'renderer';
+
+
     /* -- Public Static Properties -- */
 
     /**
@@ -48,9 +55,28 @@ class DataGrid {
     /**
      * Associative array of flags to pass on command-line
      *
+     * Format:
+     *      # boolean options
+     *          KEY                               // becomes: --KEY
+     *      # key/val option
+     *          KEY => VAL                        // becomes: --KEY="VAL"
+     *      # key/val option with multiple values
+     *          KEY => array(V1, V2)              // becomes: --KEY="V1" --KEY="V2"
+     *
+     * Run 'rendergrid --help' for documentation and list of command-line args
+     *
      * @var string[]
      */
     public $flags = array();
+
+    /**
+     * Renderer sys used to generate output
+     * 
+     * Possible Values: datagrid.html, datagrid.ascii (or any custom python module)
+     *
+     * @var string
+     */
+    public $renderer = 'datagrid.html';
 
 
     /* -- Public Static Methods -- */
@@ -67,7 +93,7 @@ class DataGrid {
         // Setup for direct file render
         $grid = new self;
         $grid->dataFile = $dataFile;
-        $grid->flags['--autocolumn'] = $includesHeader;
+        $grid->flags[self::OPT_AUTOCOLUMN] = $includesHeader;
 
         // Return new datagrid
         return $grid;
@@ -78,15 +104,43 @@ class DataGrid {
     /* -- Public Methods -- */
 
     /**
+     * Setup new datagrid instance
+     *
+     * @param string $flags
+     */
+    public function __construct( array $flags = array() ) {
+
+        // Set option defaults
+        $defaultFlags[self::OPT_RENDERER] = 'datagrid.html';
+
+        // Merge default with given flags
+        $this->flags = array_merge( $defaultFlags, $flags );
+
+    }
+
+    /**
+     * Set columns to aggregate data on
+     *
+     * @param array $aggregate - list of columns to aggregate on
+     * @return DataGrid
+     */
+    public function aggregate( array $aggregate ) {
+
+        $this->flags[self::OPT_AGGREGATE] = $aggregate;
+        return $self;
+        
+    }
+
+    /**
      * Render datagrid
      * 
      * @return string
      */
     public function render() {
 
-        // Run shell command
         $returnCode = null;     // Unix exit status
 
+        // Run shell command
         ob_start();
         passthru( $this->_buildShellCmd(), $returnCode );
         $output = ob_get_contents();
@@ -107,9 +161,24 @@ class DataGrid {
      */
     private function _buildShellCmd() {
 
-        $flags = implode( ' ', array_keys( array_filter($this->flags) ) );
+        // Filter unused boolean flags
+        $flags = array_filter($this->flags);
+        
+        // Transform into option string
+        $flagString = '';
+        foreach ( $flags as $key => $val ) {
+            if ( $val === true ) {              // Single boolean option
+                $flagString .= " --$key";
+            } elseif ( is_string( $val ) ) {    // Single Key/Val option
+                $flagString .= " --$key='" . addslashes( $val ) . "'";
+            } elseif ( is_array( $val ) ) {     // List of Key/Val options
+                foreach ( $val as $v ) 
+                    $flagString .= " --$key='" . addslashes( $v ) . "'";
+            }
+        }
 
-        return self::$executable . " $flags {$this->dataFile}";
+        // Glue the pieces together
+        return self::$executable . " $flagString {$this->dataFile}";
 
     }
 
