@@ -8,7 +8,7 @@ clean:
 	@find . -name '*.pyc' | xargs rm -f
 
 server:
-	@python -c 'from datagrid.server.core import HTTPServer;server = HTTPServer();server.run()'
+	@python extras/demo/demo-server.py
 
 phpdemo:
 	@cd extras/bindings;php demo.php
