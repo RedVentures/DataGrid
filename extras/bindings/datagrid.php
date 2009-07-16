@@ -24,11 +24,16 @@
  * @author Adam Wagner <awagner@redventures.net>
  */
 
+class DataGrid_Exception extends Exception {}
+
 class DataGrid {
 
     /* -- Class Constants -- */
 
+    const DEFAULT_RENDERER = 'datagrid.html';
+
     const OPT_AGGREGATE = 'aggregate';
+    const OPT_AGGREGATEMETHOD ='aggregatemethod';
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_RENDERER = 'renderer';
 
@@ -69,15 +74,6 @@ class DataGrid {
      */
     public $flags = array();
 
-    /**
-     * Renderer sys used to generate output
-     * 
-     * Possible Values: datagrid.html, datagrid.ascii (or any custom python module)
-     *
-     * @var string
-     */
-    public $renderer = 'datagrid.html';
-
 
     /* -- Public Static Methods -- */
 
@@ -111,7 +107,7 @@ class DataGrid {
     public function __construct( array $flags = array() ) {
 
         // Set option defaults
-        $defaultFlags[self::OPT_RENDERER] = 'datagrid.html';
+        $defaultFlags[self::OPT_RENDERER] = self::DEFAULT_RENDERER;
 
         // Merge default with given flags
         $this->flags = array_merge( $defaultFlags, $flags );
@@ -127,7 +123,7 @@ class DataGrid {
     public function aggregate( array $aggregate ) {
 
         $this->flags[self::OPT_AGGREGATE] = $aggregate;
-        return $self;
+        return $this;
         
     }
 
@@ -138,16 +134,46 @@ class DataGrid {
      */
     public function render() {
 
+        $command = $this->_buildShellCmd();
         $returnCode = null;     // Unix exit status
 
         // Run shell command
         ob_start();
-        passthru( $this->_buildShellCmd(), $returnCode );
+        passthru( $command, $returnCode );
         $output = ob_get_contents();
         ob_end_clean();
 
+        // Check for errors
+        if ( $returnCode ) {
+            $e = new DataGrid_Exception();
+            $e->commandOutput = $output;
+            $e->commandAttempted = $command;
+            throw $e;
+        }
+
         // Output rendered datagrid
         return $output;
+
+    }
+
+    /**
+     * Set aggregation method for the given column list
+     *
+     * @param array $columnList - columns to set aggregate method on
+     * @param string $method - example: 'sum', 'count', avg', etc...
+     * @return DataGrid 
+     */
+    public function setAggregationMethod( array $columnList, $method ) {
+
+        // make sure we already have an array
+        if ( !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
+            $this->flags[self::OPT_AGGREGATEMETHOD] = array();
+
+        // set method for each given column
+        foreach ( $columnList as $column ) 
+            $this->flags[self::OPT_AGGREGATEMETHOD][$column] = "$column|$method";
+
+        return $this;
 
     }
 
