@@ -19,7 +19,7 @@
 #------------------------------------------------------------------------#
 
 /**
- * Demo PHP Bindings
+ * PHP Bindings Example Usage
  *
  * @author Adam Wagner <awagner@redventures.com>
  */
@@ -30,10 +30,17 @@ require 'datagrid.php';
 //      (this step is not required if datagrid has been installed)
 DataGrid::$executable = '../../rendergrid';
 
+// create some fake data
+$data = array(
+    array( 'FirstName' => 'Bob',  'LastName' => 'Smith', 'Age' => '32'), 
+    array( 'FirstName' => 'Fred', 'LastName' => 'Smith', 'Age' => '25'), 
+    array( 'FirstName' => 'John', 'LastName' => 'Doe',   'Age' => '53')
+);
+
 // create new instance and set some configurations
-$grid = DataGrid::createFromFile('../bank-data.csv', true);
-$grid->aggregate( array('region', 'mortgage') );
-$grid->setAggregationMethod( array( 'age', 'children' ), 'avg' );
+$grid = DataGrid::create($data);
+$grid->aggregate( array( 'LastName' ) );
+$grid->setAggregationMethod( array( 'Age' ), 'avg' );
 
 // output rendered grid
 print $grid->render();

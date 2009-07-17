@@ -24,8 +24,14 @@
  * @author Adam Wagner <awagner@redventures.net>
  */
 
+/**
+ * DataGrid Exception
+ */
 class DataGrid_Exception extends Exception {}
 
+/**
+ * Main DataGrid Class
+ */
 class DataGrid {
 
     /* -- Class Constants -- */
@@ -78,13 +84,56 @@ class DataGrid {
     /* -- Public Static Methods -- */
 
     /**
-     * Instantiate new DataGrid setup for rendering given file
+     * Instantiate new DataGrid object for rendering passed in data
+     *
+     * @param array|Traversable $data
+     * @param array $flags - Optional flags configuring datagrid instance
+     */
+    public static function create( $data, array $flags = array() ) {
+        
+        // Open tempfile and write new csv file
+        $fileName = tempnam( '/tmp', 'datagrid' );
+        $fp = fopen( $fileName, 'w' );
+
+        // We cannot always consume any entire array into memory, so always
+        // use iterators for simplicity
+        if ( is_array( $data ) )
+            $data = new ArrayIterator( $data );
+
+        // Generate cvs file
+        try {
+            // Write header record
+            fputcsv( $fp, array_keys( (array) current( $data ) ) );
+
+            // Write body of datafile
+            foreach ( $data as $record ) fputcsv( $fp, (array) $record );
+        } catch ( DataGrid_Exception $e ) {
+            // Cleanup created file
+            fclose( $fp );
+            unlink( $fileName ); 
+
+            // Pass exception on
+            throw $e;
+        }
+
+        // Close pointer
+        fclose( $fp );
+
+        // Continue with createFromFile
+        return self::createFromFile( $fileName, true, $flags );
+
+    }
+
+    /**
+     * Instantiate new DataGrid object for rendering given file
      *
      * @param string $dataFile
      * @param bool $includesHeader
+     * @param array $flags - Optional flags configuring datagrid instance
      * @return DataGrid
      */
-    public static function createFromFile( $dataFile, $includesHeader = false ) {
+    public static function createFromFile( $dataFile, $includesHeader = false, 
+            array $flags = array() ) {
 
         // Setup for direct file render
         $grid = new self;
