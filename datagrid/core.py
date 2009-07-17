@@ -21,13 +21,30 @@ from functools import partial
 from collections import Mapping
 
 class DataGrid(object):
-    
+   
+    # -- Attributes -- #
+
     data = tuple()
     aggregate = tuple()
     aggregatemethods = {}
     columns = tuple()
-    renderer = None
     suppressdetail = False
+
+    
+    # -- Properties -- #
+
+    # Renderer Property
+    @property
+    def renderer(self): return self._renderer
+
+    @renderer.setter
+    def renderer(self, value):
+        # call render-setup (if we have one)
+        if hasattr(value, 'setup'): value.setup(self)
+        self._renderer = value
+
+
+    # -- Methods -- #
 
     def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
             aggregatemethods={}, suppressdetail=False):
@@ -44,9 +61,6 @@ class DataGrid(object):
         self.aggregate = tuple(aggregate)
         self.aggregatemethods = dict(
                 (self.columns.index(k), v) for k, v in aggregatemethods.items())
-
-        # call render-setup (if we have one)
-        if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
 
     def render(self):
         head = self.renderer.head(self)

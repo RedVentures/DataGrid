@@ -57,21 +57,46 @@ class TestDataGrid(unittest.TestCase):
     # Column names for test table
     testCols = ['one', 'two', 'three']
 
-    # Evaluation order or render methods for given test table
-    testLog = ['setup', 'head',             # Setup table and header
-            'cell', 'cell', 'cell', 'row',  # Rendering Row 1 
-            'cell', 'cell', 'cell', 'row',  # Rendering Row 2
-            'cell', 'cell', 'cell', 'tail', # Rendering Footer
-            'table']                        # Wrap up table render
-
     def setUp(self):
         """Setup fixtures"""
-        self.grid = DataGrid(self.testData, RendererFixture(), self.testCols)
+        self.grid = DataGrid(self.testData, None, self.testCols)
+    
+    def tearDown(self):
+        """Cleanup and prep for next run"""
+        RendererFixture.callLog = []
 
     def testRender(self):
         """Test DataGrid.render method"""
+
+        # Evaluation order or render methods for given test table
+        testLog = ['setup', 'head',             # Setup table and header
+                'cell', 'cell', 'cell', 'row',  # Rendering Row 1 
+                'cell', 'cell', 'cell', 'row',  # Rendering Row 2
+                'cell', 'cell', 'cell', 'tail', # Rendering Footer
+                'table']                        # Wrap up table render
+
+        # Test simple render
+        self.grid.renderer = RendererFixture()
         self.grid.render()
-        self.assertEquals(self.testLog, self.grid.renderer.callLog)
+        self.assertEquals(testLog, self.grid.renderer.callLog)
+
+    def testRenderAggregate(self):
+        """Test DataGrid.render method - with aggregation"""
+
+        # Aggregation eval order
+        testLog = ['setup', 'head',             # Setup table and header
+                'cell', 'cell', 'cell', 'row',  # Rendering Agg Row 1 
+                'cell', 'cell', 'cell', 'row',  # Rendering Row 1 
+                'cell', 'cell', 'cell', 'row',  # Rendering Agg Row 2
+                'cell', 'cell', 'cell', 'row',  # Rendering Row 2 
+                'cell', 'cell', 'cell', 'tail', # Rendering Footer
+                'table']                        # Wrap up table render
+
+        # Test simple render
+        self.grid.renderer = RendererFixture()
+        self.grid.aggregate = ['one']
+        self.grid.render()
+        self.assertEquals(testLog, self.grid.renderer.callLog)
 
 
 # Run tests if called from console
