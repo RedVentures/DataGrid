@@ -42,6 +42,7 @@ class DataGrid {
     const OPT_AGGREGATEMETHOD ='aggregatemethod';
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_RENDERER = 'renderer';
+    const OPT_SUPPRESSDETAIL = 'suppressdetail';
 
 
     /* -- Public Static Properties -- */
@@ -68,7 +69,7 @@ class DataGrid {
      *
      * Format:
      *      # boolean options
-     *          KEY                               // becomes: --KEY
+     *          KEY => TRUE                       // becomes: --KEY
      *      # key/val option
      *          KEY => VAL                        // becomes: --KEY="VAL"
      *      # key/val option with multiple values
@@ -222,6 +223,18 @@ class DataGrid {
         foreach ( $columnList as $column ) 
             $this->flags[self::OPT_AGGREGATEMETHOD][$column] = "$column|$method";
 
+        return $this;
+
+    }
+
+    /**
+     * Suppress detail rows from report
+     *
+     * @return DataGrid
+     */
+    public function suppressDetail() {
+
+        $this->flags[self::OPT_SUPPRESSDETAIL] = true;
         return $this;
 
     }
