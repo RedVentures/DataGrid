@@ -18,6 +18,7 @@
 
 """DataGrid Calculation Tools"""
 
+# Error generated while trying to run calculatevalues method
 class CalculatedValueError(Exception): pass
 
 def calculatevalues(data, calculations):
@@ -46,10 +47,26 @@ def calculatevalues(data, calculations):
         # check how many calculations we have left
         end = len(calculations) 
         if end == 0: break      # we must be finished, exit loop
-        elif len(calculations) == start:    # no calculations we sucessfully
-            raise CalculatedValueError()    # run, exit with exception
+        elif end == start:      # no calculations have sucessfully been run
+            raise CalculatedValueError()    # exit with exception
 
     # return initial data-row with addition of newly calculated values
     return data
 
+
+def formula(calcString):
+    """
+    Generate formula to run on given data
+
+    Example:
+    >>> f = formula('{a} + {b}')
+    >>> f({'a': 1, 'b': 1})
+    2
+    """
+    # replace place-holders with dictionary refs
+    calcString = calcString.replace('{', 'd["').replace('}', '"]')
+
+    # create new function and return
+    exec 'f = lambda d: ' + calcString
+    return f
 
