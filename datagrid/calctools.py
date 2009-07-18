@@ -21,15 +21,35 @@
 class CalculatedValueError(Exception): pass
 
 def calculatevalues(data, calculations):
+    """
+    Calculate given formulas on data
+
+    Example:
+    >>> r = calculatevalues({'a': 1, 'b': 2}, {'c': lambda d: 3})
+    >>> r == {'a': 1, 'b': 2, 'c': 3}
+    True
+    """
+
     while True:
+        # get count of calculations we have left to run
         start = len(calculations)   
-        for k, fun in calculations.items():
-            data[k] = fun(data)
-            del calculations[k]
+        for key, calc in calculations.items():
+
+            # attempt to run calculation
+            try: data[key] = calc(data)
+            except KeyError:    # we may get this missing val from some
+                continue        # other calculated value, so continue for now
+
+            # calculation was a success, remove from list
+            del calculations[key]
+
+        # check how many calculations we have left
         end = len(calculations) 
-        if end == 0: break
-        elif len(calculations) == start:
-            raise CalculatedValueError()
+        if end == 0: break      # we must be finished, exit loop
+        elif len(calculations) == start:    # no calculations we sucessfully
+            raise CalculatedValueError()    # run, exit with exception
+
+    # return initial data-row with addition of newly calculated values
     return data
 
 
