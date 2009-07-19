@@ -29,20 +29,12 @@ class DataGrid(object):
     aggregate = tuple()
     aggregatemethods = {}
     columns = tuple()
+    renderer = None
     suppressdetail = False
 
+    _rawcolumns = tuple()
     
     # -- Properties -- #
-
-    # Renderer Property
-    @property
-    def renderer(self): return self._renderer
-
-    @renderer.setter
-    def renderer(self, value):
-        # call render-setup (if we have one)
-        if hasattr(value, 'setup'): value.setup(self)
-        self._renderer = value
 
     # Calculated Columns
     @property
@@ -51,9 +43,9 @@ class DataGrid(object):
     @calculatedcolumns.setter
     def calculatedcolumns(self, value):
         # materialize all methods
-        self._calculatedcolumns = [
+        self._calculatedcolumns = dict(
                 (k, formula(v) if isinstance(v, str) else v) 
-                for k, v in value.iteritems()]
+                for k, v in value.iteritems())
 
 
     # -- Methods -- #
@@ -70,18 +62,29 @@ class DataGrid(object):
 
         # set instance vars
         self.data = tuple(data)
-        self.columns = columns or tuple()
         self.renderer = renderer
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
+        self.calculatedcolumns = calculatedcolumns
+        self._rawcolumns = columns or tuple()
+
+        # set column list
+        if self.calculatedcolumns:  # add any calculated columns to list
+            self.columns = tuple(chain(columns, self.calculatedcolumns.keys()))
+        else: self.columns = columns or tuple()     # default to tuple
+
+        # change column names to indexes
         self.aggregatemethods = dict((self.columns.index(k), v) 
                 for k, v in aggregatemethods.iteritems())
-        self.calculatedcolumns = calculatedcolumns
 
     def render(self):
         """
         Begin render process
         """
+        # run renderer setup logic (if we have any)
+        if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
+
+        # build table pieces and glue together
         head = self.renderer.head(self)
         body = self.render_body(self.data, self.aggregate)
         tail = self.renderer.tail(
@@ -131,6 +134,11 @@ class DataGrid(object):
         """
         Render cell-block using given data
         """
+        if self.calculatedcolumns:
+            dataDict = dict(zip(self._rawcolumns, data))
+            dataDict = calculatevalues(dataDict, self.calculatedcolumns)
+            data = (dataDict[k] for k in self.columns)
+
         return ''.join(self.renderer.cell(self, v, k) 
                 for k, v in enumerate(data))
 

@@ -26,10 +26,16 @@ def calculatevalues(data, calculations):
     Calculate given formulas on data
 
     Example:
-    >>> r = calculatevalues({'a': 1, 'b': 2}, {'c': lambda d: 3})
+    >>> formulas = {'c': lambda d: 3}
+    >>> r = calculatevalues({'a': 1, 'b': 2}, formulas)
     >>> r == {'a': 1, 'b': 2, 'c': 3}
     True
+    >>> len(formulas)
+    1
     """
+
+    # copy calculations to avoid destruction
+    calculations = calculations.copy()
 
     while True:
         # get count of calculations we have left to run
@@ -40,6 +46,8 @@ def calculatevalues(data, calculations):
             try: data[key] = calc(data)
             except KeyError:    # we may get this missing val from some
                 continue        # other calculated value, so continue for now
+            except ValueError:
+                data[key] = None    # data is not in a format we expect, set as null
 
             # calculation was a success, remove from list
             del calculations[key]
@@ -61,10 +69,10 @@ def formula(calcString):
     Example:
     >>> f = formula('{a} + {b}')
     >>> f({'a': 1, 'b': 1})
-    2
+    2.0
     """
     # replace place-holders with dictionary refs
-    calcString = calcString.replace('{', 'd["').replace('}', '"]')
+    calcString = calcString.replace('{', 'float(d["').replace('}', '"])')
 
     # create new function and return
     exec 'f = lambda d: ' + calcString
