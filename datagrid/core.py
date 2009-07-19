@@ -113,7 +113,7 @@ class DataGrid(object):
             for value in values:
                 # update row args (agg name & value)
                 rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
-                subData = [x for x in data if x[idx] == value]
+                subData = tuple(x for x in data if x[idx] == value)
                 rowData = self.generate_aggregate_row(subData)
                 rowData[self.columns.index(aggregate[0])] = value
 
