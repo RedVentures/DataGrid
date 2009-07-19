@@ -49,6 +49,9 @@ def main():
             help='Set the aggregation method for a given column.  '\
                     'Example: --aggregatemethod="column|sum"',
             default=[])
+    datagroup.add_option('--calculate', action='append', default=[],
+            help='Add column by running the given calculation.  '\
+                    'Example: --calculate="c|{a}+{b}"')
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
 
@@ -93,6 +96,9 @@ def main():
     except ValueError:
         parser.error("Invalid format supplied for --aggregatemethod option")
 
+    # Parse calculated-column methods
+    calculations = dict(c.split('|') for c in options.calculate)
+
     # Verify aggregate are defined columns
     for aggregate in options.aggregate:
         if aggregate not in columns:
@@ -106,7 +112,7 @@ def main():
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods,
-            options.suppressdetail)
+            options.suppressdetail, calculations)
     print(grid.render())
 
 
