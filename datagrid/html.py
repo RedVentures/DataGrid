@@ -20,12 +20,10 @@
 
 def table(config, head, body, tail):
     return """
-        <table class='helper-gridview' cols='{3}'>
-            {0}
-            <tbody>{1}</tbody>
-            {2}
+        <table class='helper-gridview' cols='%s'>
+            %s<tbody>%s</tbody>%s
         </table>
-        """.format(head, body, tail, len(config.columns))
+        """ % (len(config.columns), head, body, tail)
 
 def row(config, cells, level=0, name=None, value=None):
     """
@@ -40,11 +38,11 @@ def row(config, cells, level=0, name=None, value=None):
     if config.aggregate:
         indent = ((len(config.aggregate) - level) * 5) + 2
         if name is None:
-            return "<tr class='l={0}'><td></td>{1}</tr>".format(level, cells)
+            return "<tr class='l=%s'><td></td>%s</tr>" % (level, cells)
         else:
-            row = "<tr class='l-{0}'><td><i>{1}:</i><span>{2}</span></td>{3}</tr>"
-            return row.format(level, name, value, cells)
-    else: return "<tr>{0}</tr>".format(cells)
+            return "<tr class='l-%s'><td><i>%s:</i><span>%s</span></td>%s</tr>" \
+                % (level, name, value, cells)
+    else: return "<tr>%s</tr>" % cells
 
 def cell(config, data, column): 
     """
@@ -54,7 +52,7 @@ def cell(config, data, column):
     >>> cell(None,'foo',2)
     '<td>foo</td>'
     """
-    return "<td>{0}</td>".format(data)
+    return "<td>%s</td>" % data
 
 def head(config):
     """
@@ -66,10 +64,9 @@ def head(config):
     >>> head(cfg)
     '<thead><tr><th>Heading</th></tr></thead>'
     """
-    cells = ''.join("<th>{0}</th>".format(x) for x in config.columns)
-    headformat = "<thead><tr>{0}</tr></thead>" if not config.aggregate else \
-                 "<thead><tr><th></th>{0}</tr></thead>"
-    return headformat.format(cells)
+    cells = ''.join("<th>%s</th>" % x for x in config.columns)
+    return ("<thead><tr>%s</tr></thead>" if not config.aggregate else
+                 "<thead><tr><th></th>%s</tr></thead>") % cells
 
 def tail(config, cells):
     """
@@ -81,7 +78,6 @@ def tail(config, cells):
     >>> tail(cfg,"<td></td>")
     '<tfoot><tr><td></td></tr></tfoot>'
     """
-    tailformat = "<tfoot><tr>{0}</tr></tfoot>" if not config.aggregate else \
-                 "<tfoot><tr><td></td>{0}</tr></tfoot>"
-    return tailformat.format(cells)
+    return ("<tfoot><tr>%s</tr></tfoot>" if not config.aggregate else 
+                 "<tfoot><tr><td></td>%s</tr></tfoot>") % cells
 
