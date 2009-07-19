@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------#
 
 import sys
-from functools import partial
+from itertools import chain
 from collections import Mapping
 from datagrid.calctools import formula, calculatevalues
 
@@ -52,13 +52,17 @@ class DataGrid(object):
     def calculatedcolumns(self, value):
         # materialize all methods
         self._calculatedcolumns = [
-                (k, formula(v) if isinstance(v, str) else v) for k, v in value.items()]
+                (k, formula(v) if isinstance(v, str) else v) 
+                for k, v in value.iteritems()]
 
 
     # -- Methods -- #
 
     def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
             aggregatemethods={}, suppressdetail=False, calculatedcolumns={}):
+        """
+        Setup DataGrid instance
+        """
 
         # check supplied args
         if not isinstance(aggregatemethods, Mapping):
@@ -70,20 +74,30 @@ class DataGrid(object):
         self.renderer = renderer
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
-        self.aggregatemethods = dict(
-                (self.columns.index(k), v) for k, v in aggregatemethods.items())
+        self.aggregatemethods = dict((self.columns.index(k), v) 
+                for k, v in aggregatemethods.iteritems())
         self.calculatedcolumns = calculatedcolumns
 
     def render(self):
+        """
+        Begin render process
+        """
         head = self.renderer.head(self)
         body = self.render_body(self.data, self.aggregate)
         tail = self.renderer.tail(
                 self, self.render_cells(self.generate_aggregate_row(self.data)))
-        
+
         # render table and return
         return self.renderer.table(self, head, body, tail)
 
     def render_body(self,data,aggregate=[]):
+        """
+        Render table body segment
+
+        For flat data sets (unaggregated), this includes the entire body of
+        data.  Aggregated sets, however, will call render_body for each 
+        aggregation name/value pair.
+        """
         aggregateLen = len(aggregate)
 
         if aggregateLen:
@@ -114,20 +128,30 @@ class DataGrid(object):
             return ''.join(self.render_row(row) for row in data)
     
     def render_cells(self, data):
-        return ''.join(self.renderer.cell(self, str(v), k) 
+        """
+        Render cell-block using given data
+        """
+        return ''.join(self.renderer.cell(self, v, k) 
                 for k, v in enumerate(data))
 
     def render_row(self, data, **kargs):
+        """
+        Render table-row
+        """
         return self.renderer.row(self, self.render_cells(data), **kargs)
 
     def generate_aggregate_row(self, data):
+        """
+        Generate aggregate row summary data
+        """
         # prepopulate with empty data
         rowData = ['' for x in self.columns]
 
         # generate aggregate-row values
         if len(self.aggregatemethods):
             columnValues = zip(*data)
-            for i, m in self.aggregatemethods.items():
-                rowData[i] = str(m([float(v) for v in columnValues[i] if v != '']))
+            for i, m in self.aggregatemethods.iteritems():
+                rowData[i] = str(m([float(v) 
+                    for v in columnValues[i] if v != '']))
         return rowData
 

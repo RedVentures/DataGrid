@@ -49,7 +49,7 @@ def main():
             help='Set the aggregation method for a given column.  '\
                     'Example: --aggregatemethod="column|sum"',
             default=[])
-    datagroup.add_option('--calculate', action='append',
+    datagroup.add_option('--calculate', action='append', default=[],
             help='Add column by running the given calculation.  '\
                     'Example: --calculate="c|{a}+{b}"')
     datagroup.add_option('--suppressdetail', action='store_true',
