@@ -19,6 +19,7 @@
 import sys
 from functools import partial
 from collections import Mapping
+from datagrid.calctools import formula, calculatevalues
 
 class DataGrid(object):
    
@@ -43,11 +44,21 @@ class DataGrid(object):
         if hasattr(value, 'setup'): value.setup(self)
         self._renderer = value
 
+    # Calculated Columns
+    @property
+    def calculatedcolumns(self): return self._calculatedcolumns
+
+    @calculatedcolumns.setter
+    def calculatedcolumns(self, value):
+        # materialize all methods
+        self._calculatedcolumns = [
+                (k, formula(v) if isinstance(v, str) else v) for k, v in value.items()]
+
 
     # -- Methods -- #
 
     def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
-            aggregatemethods={}, suppressdetail=False):
+            aggregatemethods={}, suppressdetail=False, calculatedcolumns={}):
 
         # check supplied args
         if not isinstance(aggregatemethods, Mapping):
@@ -61,6 +72,7 @@ class DataGrid(object):
         self.aggregate = tuple(aggregate)
         self.aggregatemethods = dict(
                 (self.columns.index(k), v) for k, v in aggregatemethods.items())
+        self.calculatedcolumns = calculatedcolumns
 
     def render(self):
         head = self.renderer.head(self)
