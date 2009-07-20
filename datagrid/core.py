@@ -17,7 +17,7 @@
 #------------------------------------------------------------------------#
 
 import sys
-from itertools import chain
+from itertools import chain, groupby
 from collections import Mapping
 from datagrid.calctools import formula, calculatevalues
 
@@ -106,14 +106,18 @@ class DataGrid(object):
         if aggregateLen:
             # get unique values for aggregation requested
             idx = self.columns.index(aggregate[0])
-            values = set(x[idx] for x in data)
 
-            # build output string
+            # create method to group by
+            keyfunc = lambda x: x[idx]
+
+            # group data into chunks of aggregated data
             output = []
-            for value in values:
+            data = sorted(data, key=keyfunc)
+            for value, subData in groupby(data, keyfunc):
+                
                 # update row args (agg name & value)
                 rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
-                subData = tuple(x for x in data if x[idx] == value)
+                subData = tuple(subData)
                 rowData = self.generate_aggregate_row(subData)
                 rowData[self.columns.index(aggregate[0])] = value
 
