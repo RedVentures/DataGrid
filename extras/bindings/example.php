@@ -41,6 +41,7 @@ $data = array(
 $grid = DataGrid::create($data);
 $grid->aggregate( array( 'LastName' ) );
 $grid->setAggregationMethod( array( 'Age' ), 'avg' );
+$grid->addCalculatedColumn( 'TwiceAge', '{Age}*2' );
 
 // output rendered grid
 print $grid->render();

@@ -41,6 +41,7 @@ class DataGrid {
     const OPT_AGGREGATE = 'aggregate';
     const OPT_AGGREGATEMETHOD ='aggregatemethod';
     const OPT_AUTOCOLUMN = 'autocolumn';
+    const OPT_CALCULATE = 'calculate';
     const OPT_RENDERER = 'renderer';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
 
@@ -161,6 +162,26 @@ class DataGrid {
 
         // Merge default with given flags
         $this->flags = array_merge( $defaultFlags, $flags );
+
+    }
+
+    /**
+     * Add formula-driven column
+     *
+     * @param string $columnName - Name of new column
+     * @param string $formula - How to get the data we are seeking
+     * @return DataGrid
+     */
+    public function addCalculatedColumn( $columnName, $formula ) {
+
+        // make sure we already have an array
+        if ( !is_array( $this->flags[self::OPT_CALCULATE] ) )
+            $this->flags[self::OPT_CALCULATE] = array();
+
+        // set method for each given column
+        $this->flags[self::OPT_CALCULATE][$columnName] = "$columnName|$formula";
+
+        return $this;
 
     }
 
