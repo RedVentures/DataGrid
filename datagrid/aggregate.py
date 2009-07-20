@@ -18,9 +18,12 @@
 
 """Aggregate Method Library"""
 
-from __builtin__ import sum, len, min, max
+import __builtin__
+from __builtin__ import len, min, max
 
 def count(iter): return len(iter)
 
 def avg(iter): return sum(iter) / count(iter)
+
+def sum(iter): return __builtin__.sum(float(x) for x in iter)
 

@@ -163,7 +163,6 @@ class DataGrid(object):
         if len(self.aggregatemethods):
             columnValues = zip(*data)
             for i, m in self.aggregatemethods.iteritems():
-                rowData[i] = str(m([float(v) 
-                    for v in columnValues[i] if v != '']))
+                rowData[i] = str(m([v for v in columnValues[i] if v != '']))
         return rowData
 
