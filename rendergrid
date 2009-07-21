@@ -52,6 +52,8 @@ def main():
     datagroup.add_option('--calculate', action='append', default=[],
             help='Add column by running the given calculation.  '\
                     'Example: --calculate="c|{a}+{b}"')
+    datagroup.add_option('-s', '--sort', action='append', default=[],
+            help='Set the sort column(s)')
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
 
@@ -99,6 +101,9 @@ def main():
     # Parse calculated-column methods
     calculations = dict(c.split('|') for c in options.calculate)
 
+    # Parse sort options
+    sortby = [s.split('|') if '|' in s else s for s in options.sort]
+
     # Verify aggregate are defined columns
     for aggregate in options.aggregate:
         if aggregate not in columns:
@@ -112,7 +117,7 @@ def main():
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods,
-            options.suppressdetail, calculations)
+            options.suppressdetail, calculations, sortby)
     print(grid.render())
 
 

@@ -31,6 +31,7 @@ class DataGrid(object):
     columns = tuple()
     renderer = None
     suppressdetail = False
+    sortby = []
 
     _rawcolumns = tuple()
     
@@ -51,7 +52,8 @@ class DataGrid(object):
     # -- Methods -- #
 
     def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
-            aggregatemethods={}, suppressdetail=False, calculatedcolumns={}):
+            aggregatemethods={}, suppressdetail=False, calculatedcolumns={},
+            sortby=[]):
         """
         Setup DataGrid instance
         """
@@ -76,6 +78,9 @@ class DataGrid(object):
         # change column names to indexes
         self.aggregatemethods = dict((self.columns.index(k), v) 
                 for k, v in aggregatemethods.iteritems())
+
+        # setup sortby list
+        self.sortby = [self.columns.index(k) for k in sortby]
 
     def render(self):
         """
@@ -132,6 +137,9 @@ class DataGrid(object):
                     output.append(self.render_body(subData, aggregate[1:]))
             return ''.join(output)
         else:
+            # sort data and display
+            for column in reversed(self.sortby):
+                data = sorted(data, key=lambda x: x[column])
             return ''.join(self.render_row(row) for row in data)
     
     def render_cells(self, data):
