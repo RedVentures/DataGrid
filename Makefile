@@ -13,3 +13,6 @@ server:
 phpdemo:
 	@cd extras/bindings;php demo.php
 
+install:
+	./setup.py install
+
