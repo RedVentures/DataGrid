@@ -74,13 +74,17 @@ class DataGrid(object):
         if self.calculatedcolumns:  # add any calculated columns to list
             self.columns = tuple(chain(columns, self.calculatedcolumns.keys()))
         else: self.columns = columns or tuple()     # default to tuple
-
+        
+        # alias for easier readability below
+        idx = self.columns.index        
+        
         # change column names to indexes
-        self.aggregatemethods = dict((self.columns.index(k), v) 
+        self.aggregatemethods = dict((idx(k), v) 
                 for k, v in aggregatemethods.iteritems())
 
         # setup sortby list
-        self.sortby = [self.columns.index(k) for k in sortby]
+        self.sortby = [(idx(k), 'asc') if isinstance(k, str) else (idx(k[0]), k[1]) 
+                for k in sortby]
 
     def render(self):
         """
@@ -138,8 +142,9 @@ class DataGrid(object):
             return ''.join(output)
         else:
             # sort data and display
-            for column in reversed(self.sortby):
+            for column, direction in reversed(self.sortby):
                 data = sorted(data, key=lambda x: x[column])
+                if direction == 'desc': data = reversed(data)
             return ''.join(self.render_row(row) for row in data)
     
     def render_cells(self, data):
