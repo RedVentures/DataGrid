@@ -19,9 +19,9 @@
 #------------------------------------------------------------------------#
 
 /**
- * PHP DataGrid Bindings
+ * PHP Bindings to Python DataGrid module
  * 
- * @author Adam Wagner <awagner@redventures.net>
+ * @author Adam Wagner <awagner@redventures.com>
  */
 
 /**
@@ -43,6 +43,7 @@ class DataGrid {
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_CALCULATE = 'calculate';
     const OPT_RENDERER = 'renderer';
+    const OPT_SORT = 'sort';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
 
 
@@ -51,7 +52,7 @@ class DataGrid {
     /**
      * DataGrid executable
      *
-     * If custom path is required, add it here
+     * If custom path to executable is required, add it here
      *
      * @var string
      */
@@ -244,6 +245,29 @@ class DataGrid {
         foreach ( $columnList as $column ) 
             $this->flags[self::OPT_AGGREGATEMETHOD][$column] = "$column|$method";
 
+        return $this;
+
+    }
+
+    /**
+     * Set sort parameters
+     *
+     * Accepts an array of column names indicating the sort order.
+     * Changing the sort order is achieved by passing appending "|" and the
+     * direction to the end of the column name.  ie: "FirstName|desc".
+     * If not direction is specified, ascending is assumed.
+     *
+     * Here is a full example of how to sort by LastName, then FirstName
+     * descending:
+     *      $grid->sortBy( array( 'LastName', 'FirstName|desc' ) );
+     *
+     * @param string $columnList
+     * @return DataGrid
+     */
+    public function sortBy( array $columnList ) {
+
+        // set method for each given column
+        $this->flags[self::OPT_SORT] = $columnList;
         return $this;
 
     }
