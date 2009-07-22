@@ -109,7 +109,7 @@ class DataGrid(object):
         # render table and return
         return self.renderer.table(self, head, body, tail)
 
-    def render_body(self,data,aggregate=[]):
+    def render_body(self,data,aggregate=[],aggregateRow=None):
         """
         Render table body segment
 
@@ -130,13 +130,17 @@ class DataGrid(object):
             output = []
             data = sorted(data, key=keyfunc)
             for value, subData in groupby(data, keyfunc):
-                
+               
+                # we will be looking at this more than once, so we need a concrete
+                #   list (tuple), not just an iterator
+                subData = tuple(subData)
+
                 # this config gets sent to renderer.row for displaying aggregate 
                 #   row information (name, value, etc)
                 rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
-
+               
                 # build aggregate summary row
-                rowData = self.generate_aggregate_row(subData)
+                rowData = self.generate_aggregate_row(subData, aggregateRow)
                 rowData[self.columns.index(aggregate[0])] = value
 
                 # add aggregate row
@@ -147,7 +151,7 @@ class DataGrid(object):
 
                 # render remainder of rows beneath aggregation level
                 if rowArgs['level'] > 0:
-                    output.append(self.render_body(subData, aggregate[1:]))
+                    output.append(self.render_body(subData, aggregate[1:], rowData))
             return ''.join(output)
         else:
             # sort data and display
@@ -176,12 +180,12 @@ class DataGrid(object):
         """
         return self.renderer.row(self, self.render_cells(data), **kargs)
 
-    def generate_aggregate_row(self, data):
+    def generate_aggregate_row(self, data, rowModel=None):
         """
         Generate aggregate row summary data
         """
         # prepopulate with empty data
-        rowData = ['' for x in self.columns]
+        rowData = rowModel or ['' for x in self.columns]
 
         # generate aggregate-row values
         if len(self.aggregatemethods):
