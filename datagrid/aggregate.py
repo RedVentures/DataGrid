@@ -20,10 +20,38 @@
 
 import __builtin__
 from __builtin__ import len, min, max
+from operator import countOf
 
-def count(iter): return len(iter)
+def count(iter): 
+    """
+    Count Unique Values
+    
+    Example:
+    >>> count(['red', 'green', 'red', 'blue'])
+    '1 blue, 1 green, 2 red'
+    """
+    return ', '.join(str(countOf(iter, x)) + ' ' + str(x) 
+            for x in sorted(set(iter)))
 
-def avg(iter): return sum(iter) / count(iter)
+def avg(iter): 
+    """
+    Average Values
+    
+    Example:
+    >>> result = avg([1,2,3])
+    >>> int(result)
+    2
+    """
+    return sum(iter) / len(iter)
 
-def sum(iter): return __builtin__.sum(float(x) for x in iter)
+def sum(iter): 
+    """
+    Sum Values
+    
+    Example:
+    >>> result = sum([1,2,3])
+    >>> int(result)
+    6
+    """
+    return __builtin__.sum(float(x) for x in iter)
 

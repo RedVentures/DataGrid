@@ -6,12 +6,10 @@ testverbose:
 
 clean:
 	@find . -name '*.pyc' | xargs rm -f
+	@rm -rf build
 
 server:
 	@python extras/demo/server.py
-
-phpdemo:
-	@cd extras/bindings;php demo.php
 
 install:
 	./setup.py install
