@@ -8,7 +8,7 @@ clean:
 	@find . -name '*.pyc' | xargs rm -f
 
 server:
-	@python extras/demo/demo-server.py
+	@python extras/demo/server.py
 
 phpdemo:
 	@cd extras/bindings;php demo.php
