@@ -1,4 +1,3 @@
-#!/bin/env python
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
@@ -17,32 +16,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-"""DataGrid setup-tools"""
+"""DataGrid install/dist utils"""
 
-import sys
-from distutils.core import setup
-from datagrid.distutils import phpdir
-from datagrid import about
+from os import tmpfile
+from subprocess import check_call, CalledProcessError
 
-# Executables and bindings list
-data_files = [('bin', ['rendergrid'])]
+def phpdir():
+    """Locate PHP's include-dir"""
+    with tmpfile() as buffer:
+        try:
+            check_call(['php -r "echo get_include_path();"'], stdout=buffer,
+                    shell=True)
+            buffer.seek(0)
 
-# if we are installing, do checks for extras installation
-if len(sys.argv) > 1 and sys.argv[1] == 'install':
-    # Check for existance of php and find share dir
-    print "Checking for PHP: ",
-    dir = phpdir()
-    if dir:
-        print "found, Installing PHP bindings in", dir
-        data_files.append((phpdir(), ['extras/bindings/datagrid.php']))
-    else:
-        print "not found, skipping install of php bindings"
+            # attempt to find best match for php include dir
+            include_path = buffer.read().split(':')
 
-# Dispatch distutils setup magic
-setup(
-        name = about.name,
-        version = about.version,
-        packages = ['datagrid'],
-        data_files = data_files
-     )
-
+            # find the least significant dir that includes the name php
+            return [dir for dir in include_path if 'php' in dir][-1]
+        except CalledProcessError:
+            return False
+                
