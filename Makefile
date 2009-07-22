@@ -6,6 +6,7 @@ testverbose:
 
 clean:
 	@find . -name '*.pyc' | xargs rm -f
+	@rm -rf build
 
 server:
 	@python extras/demo/demo-server.py
