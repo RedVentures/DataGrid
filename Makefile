@@ -11,9 +11,6 @@ clean:
 server:
 	@python extras/demo/demo-server.py
 
-phpdemo:
-	@cd extras/bindings;php demo.php
-
 install:
 	./setup.py install
 
