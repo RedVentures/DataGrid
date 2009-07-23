@@ -31,13 +31,13 @@ class DataGrid(object):
     aggregatemethods = {}
     columns = tuple()   
     descriptions = dict()
-    display = tuple()   # list of columns to display
     renderer = None
     suppressdetail = False
     sortby = tuple()    # list of columns to sort on
 
-    # list of columns containing raw data
-    _rawcolumns = tuple()
+    _displaycolumns = tuple()   # indexes of columns to display
+    _allcolumns = tuple()   # all columns (calculated and raw)
+    _rawcolumns = tuple()   # columns containing raw data
 
     
     # -- Properties -- #
@@ -70,7 +70,7 @@ class DataGrid(object):
         # setup datagrid instance
         self.data = tuple(data)         # use tuples for performance
         self.renderer = renderer
-        self.display = display or tuple()
+        self.columns = display or tuple()
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
         self.calculatedcolumns = calculatedcolumns
@@ -82,11 +82,11 @@ class DataGrid(object):
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self.columns = tuple(chain(columns, self.calculatedcolumns.keys()))
-        else: self.columns = columns or tuple()     # default to tuple
+            self._allcolumns = tuple(chain(columns, self.calculatedcolumns.keys()))
+        else: self._allcolumns = columns or tuple()     # default to tuple
         
         # alias for easier readability below
-        idx = self.columns.index        
+        idx = self._allcolumns.index        
         
         # change column names to indexes
         self.aggregatemethods = dict((idx(k), v) 
@@ -103,10 +103,10 @@ class DataGrid(object):
         Begin render process
         """
         # make sure we have display columns
-        if not len(self.display): self.display = self.columns
+        if not len(self.columns): self.columns = self._allcolumns
         
         # materialize display column into numerical indexes
-        self.display = tuple(self.columns.index(k) for k in self.display)
+        self._displaycolumns = tuple(self._allcolumns.index(k) for k in self.columns)
 
         # run renderer setup logic (if we have any)
         if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
@@ -132,7 +132,7 @@ class DataGrid(object):
 
         if aggregateLen:
             # get unique values for aggregation requested
-            idx = self.columns.index(aggregate[0])
+            idx = self._allcolumns.index(aggregate[0])
 
             # create method to group by
             keyfunc = lambda x: x[idx]
@@ -152,7 +152,7 @@ class DataGrid(object):
                
                 # build aggregate summary row
                 rowData = self.generate_aggregate_row(subData, aggregateRow)
-                rowData[self.columns.index(aggregate[0])] = value
+                rowData[self._allcolumns.index(aggregate[0])] = value
 
                 # add aggregate row
                 output.append(self.render_row(rowData, **rowArgs))
@@ -179,11 +179,11 @@ class DataGrid(object):
         if self.calculatedcolumns:
             dataDict = dict(zip(self._rawcolumns, data))
             dataDict = calculatevalues(dataDict, self.calculatedcolumns)
-            data = (dataDict[k] for k in self.columns)
+            data = (dataDict[k] for k in self._allcolumns)
 
         # Return block of rendered cells (use renderer.cell for actual rendering)
         return ''.join(self.renderer.cell(self, data[k], k) 
-                for k in self.display)
+                for k in self._displaycolumns)
 
     def render_row(self, data, **kargs):
         """
@@ -196,7 +196,7 @@ class DataGrid(object):
         Generate aggregate row summary data
         """
         # prepopulate with empty data
-        rowData = rowModel or ['' for x in self.columns]
+        rowData = rowModel or ['' for x in self._allcolumns]
 
         # generate aggregate-row values
         if len(self.aggregatemethods):
