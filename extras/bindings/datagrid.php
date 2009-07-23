@@ -3,6 +3,7 @@
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+#                    Kenny Parnell <kparnell@redventures.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published 
@@ -42,6 +43,7 @@ class DataGrid {
     const OPT_AGGREGATEMETHOD ='aggregatemethod';
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_CALCULATE = 'calculate';
+    const OPT_DESCRIPTION = 'columndescription';
     const OPT_RENDERER = 'renderer';
     const OPT_SORT = 'sort';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
@@ -176,11 +178,33 @@ class DataGrid {
     public function addCalculatedColumn( $columnName, $formula ) {
 
         // make sure we already have an array
-        if ( !is_array( $this->flags[self::OPT_CALCULATE] ) )
+        if ( empty( $this->flags[self::OPT_CALCULATE] )
+            || !is_array( $this->flags[self::OPT_CALCULATE] ) )
             $this->flags[self::OPT_CALCULATE] = array();
 
         // set method for each given column
         $this->flags[self::OPT_CALCULATE][$columnName] = "$columnName|$formula";
+
+        return $this;
+
+    }
+
+    /**
+     * Add column description
+     *
+     * @param string $columnName - Name of column
+     * @param string $description - What the column's all about
+     * @return DataGrid
+     */
+    public function addColumnDescription( $columnName, $description ) {
+
+        // make sure we already have an array
+        if ( empty( $this->flags[self::OPT_DESCRIPTION] )
+            || !is_array( $this->flags[self::OPT_DESCRIPTION] ) )
+            $this->flags[self::OPT_DESCRIPTION] = array();
+
+        // set method for each given column
+        $this->flags[self::OPT_DESCRIPTION][$columnName] = "$columnName|$description";
 
         return $this;
 
@@ -238,7 +262,8 @@ class DataGrid {
     public function setAggregationMethod( array $columnList, $method ) {
 
         // make sure we already have an array
-        if ( !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
+        if ( empty( $this->flags[self::OPT_AGGREGATEMETHOD] )
+            || !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
             $this->flags[self::OPT_AGGREGATEMETHOD] = array();
 
         // set method for each given column
