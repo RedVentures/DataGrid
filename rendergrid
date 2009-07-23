@@ -2,6 +2,7 @@
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+#                    Kenny Parnell <kparnell@redventures.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published 
@@ -52,6 +53,9 @@ def main():
     datagroup.add_option('--calculate', action='append', default=[],
             help='Add column by running the given calculation.  '\
                     'Example: --calculate="c|{a}+{b}"')
+    datagroup.add_option('--columndescription', action='append', default=[],
+            help='Provide a description for the given column.  '\
+                    'Example: --columndescription="c|Really helpful info."')
     datagroup.add_option('-s', '--sort', action='append', default=[],
             help='Set the sort column(s)')
     datagroup.add_option('--suppressdetail', action='store_true',
@@ -101,6 +105,9 @@ def main():
     # Parse calculated-column methods
     calculations = dict(c.split('|') for c in options.calculate)
 
+    # Parse column descriptions
+    descriptions = dict(d.split('|') for d in options.columndescription)
+
     # Parse sort options
     sortby = [s.split('|') if '|' in s else s for s in options.sort]
 
@@ -116,8 +123,8 @@ def main():
             parser.error("Cannot suppress if no aggregation is declared")
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns,options.aggregate,aggregatemethods,
-            options.suppressdetail, calculations, sortby)
+    grid = DataGrid(data,renderer,columns,descriptions,options.aggregate,
+            aggregatemethods, options.suppressdetail, calculations, sortby)
     print(grid.render())
 
 

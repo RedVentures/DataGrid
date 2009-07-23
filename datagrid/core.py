@@ -1,6 +1,7 @@
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+#                    Kenny Parnell <kparnell@redventures.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published 
@@ -29,6 +30,7 @@ class DataGrid(object):
     aggregate = tuple()
     aggregatemethods = {}
     columns = tuple()
+    descriptions = dict()
     renderer = None
     suppressdetail = False
     sortby = []
@@ -53,9 +55,9 @@ class DataGrid(object):
 
     # -- Methods -- #
 
-    def __init__(self, data, renderer, columns=tuple(), aggregate=tuple(),
-            aggregatemethods={}, suppressdetail=False, calculatedcolumns={},
-            sortby=[]):
+    def __init__(self, data, renderer, columns=tuple(), descriptions=dict(),
+            aggregate=tuple(), aggregatemethods={}, suppressdetail=False,
+            calculatedcolumns={}, sortby=[]):
         """
         Setup DataGrid instance
         """
@@ -70,6 +72,7 @@ class DataGrid(object):
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
         self.calculatedcolumns = calculatedcolumns
+        self.descriptions = descriptions
 
         # when getting calculated column values, we to know what columns contain
         #   raw data versus calculated data

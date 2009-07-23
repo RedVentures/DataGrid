@@ -1,6 +1,7 @@
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+#                    Kenny Parnell <kparnell@redventures.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published 
@@ -64,7 +65,8 @@ def head(config):
     >>> head(cfg)
     '<thead><tr><th>Heading</th></tr></thead>'
     """
-    cells = ''.join("<th>%s</th>" % x for x in config.columns)
+    cells = ''.join("<th title=\"%s\">%s</th>" %
+            (config.descriptions.get(x,''),x) for x in config.columns)
     return ("<thead><tr>%s</tr></thead>" if not config.aggregate else
                  "<thead><tr><th></th>%s</tr></thead>") % cells
 
