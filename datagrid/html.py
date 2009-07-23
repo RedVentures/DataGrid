@@ -61,14 +61,26 @@ def head(config):
 
     Example:
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'columns aggregate')(('Heading',), [])
+    >>> Cfg = namedtuple('Cfg', 'columns aggregate descriptions')
+    >>> cfg = Cfg(('Heading',), [], {})
     >>> head(cfg)
     '<thead><tr><th>Heading</th></tr></thead>'
+    >>> cfg = Cfg(('Heading',), [], {'Heading': 'Hello World!'})
+    >>> head(cfg)
+    '<thead><tr><th title="Hello World!">Heading</th></tr></thead>'
     """
-    cells = ''.join("<th title=\"%s\">%s</th>" %
-            (config.descriptions.get(x,''),x) for x in config.columns)
+    # build list of cells
+    cells = []
+    for col in config.columns:
+        try:
+            cells.append("<th title=\"%s\">%s</th>" 
+                    % (config.descriptions[col], col))
+        except KeyError:    # title was not found, omit
+            cells.append("<th>%s</th>" % col)
+
+    # glue pieces together and return
     return ("<thead><tr>%s</tr></thead>" if not config.aggregate else
-                 "<thead><tr><th></th>%s</tr></thead>") % cells
+                 "<thead><tr><th></th>%s</tr></thead>") % ''.join(cells)
 
 def tail(config, cells):
     """
