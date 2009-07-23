@@ -106,7 +106,10 @@ class DataGrid(object):
         if not len(self.columns): self.columns = self._allcolumns
         
         # materialize display column into numerical indexes
-        self._displaycolumns = tuple(self._allcolumns.index(k) for k in self.columns)
+        if len(self._allcolumns):
+            self._displaycolumns = tuple(self._allcolumns.index(k) for k in self.columns)
+        else:
+            self._allcolumns = self._displaycolumns = range(len(self.data[0]))
 
         # run renderer setup logic (if we have any)
         if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
