@@ -29,11 +29,12 @@ class DataGrid(object):
     data = tuple()
     aggregate = tuple()
     aggregatemethods = {}
-    columns = tuple()
+    columns = tuple()   
     descriptions = dict()
+    display = tuple()   # list of columns to display
     renderer = None
     suppressdetail = False
-    sortby = []
+    sortby = tuple()    # list of columns to sort on
 
     # list of columns containing raw data
     _rawcolumns = tuple()
@@ -57,7 +58,7 @@ class DataGrid(object):
 
     def __init__(self, data, renderer, columns=tuple(), descriptions=dict(),
             aggregate=tuple(), aggregatemethods={}, suppressdetail=False,
-            calculatedcolumns={}, sortby=[]):
+            calculatedcolumns={}, sortby=[], display=tuple()):
         """
         Setup DataGrid instance
         """
@@ -69,6 +70,7 @@ class DataGrid(object):
         # setup datagrid instance
         self.data = tuple(data)         # use tuples for performance
         self.renderer = renderer
+        self.display = display or tuple()
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
         self.calculatedcolumns = calculatedcolumns
@@ -100,6 +102,12 @@ class DataGrid(object):
         """
         Begin render process
         """
+        # make sure we have display columns
+        if not len(self.display): self.display = self.columns
+        
+        # materialize display column into numerical indexes
+        self.display = tuple(self.columns.index(k) for k in self.display)
+
         # run renderer setup logic (if we have any)
         if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
 
@@ -174,8 +182,8 @@ class DataGrid(object):
             data = (dataDict[k] for k in self.columns)
 
         # Return block of rendered cells (use renderer.cell for actual rendering)
-        return ''.join(self.renderer.cell(self, v, k) 
-                for k, v in enumerate(data))
+        return ''.join(self.renderer.cell(self, data[k], k) 
+                for k in self.display)
 
     def render_row(self, data, **kargs):
         """

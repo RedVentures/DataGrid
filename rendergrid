@@ -61,8 +61,15 @@ def main():
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
 
+    # Display group options
+    displaygroup = OptionGroup(parser, 'Data display options')
+    displaygroup.add_option('-d', '--display', action='append', default=[],
+            help='Set display column.  '\
+                    '(Optional - if not set, all columns are used)')
+
     # Parse options
     parser.add_option_group(datagroup)
+    parser.add_option_group(displaygroup)
     options, args = parser.parse_args()
 
     # Load table renderer
@@ -124,7 +131,8 @@ def main():
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,descriptions,options.aggregate,
-            aggregatemethods, options.suppressdetail, calculations, sortby)
+            aggregatemethods, options.suppressdetail, calculations, sortby,
+            options.display)
     print(grid.render())
 
 
