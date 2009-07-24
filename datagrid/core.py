@@ -182,7 +182,7 @@ class DataGrid(object):
         if self.calculatedcolumns:
             dataDict = dict(zip(self._rawcolumns, data))
             dataDict = calculatevalues(dataDict, self.calculatedcolumns)
-            data = (dataDict[k] for k in self._allcolumns)
+            data = [dataDict[k] for k in self._allcolumns]
 
         # Return block of rendered cells (use renderer.cell for actual rendering)
         return ''.join(self.renderer.cell(self, data[k], k) 
