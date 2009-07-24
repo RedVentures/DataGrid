@@ -16,6 +16,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
+# allow relative imports
+import sys, os
+sys.path.insert(0, os.path.dirname(__file__) + '/../')
+
 import unittest
 import core, calctools
 
@@ -27,5 +31,5 @@ for module in [core, calctools]:
     suite.addTest(unittest.TestLoader().loadTestsFromModule(module))
 
 # Begin tests
-unittest.TextTestRunner(verbosity=2).run(suite)
+unittest.TextTestRunner(verbosity=1).run(suite)
 

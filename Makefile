@@ -1,12 +1,12 @@
-test:
+test: testpyunit
 	@python -m doctest datagrid/*.py && echo "All doc-tests passed"
-	@echo '----------------------------------------------------------------------'
-	@python tests/runner.py
 
-testverbose:
+testverbose: testpyunit
 	python -m doctest datagrid/*.py -v && echo "All doc-tests passed"
-	@echo '----------------------------------------------------------------------'
+
+testpyunit:
 	python tests/runner.py
+	@echo '----------------------------------------------------------------------'
 
 clean:
 	@find . -name '*.pyc' | xargs rm -f

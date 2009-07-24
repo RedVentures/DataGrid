@@ -18,12 +18,8 @@
 
 """datagrid.core test module"""
 
-# allow relative imports
-import sys, os
-sys.path.append(os.path.dirname(__file__) + '/../')
-
-from datagrid.core import DataGrid
 import unittest
+from datagrid.core import DataGrid
 
 
 # -- TEST FIXTURES -- #
@@ -127,10 +123,19 @@ class TestOutput(unittest.TestCase):
         """Setup for all tests in class"""
         self.grid = DataGrid(testData, EchoRenderer(), testCols)
 
-    def testRender(self): 
+    def testBasicRender(self): 
         # Output of test run should look like this
         expected = "[t][h/][r][c]1[/c][c]2[/c][c]3[/c][/r]" \
                 "[r][c]4[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
+        self.assertEquals(expected, self.grid.render())
+
+    def testHideColumn(self): 
+        # Output of test run should look like this
+        expected = "[t][h/][r][c]1[/c][c]2[/c][/r]" \
+                "[r][c]4[/c][c]5[/c][/r][f][c][/c][c][/c][/f][/t]"
+
+        # Only show first two columns
+        self.grid.columns = ('one', 'two')
         self.assertEquals(expected, self.grid.render())
 
 

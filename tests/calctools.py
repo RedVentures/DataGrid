@@ -18,12 +18,8 @@
 
 """datagrid.calculate test module"""
 
-# allow relative imports
-import sys, os
-sys.path.append(os.path.dirname(__file__) + '/../')
-
-from datagrid.calctools import calculatevalues, CalculatedValueError
 import unittest
+from datagrid.calctools import calculatevalues, CalculatedValueError
 
 class TestCalcTools(unittest.TestCase):
     """CalcTools unit-tests"""

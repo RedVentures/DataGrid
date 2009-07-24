@@ -29,12 +29,12 @@ class DataGrid(object):
     data = tuple()
     aggregate = tuple()
     aggregatemethods = {}
-    columns = tuple()   
     descriptions = dict()
     renderer = None
     suppressdetail = False
     sortby = tuple()    # list of columns to sort on
 
+    _columns = tuple()      # columns to display
     _displaycolumns = tuple()   # indexes of columns to display
     _allcolumns = tuple()   # all columns (calculated and raw)
     _rawcolumns = tuple()   # columns containing raw data
@@ -53,16 +53,22 @@ class DataGrid(object):
                 (k, formula(v) if isinstance(v, str) else v) 
                 for k, v in value.iteritems())
 
+    # Display columns
+    @property
+    def columns(self): return self._columns
+
+    @columns.setter
+    def columns(self, value):
+       self._columns = value or tuple() 
 
     # -- Methods -- #
 
-    def __init__(self, data, renderer, columns=tuple(), descriptions=dict(),
+    def __init__(self, data, renderer, rawColumns=[], descriptions=dict(),
             aggregate=tuple(), aggregatemethods={}, suppressdetail=False,
-            calculatedcolumns={}, sortby=[], display=tuple()):
+            calculatedcolumns={}, sortby=[], columns=tuple()):
         """
         Setup DataGrid instance
         """
-
         # check supplied args
         if not isinstance(aggregatemethods, Mapping):
             raise TypeError('aggregatemethods must be a Mapping object (ie dict)')
@@ -70,7 +76,7 @@ class DataGrid(object):
         # setup datagrid instance
         self.data = tuple(data)         # use tuples for performance
         self.renderer = renderer
-        self.columns = display or tuple()
+        self.columns = columns or tuple()
         self.suppressdetail = suppressdetail
         self.aggregate = tuple(aggregate)
         self.calculatedcolumns = calculatedcolumns
@@ -78,12 +84,12 @@ class DataGrid(object):
 
         # when getting calculated column values, we to know what columns contain
         #   raw data versus calculated data
-        self._rawcolumns = columns or tuple()
+        self._rawcolumns = rawColumns or tuple()
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(chain(columns, self.calculatedcolumns.keys()))
-        else: self._allcolumns = columns or tuple()     # default to tuple
+            self._allcolumns = tuple(chain(rawColumns, self.calculatedcolumns.keys()))
+        else: self._allcolumns = rawColumns or tuple()     # default to tuple
         
         # alias for easier readability below
         idx = self._allcolumns.index        
@@ -104,7 +110,7 @@ class DataGrid(object):
         """
         # make sure we have display columns
         if not len(self.columns): self.columns = self._allcolumns
-        
+
         # materialize display column into numerical indexes
         if len(self._allcolumns):
             self._displaycolumns = tuple(self._allcolumns.index(k) for k in self.columns)

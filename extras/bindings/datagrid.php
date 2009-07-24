@@ -285,11 +285,6 @@ class DataGrid {
      */
     public function setDisplayColumns( array $columnList ) {
 
-        // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_DISPLAY] )
-                || !is_array( $this->flags[self::OPT_DISPLAY] ) )
-            $this->flags[self::OPT_DISPLAY] = array();
-
         // set columns list
         $this->flags[self::OPT_DISPLAY] = $columnList;
 
