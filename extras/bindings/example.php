@@ -43,6 +43,7 @@ $grid->aggregate( array( 'LastName' ) );
 $grid->setAggregationMethod( array( 'Age' ), 'avg' );
 $grid->addCalculatedColumn( 'TwiceAge', '{Age}*2' );
 $grid->addColumnDescription( 'Age', 'How many years since birth' );
+$grid->setDisplayColumns( array( 'FirstName', 'Age', 'LastName', 'TwiceAge' ) );
 
 // output rendered grid
 print $grid->render();

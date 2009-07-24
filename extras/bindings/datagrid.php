@@ -44,6 +44,7 @@ class DataGrid {
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_CALCULATE = 'calculate';
     const OPT_DESCRIPTION = 'columndescription';
+    const OPT_DISPLAY = 'display';
     const OPT_RENDERER = 'renderer';
     const OPT_SORT = 'sort';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
@@ -179,7 +180,7 @@ class DataGrid {
 
         // make sure we already have an array
         if ( empty( $this->flags[self::OPT_CALCULATE] )
-            || !is_array( $this->flags[self::OPT_CALCULATE] ) )
+                || !is_array( $this->flags[self::OPT_CALCULATE] ) )
             $this->flags[self::OPT_CALCULATE] = array();
 
         // set method for each given column
@@ -200,7 +201,7 @@ class DataGrid {
 
         // make sure we already have an array
         if ( empty( $this->flags[self::OPT_DESCRIPTION] )
-            || !is_array( $this->flags[self::OPT_DESCRIPTION] ) )
+                || !is_array( $this->flags[self::OPT_DESCRIPTION] ) )
             $this->flags[self::OPT_DESCRIPTION] = array();
 
         // set method for each given column
@@ -263,12 +264,34 @@ class DataGrid {
 
         // make sure we already have an array
         if ( empty( $this->flags[self::OPT_AGGREGATEMETHOD] )
-            || !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
+                || !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
             $this->flags[self::OPT_AGGREGATEMETHOD] = array();
 
         // set method for each given column
         foreach ( $columnList as $column ) 
             $this->flags[self::OPT_AGGREGATEMETHOD][$column] = "$column|$method";
+
+        return $this;
+
+    }
+
+    /**
+     * Set list of columns to display
+     *
+     * If this optional call is not made, all data columns will be rendered
+     *
+     * @param array $columnList - columns to display
+     * @return DataGrid
+     */
+    public function setDisplayColumns( array $columnList ) {
+
+        // make sure we already have an array
+        if ( empty( $this->flags[self::OPT_DISPLAY] )
+                || !is_array( $this->flags[self::OPT_DISPLAY] ) )
+            $this->flags[self::OPT_DISPLAY] = array();
+
+        // set columns list
+        $this->flags[self::OPT_DISPLAY] = $columnList;
 
         return $this;
 
