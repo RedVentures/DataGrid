@@ -25,10 +25,18 @@ sys.path.append(os.path.dirname(__file__) + '/../')
 from datagrid.core import DataGrid
 import unittest
 
-class RendererFixture(object):
+
+# -- TEST FIXTURES -- #
+
+# Test data: simple 2x3 table
+testData = [['1', '2', '3'], ['4', '5', '6']]
+
+# Column names for test table
+testCols = ['one', 'two', 'three']
+
+class StackTestRenderer(object):
     """
-    TestRenderer - Allows testing of datagrid.core without intimate
-    details of how any specific renderer works
+    Allows testing of datagrid-renderer interaction and call order
     """
 
     # Stack of filter calls made
@@ -44,30 +52,45 @@ class RendererFixture(object):
         setattr(self,name,method)
         return method
 
+class EchoRenderer(object):
+    """
+    Test Renderer that simply echos method name and received input.
+    This renderer is used for basic output testing
+    """
 
-class TestDataGrid(unittest.TestCase):
+    def table(self, config, head, body, tail): 
+        return "[t]" + head + body + tail + "[/t]"
+
+    def row(self, config, cells, level=0, name=None, value=None): 
+        return "[r]" + cells + "[/r]"
+
+    def cell(self, config, data, column): 
+        return "[c]" + data + "[/c]"
+
+    def head(self, config): 
+        return "[h/]"
+
+    def tail(self, config, cells): 
+        return "[f]" + cells + "[/f]"
+
+
+# -- TEST CLASSES -- #
+
+class TestRenderInteract(unittest.TestCase):
     """DataGrid core unit-test"""
 
     # Grid fixture
     grid = None
 
-    # Test data: simple 2x3 table
-    testData = [[1, 2, 3], [4, 5, 6]]
-
-    # Column names for test table
-    testCols = ['one', 'two', 'three']
-
     def setUp(self):
         """Setup fixtures"""
-        self.grid = DataGrid(self.testData, None, self.testCols)
+        self.grid = DataGrid(testData, StackTestRenderer(), testCols)
     
     def tearDown(self):
         """Cleanup and prep for next run"""
-        RendererFixture.callLog = []
+        StackTestRenderer.callLog = []
 
     def testRender(self):
-        """Test DataGrid.render method"""
-
         # Evaluation order or render methods for given test table
         testLog = ['setup', 'head',             # Setup table and header
                 'cell', 'cell', 'cell', 'row',  # Rendering Row 1 
@@ -76,13 +99,10 @@ class TestDataGrid(unittest.TestCase):
                 'table']                        # Wrap up table render
 
         # Test simple render
-        self.grid.renderer = RendererFixture()
         self.grid.render()
         self.assertEquals(testLog, self.grid.renderer.callLog)
 
     def testRenderAggregate(self):
-        """Test DataGrid.render method - with aggregation"""
-
         # Aggregation eval order
         testLog = ['setup', 'head',             # Setup table and header
                 'cell', 'cell', 'cell', 'row',  # Rendering Agg Row 1 
@@ -93,10 +113,25 @@ class TestDataGrid(unittest.TestCase):
                 'table']                        # Wrap up table render
 
         # Test simple render
-        self.grid.renderer = RendererFixture()
         self.grid.aggregate = ['one']
         self.grid.render()
         self.assertEquals(testLog, self.grid.renderer.callLog)
+
+
+class TestOutput(unittest.TestCase):
+    
+    # Grid fixture
+    grid = None
+
+    def setUp(self):
+        """Setup for all tests in class"""
+        self.grid = DataGrid(testData, EchoRenderer(), testCols)
+
+    def testRender(self): 
+        # Output of test run should look like this
+        expected = "[t][h/][r][c]1[/c][c]2[/c][c]3[/c][/r]" \
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
+        self.assertEquals(expected, self.grid.render())
 
 
 # Run tests if called from console
