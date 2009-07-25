@@ -26,8 +26,14 @@ class Renderer(datagrid.renderer.Renderer):
     ASCII/Text Table Renderer
     """
 
-    # Calculated max str-lens of each table column
-    columnwidths = tuple()
+    # Internal storage
+    _currentRow = []
+    _headRow = []
+    _bodyRows = []
+    _tailRow = []
+
+    # calculated column widths (for proper column alignment)
+    columnwidths = []
 
     # Reference to datagrid.core.DataGrid object that is using renderer 
     config = None
@@ -36,45 +42,90 @@ class Renderer(datagrid.renderer.Renderer):
     padding = ' ' * 3
 
     def setup(self, config):
-        """
-        Complete setup tasks for a successful render
-
-        Example:
-        >>> from collections import namedtuple
-        >>> Cfg = namedtuple('Cfg', 'columns data')
-        >>> r = Renderer()
-        >>> r.setup(Cfg(['Col'], [['a'],['b']]))
-        >>> r.columnwidths
-        (3,)
-        >>> r.setup(Cfg([], [['a'],['b']]))
-        >>> r.columnwidths
-        (1,)
-        """
         self.config = config
-        columnwidths = [max(len(data) for data in vals) 
-                for vals in izip(*config.data)]
 
-        # Check for longer columns in header row
-        for idx, width in enumerate(columnwidths):
-            try:
-                columnwidths[idx] = max((len(config.columns[idx]), width))
-            except: pass
+        # initial column widths from headers
+        self.columnwidths = [len(column) for column in config.columns]
 
-        # Save found max in instance
-        self.columnwidths = tuple(columnwidths)
+    def table(self, *args):
+        # Build table header
+        head = self._head()
 
-    def table(self, config, head, body, tail):
+        # Build main body of table
+        body = ''.join(self._generate_rows())
+
+        # Build footer (or tail) or table
+        tail = self._tail(''.join(self._cell(*a) for a in self._tailRow))
+
+        return self._table(head, body, tail)
+
+    def row(self, *args, **kargs):
+        """
+        core-facing row method.
+        capture what we have in our cell collector and give it a home
+        in the bodyrows list, then clear the collector to leave room
+        for the next set of cells.
+        """
+        self._bodyRows.append((args[2:], kargs, self._currentRow))
+        self._currentRow = []
+        return ''
+
+    def cell(self, config, data, column):
+        """
+        formatter that is called to render cell data
+        for the ascii module, we simply capture this so we can output it
+            once we've seen what the all cells look like
+        """
+        # make sure we have the right format
+        data = str(data)
+
+        # add to list of rows to process
+        self._currentRow.append((data, column))
+
+        # pit against previous length champion
+        self.columnwidths[column] = max(self.columnwidths[column], len(data))
+
+        return ''   # datagrid.core needs to think this worked properly
+
+    def head(self, *args):
+        """
+        core-facing head method, all we usually use here is config, but
+        we already have that stored on the object, so we can do nothing
+        now.
+        """
+        return ''
+
+    def tail(self, *args):
+        """
+        core-facing tail method, capture what we need to call this 
+        'for real' later
+        """
+        self._tailRow = (self._currentRow)
+        self._currentRow = []
+
+    def _generate_rows(self):
+        """
+        Generate row from cached data.
+        """
+        for args, kargs, cells in self._bodyRows:
+            # generate cells for row
+            cells = ''.join(self._cell(*cellArgs) for cellArgs in cells) 
+
+            # return generated row
+            yield self._row(cells, *args, **kargs)
+
+    def _table(self, head, body, tail):
         """
         Generate ASCII table
 
         Example:
         >>> r = Renderer()
-        >>> r.table(None, 'head', 'body', 'tail')
+        >>> r._table('head', 'body', 'tail')
         'headbodytail'
         """
         return head + body + tail
 
-    def row(self, config, cells, level=0, name=None, value=None):
+    def _row(self, cells, level=0, name=None, value=None):
         """
         Generate ASCII Table Row
 
@@ -82,30 +133,31 @@ class Renderer(datagrid.renderer.Renderer):
         >>> from collections import namedtuple
         >>> cfg = namedtuple('Cfg', 'aggregate')(tuple())
         >>> r = Renderer()
-        >>> r.row(cfg, 'table cells')
+        >>> r.config = cfg
+        >>> r._row('table cells')
         'table cells\\n'
         """
-        if config.aggregate:
-            levels = len(config.aggregate)
+        if self.config.aggregate:
+            levels = len(self.config.aggregate)
             indent = ((levels - level) * '|').ljust(levels + 1) + ' '
             row = indent + cells + '\n'
             if level > 0: return indent + name + ': ' + value + '\n' + row
             else: return row
         else: return cells + '\n'
 
-    def cell(self, config, data, column):
+    def _cell(self, data, column):
         """
         Generate ASCII Table Cell
         
         Example:
         >>> r = Renderer()
         >>> r.columnwidths = (10,)
-        >>> r.cell(None, 'cell data', 0)
+        >>> r._cell('cell data', 0)
         'cell data    '
         """
         return data.ljust(self.column_width(column)) + self.padding
 
-    def head(self, config):
+    def _head(self):
         """
         Generate the Header Row
 
@@ -115,18 +167,18 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r = Renderer()
         >>> r.config = cfg
         >>> r.columnwidths = (10,)
-        >>> r.head(cfg)
+        >>> r._head()
         'Heading      \\n=============\\n'
         """
         maxwidth = sum(self.columnwidths) + \
                 len(self.columnwidths) * len(self.padding)
         heading = ''.join(v.ljust(self.columnwidths[k]) + self.padding 
-                for k, v in enumerate(config.columns))
+                for k, v in enumerate(self.config.columns))
         border = '=' * maxwidth
         indent = self.aggregate_indent()
         return indent + heading + '\n' + indent + border + '\n'
 
-    def tail(self, config, cells):
+    def _tail(self, cells):
         """
         Generate the Footer Row
 
@@ -136,7 +188,7 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r = Renderer()
         >>> r.config = Cfg(tuple())
         >>> r.columnwidths = (10,)
-        >>> r.tail(None,'My Data')
+        >>> r._tail('My Data')
         '=============\\nMy Data'
         """
         maxwidth = sum(self.columnwidths) + \

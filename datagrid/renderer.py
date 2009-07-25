@@ -23,7 +23,7 @@ from abc import ABCMeta, abstractmethod
 class Renderer(object):
     __metaclass__ = ABCMeta
 
-    def setup(self):
+    def setup(self, config):
         """Optional setup method"""
         pass
 
