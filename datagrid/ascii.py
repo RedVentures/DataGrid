@@ -35,6 +35,9 @@ class Renderer(datagrid.renderer.Renderer):
     # calculated column widths (for proper column alignment)
     columnwidths = []
 
+    # calculated aggregation depth
+    levels = 0
+    
     # Reference to datagrid.core.DataGrid object that is using renderer 
     config = None
     
@@ -46,6 +49,11 @@ class Renderer(datagrid.renderer.Renderer):
 
         # initial column widths from headers
         self.columnwidths = [len(column) for column in config.columns]
+            
+        # find number of aggregation levels
+        self.levels = len(self.config.aggregate)
+        if config.suppressdetail: self.levels -= 1 # detail row does not count
+
 
     def table(self, *args):
         # Build table header
@@ -137,9 +145,8 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r._row('table cells')
         'table cells\\n'
         """
-        if self.config.aggregate:
-            levels = len(self.config.aggregate)
-            indent = ((levels - level) * '|').ljust(levels + 1) + ' '
+        if self.levels:
+            indent = ((self.levels - level) * '|').ljust(self.levels + 1) + ' '
             row = indent + cells + '\n'
             if level > 0: return indent + name + ': ' + value + '\n' + row
             else: return row
@@ -225,10 +232,9 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.aggregate_indent(1)
         '|   '
         """
-        levels = len(self.config.aggregate)
-        if levels:
+        if self.levels:
             try:
-                return ((levels - level) * '|').ljust(levels + 1) + ' '
-            except: return ' ' * (levels + 2)
+                return ((self.levels - level) * '|').ljust(self.levels + 1) + ' '
+            except: return ' ' * (self.levels + 2)
         else: return ''
 

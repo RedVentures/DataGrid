@@ -55,7 +55,7 @@ class DataGrid(object):
 
     # Display columns
     @property
-    def columns(self): return self._columns
+    def columns(self): return self._columns or ['']*len(self._displaycolumns)
 
     @columns.setter
     def columns(self, value):
@@ -163,11 +163,11 @@ class DataGrid(object):
                 rowData = self.generate_aggregate_row(subData, aggregateRow)
                 rowData[self._allcolumns.index(aggregate[0])] = value
 
-                # add aggregate row
-                output.append(self.render_row(rowData, **rowArgs))
-
                 # if details are suppressed, decrement out agg-level
                 if self.suppressdetail: rowArgs['level'] -= 1
+
+                # add aggregate row
+                output.append(self.render_row(rowData, **rowArgs))
 
                 # render remainder of rows beneath aggregation level
                 if rowArgs['level'] > 0:
@@ -191,8 +191,8 @@ class DataGrid(object):
             data = [dataDict[k] for k in self._allcolumns]
 
         # Return block of rendered cells (use renderer.cell for actual rendering)
-        return ''.join(self.renderer.cell(self, data[k], k) 
-                for k in self._displaycolumns)
+        return ''.join(self.renderer.cell(self, data[k], i) 
+                for i, k in enumerate(self._displaycolumns))
 
     def render_row(self, data, **kargs):
         """
