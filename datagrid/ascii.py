@@ -226,6 +226,7 @@ class Renderer(datagrid.renderer.Renderer):
         >>> from collections import namedtuple
         >>> Cfg = namedtuple('Cfg', 'aggregate')
         >>> r = Renderer()
+        >>> r.levels = 2
         >>> r.config = Cfg((1,2))
         >>> r.aggregate_indent()
         '    '
