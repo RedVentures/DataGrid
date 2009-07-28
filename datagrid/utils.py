@@ -16,8 +16,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-from copy import deepcopy
-from itertools import ifilter
+from itertools import ifilter, izip, starmap
+
+def set_column_types(iter, types):
+    """
+    Cast each col in row as requested type
+
+    Example:
+    >>> i = set_column_types([['1','2'],['4','5']],(float,str))
+    >>> list(i)
+    [(1.0, '2'), (4.0, '5')]
+    """
+    # put types in single item lists, so we can use apply
+    return (tuple(starmap(apply, izip(types,row))) for row in iter)
 
 def get_column_types(iter):
     """
@@ -27,10 +38,7 @@ def get_column_types(iter):
     >>> get_column_types([[1,'2',3,'a'],[2,'3','z','b']])
     [<type 'float'>, <type 'float'>, <type 'str'>, <type 'str'>]
     """
-    # make sure we do not consume iterators
-    data = deepcopy(iter)
-
-    return [column_type(col) for col in zip(*data)]
+    return [column_type(col) for col in zip(*iter)]
 
 def column_type(iter):
     """
