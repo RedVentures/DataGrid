@@ -26,11 +26,23 @@ class DataGrid(object):
    
     # -- Attributes -- #
 
+    # List of data rows we are going to render
     data = tuple()
+
+    # Columns we want to aggregate on (or group by)
     aggregate = tuple()
+
+    # How we intend to summarize each column for each aggregation
     aggregatemethods = {}
+
+    # Dictionary describing each column's purpose/meaning
     descriptions = dict()
+
+    # Class/Module we will use to render our datagrid (ie: datagrid.html)
     renderer = None
+
+    # Should we hide bottom level rows (the true data rows) and only 
+    # display the aggregated data
     suppressdetail = False
     sortby = tuple()    # list of columns to sort on
 
