@@ -18,17 +18,32 @@
 
 from itertools import ifilter, izip, starmap
 
-def set_column_types(iter, types):
+def set_column_types(data, types):
     """
-    Cast each col in row as requested type
+    Map types to columns on give data (generator) 
 
     Example:
-    >>> i = set_column_types([['1','2'],['4','5']],(float,str))
+    >>> i = set_column_types([['1','abc','0'],['4','b','1']],(float,str,int))
     >>> list(i)
-    [(1.0, '2'), (4.0, '5')]
+    [(1.0, 'abc', 0), (4.0, 'b', 1)]
     """
-    # put types in single item lists, so we can use apply
-    return (tuple(starmap(apply, izip(types,row))) for row in iter)
+    # by using an iterator, if we hit the except clause below, we should
+    # output the same rows twice (assuming the exception is not hit on the
+    # first row
+    data = iter(data)
+
+    for row in data:
+        # apply type mapping to current row and yield
+        try: yield tuple(starmap(lambda f,v: f(v), izip(types,row)))
+
+        # we found a problem with the types mapping.
+        # either we have the wrong number of args, or a column was
+        # incorrectly mapped.  This will likely happen on every row,
+        # so we should yield the remainder with no transformations
+        except TypeError, ValueError:
+            types = [str]*len(row)
+            for row in data: yield row
+            break
 
 def get_column_types(iter):
     """
@@ -49,14 +64,18 @@ def column_type(iter):
     <type 'float'>
     >>> column_type(['a','b','c'])
     <type 'str'>
-    >>> column_type(['1', '2', '3'])
+    >>> column_type(['1', '2', '3.0'])
     <type 'float'>
+    >>> column_type(['1', '2.0.0', '3.0'])
+    <type 'str'>
     >>> column_type(['1', '1a', '1b'])
     <type 'str'>
     """
     for x in filter(None, iter):
         # assume float, but wrap-up early if we find a string
-        if type(x) == str and not x.isdigit(): return str
+        if type(x) == str and not (
+                x.count('.') <= 1 and x.replace('.','').isdigit()):
+            return str
     return float
 
 

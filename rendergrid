@@ -21,6 +21,7 @@
 import sys, csv
 from optparse import OptionParser, OptionGroup
 from datagrid.core import DataGrid
+from datagrid import utils
 
 def main():
     """Command-line interface main method"""
@@ -60,6 +61,10 @@ def main():
             help='Set the sort column(s)')
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
+    datagroup.add_option('--type', action='append', default=[],
+            help='Set the type (str|float) of a column.  '\
+                    'If no --type declarations are made, each column-type '\
+                    'is guessed')
 
     # Display group options
     displaygroup = OptionGroup(parser, 'Data display options')
@@ -91,6 +96,15 @@ def main():
         parser.error("No file was supplied")
     except IOError:
         parser.error("%s does not exist, or is inaccessable" % args[0])
+
+    # Setup column types
+    if options.type: types = options.type
+    else:
+        data = list(data)
+        types = options.type or utils.get_column_types(data)
+
+    # Apply type conversions to data
+    data = utils.set_column_types(data, types)
 
     # Parse aggregate methods
     try:
@@ -138,4 +152,5 @@ def main():
 
 # Run if called directly
 if __name__ == '__main__': main()
+
 
