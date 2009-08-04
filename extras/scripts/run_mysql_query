@@ -1,0 +1,49 @@
+#!/bin/env bash
+#------------------------------------------------------------------------#
+# DataGrid - Tabular Data Rendering Library
+# Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+#                    Kenny Parnell <kparnell@redventures.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published 
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#------------------------------------------------------------------------#
+
+# Ensure we are given a sql file to run
+if [ $# -eq 0 ] ; then
+    echo "Please supply a file as the first arg" >&2
+    exit 1
+fi
+
+# Collect Username and Host from user on console
+read -p "MySQL Username [$(whoami)]: " USER
+if [[ ! $USER ]] ; then
+    USER=`whoami`
+fi
+read -p "MySQL Host [localhost]: " HOST
+if [[ ! $HOST ]] ; then
+    HOST=localhost
+fi
+
+# Create temp file to dump sql results to
+TMPFILE=mktemp
+
+# Run MySQL and dump results (with tabs replaced with commas) into tmpfile
+mysql -u $USER -p -h $HOST < $1 | sed 's/\t/","/g;s/^/"/;s/$/"/' > $TMPFILE
+
+# Take remaining args and pass to rendergrid
+shift
+../../rendergrid -A $@ $TMPFILE
+
+# Cleanup
+rm $TMPFILE
+

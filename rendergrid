@@ -92,6 +92,8 @@ def main():
     try:
         data = csv.reader(open(args[0]))    # load data file
         columns = data.next() if options.autocolumn else options.column
+    except StopIteration: 
+        parser.error("Data file is empty")
     except IndexError:
         parser.error("No file was supplied")
     except IOError:
