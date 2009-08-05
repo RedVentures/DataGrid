@@ -178,13 +178,21 @@ class DataGrid(object):
                 # if details are suppressed, decrement out agg-level
                 if self.suppressdetail: rowArgs['level'] -= 1
 
-                # add aggregate row
-                output.append(self.render_row(rowData, **rowArgs))
+                # generate aggregate row
+                rowOutput = self.render_row(rowData, **rowArgs)
 
                 # render remainder of rows beneath aggregation level
                 if rowArgs['level'] > 0:
-                    output.append(self.render_body(subData, aggregate[1:], rowData))
-            return ''.join(output)
+                    rowOutput += self.render_body(subData, aggregate[1:], rowData)
+
+                # append rendered data to output buffer
+                output.append((rowData, rowOutput))
+
+            # sort aggregate row sorting and return compiled string
+            for column, direction in reversed(self.sortby):
+                output = sorted(output, key=lambda x: x[0][column])
+                if direction == 'desc': output = reversed(output)
+            return ''.join(row[1] for row in output)
         else:
             # sort data and display
             for column, direction in reversed(self.sortby):
