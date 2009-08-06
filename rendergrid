@@ -21,7 +21,7 @@
 import sys, csv
 from optparse import OptionParser, OptionGroup
 from datagrid.core import DataGrid
-from datagrid import utils
+from datagrid import datatools
 
 def main():
     """Command-line interface main method"""
@@ -103,10 +103,10 @@ def main():
     if options.type: types = options.type
     else:
         data = list(data)
-        types = options.type or utils.get_column_types(data)
+        types = options.type or datatools.get_column_types(data)
 
     # Apply type conversions to data
-    data = utils.set_column_types(data, types)
+    data = datatools.set_column_types(data, types)
 
     # Parse aggregate methods
     try:

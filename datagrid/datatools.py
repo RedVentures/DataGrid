@@ -17,6 +17,7 @@
 #------------------------------------------------------------------------#
 
 from functools import partial
+from itertools import ifilter, izip, starmap
 
 def multi_sorted(data, sortcolumns, key=None):
     """
@@ -46,4 +47,66 @@ def multi_sorted(data, sortcolumns, key=None):
 
     # Return sorting iterator
     return data
+
+def set_column_types(data, types):
+    """
+    Map types to columns on give data (generator) 
+
+    Example:
+    >>> i = set_column_types([['1','abc','0'],['4','b','1']],(float,str,int))
+    >>> list(i)
+    [(1.0, 'abc', 0), (4.0, 'b', 1)]
+    """
+    # by using an iterator, if we hit the except clause below, we should
+    # output the same rows twice (assuming the exception is not hit on the
+    # first row
+    data = iter(data)
+
+    for row in data:
+        # apply type mapping to current row and yield
+        try: yield tuple(starmap(lambda f,v: f(v), izip(types,row)))
+
+        # we found a problem with the types mapping.
+        # either we have the wrong number of args, or a column was
+        # incorrectly mapped.  This will likely happen on every row,
+        # so we should yield the remainder with no transformations
+        except TypeError, ValueError:
+            types = [str]*len(row)
+            for row in data: yield row
+            break
+
+def get_column_types(iter):
+    """
+    Determine column types from content in each column
+
+    Example:
+    >>> get_column_types([[1,'2',3,'a'],[2,'3','z','b']])
+    [<type 'float'>, <type 'float'>, <type 'str'>, <type 'str'>]
+    """
+    return [column_type(col) for col in zip(*iter)]
+
+def column_type(iter):
+    """
+    Guess column type from data-therin (ie: str or float)
+
+    Example:
+    >>> column_type([1,2,3])
+    <type 'float'>
+    >>> column_type(['a','b','c'])
+    <type 'str'>
+    >>> column_type(['1', '2', '3.0'])
+    <type 'float'>
+    >>> column_type(['1', '2.0.0', '3.0'])
+    <type 'str'>
+    >>> column_type(['1', '1a', '1b'])
+    <type 'str'>
+    """
+    for x in filter(None, iter):
+        # assume float, but wrap-up early if we find a string
+        if type(x) == str and not (
+                x.count('.') <= 1 and x.replace('.','').isdigit()):
+            return str
+    return float
+
+
 
