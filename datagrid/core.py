@@ -21,6 +21,7 @@ import sys
 from itertools import chain, groupby
 from collections import Mapping
 from datagrid.calctools import formula, calculatevalues
+from datagrid.datatools import multi_sorted
 
 class DataGrid(object):
    
@@ -189,15 +190,11 @@ class DataGrid(object):
                 output.append((rowData, rowOutput))
 
             # sort aggregate row sorting and return compiled string
-            for column, direction in reversed(self.sortby):
-                output = sorted(output, key=lambda x: x[0][column])
-                if direction == 'desc': output = reversed(output)
+            output = multi_sorted(output, self.sortby, lambda c, d: d[0][c])
             return ''.join(row[1] for row in output)
         else:
             # sort data and display
-            for column, direction in reversed(self.sortby):
-                data = sorted(data, key=lambda x: x[column])
-                if direction == 'desc': data = reversed(data)
+            data = multi_sorted(data, self.sortby)
             return ''.join(self.render_row(row) for row in data)
     
     def render_cells(self, data):
