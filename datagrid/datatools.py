@@ -18,6 +18,15 @@
 
 from functools import partial
 from itertools import ifilter, izip, starmap
+from abc import ABCMeta
+
+class TypeOrValueError(Exception):
+    """Meta exception including both TypeError and ValueError exceptions"""
+    __metaclass__ = ABCMeta
+
+# Register Type/ValueError Exceptions as part of this ABC
+TypeOrValueError.register(TypeError)
+TypeOrValueError.register(ValueError)
 
 def multi_sorted(data, sortcolumns, key=None):
     """
@@ -70,7 +79,7 @@ def set_column_types(data, types):
         # either we have the wrong number of args, or a column was
         # incorrectly mapped.  This will likely happen on every row,
         # so we should yield the remainder with no transformations
-        except TypeError, ValueError:
+        except TypeOrValueError:
             types = [str]*len(row)
             for row in data: yield row
             break
