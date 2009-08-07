@@ -66,7 +66,7 @@ def parse_options(formatters):
             # consolidate function into one callable, so that when we call 
             # returned function c, it's really calling a then passing the 
             # results through b.    (given we have method list [a,b])
-            formatters[key] = reduce(lambda a,b: lambda x: a(b(x)), methods)
+            formatters[key] = reduce(lambda a,b: lambda x: b(a(x)), methods)
 
     # return parsed formatters dictionary
     return formatters
