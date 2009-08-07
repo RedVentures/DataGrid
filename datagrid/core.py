@@ -36,6 +36,9 @@ class DataGrid(object):
     # How we intend to summarize each column for each aggregation
     aggregatemethods = {}
 
+    # Format methods applied to each column value
+    columnformatters = {}
+
     # Dictionary describing each column's purpose/meaning
     descriptions = dict()
 
@@ -78,7 +81,7 @@ class DataGrid(object):
 
     def __init__(self, data, renderer, rawColumns=[], descriptions=dict(),
             aggregate=tuple(), aggregatemethods={}, suppressdetail=False,
-            calculatedcolumns={}, sortby=[], columns=tuple()):
+            calculatedcolumns={}, sortby=[], columns=tuple(), columnformatters={}):
         """
         Setup DataGrid instance
         """
@@ -110,6 +113,8 @@ class DataGrid(object):
         # change column names to indexes
         self.aggregatemethods = dict((idx(k), v) 
                 for k, v in aggregatemethods.iteritems())
+        self.columnformatters = dict((idx(k), v)
+                for k, v in columnformatters.iteritems())
 
         # normalize sortby list -- if sort item is string, assume we want ASC sort
         #   otherwise, use supplied sort direction
@@ -201,11 +206,21 @@ class DataGrid(object):
         """
         Render cell-block using given data
         """
-        # Find calculated column values for given row
+        # Find calculated column values and apply formatting for given row
         if self.calculatedcolumns:
             dataDict = dict(zip(self._rawcolumns, data))
-            dataDict = calculatevalues(dataDict, self.calculatedcolumns)
+
+            # calculated columns
+            if self.calculatedcolumns:
+                dataDict = calculatevalues(dataDict, self.calculatedcolumns)
+
             data = [dataDict[k] for k in self._allcolumns]
+
+        # formatted columns
+        if self.columnformatters:
+            data = list(data)
+            for column, formatter in self.columnformatters.iteritems():
+                if data[column] != '': data[column] = formatter(data[column])
 
         # Return block of rendered cells (use renderer.cell for actual rendering)
         return ''.join(self.renderer.cell(self, data[k], i) 

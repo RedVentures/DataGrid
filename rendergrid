@@ -21,7 +21,7 @@
 import sys, csv
 from optparse import OptionParser, OptionGroup
 from datagrid.core import DataGrid
-from datagrid import datatools
+from datagrid import datatools, formattools
 
 def main():
     """Command-line interface main method"""
@@ -66,11 +66,13 @@ def main():
                     'If no --type declarations are made, each column-type '\
                     'is guessed')
 
-    # Display group options
+    # Display options
     displaygroup = OptionGroup(parser, 'Data display options')
     displaygroup.add_option('-d', '--display', action='append', default=[],
             help='Set display column.  '\
                     '(Optional - if not set, all columns are used)')
+    displaygroup.add_option('-f', '--format', action='append', default=[],
+            help='Set column formatters')
 
     # Parse options
     parser.add_option_group(datagroup)
@@ -123,7 +125,10 @@ def main():
                             % key)
                 aggregatemethods[key] = vars(datagrid.aggregate)[method]
     except ValueError:
-        parser.error("Invalid format supplied for --aggregatemethod option")
+        parser.error("Invalid format supplied to --aggregatemethod option")
+
+    # Parse column formatters
+    formatters = formattools.parse_options(options.format)
 
     # Parse calculated-column methods
     calculations = dict(c.split('|') for c in options.calculate)
@@ -148,7 +153,7 @@ def main():
     # Create datagrid instance and render to stdout
     grid = DataGrid(data,renderer,columns,descriptions,options.aggregate,
             aggregatemethods, options.suppressdetail, calculations, sortby,
-            options.display)
+            options.display, formatters)
     print(grid.render())
 
 
