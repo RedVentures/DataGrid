@@ -19,6 +19,7 @@
 #------------------------------------------------------------------------#
 
 import sys, csv
+from pydoc import pager
 from optparse import OptionParser, OptionGroup
 from datagrid.core import DataGrid
 from datagrid import datatools, formattools
@@ -154,7 +155,7 @@ def main():
     grid = DataGrid(data,renderer,columns,descriptions,options.aggregate,
             aggregatemethods, options.suppressdetail, calculations, sortby,
             options.display, formatters)
-    print(grid.render())
+    pager(grid.render())
 
 
 # Run if called directly
