@@ -161,6 +161,10 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.columnwidths = (10,)
         >>> r._cell('cell data', 0)
         'cell data    '
+        >>> r = Renderer()
+        >>> r.columnwidths = (10,)
+        >>> r._cell('2.0', 0)
+        '       2.0   '
         """
         try:
             float(data)
