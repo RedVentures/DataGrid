@@ -162,7 +162,12 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r._cell('cell data', 0)
         'cell data    '
         """
-        return data.ljust(self.column_width(column)) + self.padding
+        try:
+            float(data)
+            justify = data.rjust
+        except ValueError:
+            justify = data.ljust
+        return justify(self.column_width(column)) + self.padding
 
     def _head(self):
         """
