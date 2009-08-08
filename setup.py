@@ -40,8 +40,8 @@ if len(sys.argv) > 1 and sys.argv[1] == 'install':
 
 # Dispatch distutils setup magic
 setup(
-        name = about.name,
-        version = about.version,
+        name = about.NAME,
+        version = about.VERSION,
         packages = ['datagrid'],
         data_files = data_files
      )

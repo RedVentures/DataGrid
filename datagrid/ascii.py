@@ -51,7 +51,7 @@ class Renderer(datagrid.renderer.Renderer):
         self.columnwidths = [len(column) for column in config.columns]
             
         # find number of aggregation levels
-        self.levels = len(self.config.aggregate)
+        self.levels = len(self.config.groupby)
         if config.suppressdetail: self.levels -= 1 # detail row does not count
 
 

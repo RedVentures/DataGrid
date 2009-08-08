@@ -109,7 +109,7 @@ class TestRenderInteract(unittest.TestCase):
                 'table']                        # Wrap up table render
 
         # Test simple render
-        self.grid.aggregate = ['one']
+        self.grid.groupby = ['one']
         self.grid.render()
         self.assertEquals(testLog, self.grid.renderer.callLog)
 

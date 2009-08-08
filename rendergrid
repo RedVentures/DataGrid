@@ -46,11 +46,11 @@ def main():
             help='Derive column headers from DATAFILE')
     datagroup.add_option('-c', '--column', action='append',
             help='Set the column header') 
-    datagroup.add_option('-a', '--aggregate', action='append',
+    datagroup.add_option('-g', '--groupby', action='append',
             help='Set the report aggregation', default=[])
-    datagroup.add_option('--aggregatemethod', action='append',
+    datagroup.add_option('-a', '--aggregate', action='append',
             help='Set the aggregation method for a given column.  '\
-                    'Example: --aggregatemethod="column|sum"',
+                    'Example: --aggregate="column|sum"',
             default=[])
     datagroup.add_option('--calculate', action='append', default=[],
             help='Add column by running the given calculation.  '\
@@ -113,20 +113,20 @@ def main():
 
     # Parse aggregate methods
     try:
-        aggregatemethods = dict(m.split('|') for m in options.aggregatemethod)
+        aggregate = dict(m.split('|') for m in options.aggregate)
         
         # load aggregate methods
-        if aggregatemethods:
+        if aggregate:
             import datagrid.aggregate
             
             # materialize methods
-            for key, method in aggregatemethods.items():
+            for key, method in aggregate.items():
                 if key not in columns:
                     parser.error("aggregate column %s not found in column-list" 
                             % key)
-                aggregatemethods[key] = vars(datagrid.aggregate)[method]
+                aggregate[key] = vars(datagrid.aggregate)[method]
     except ValueError:
-        parser.error("Invalid format supplied to --aggregatemethod option")
+        parser.error("Invalid format supplied to --aggregate option")
 
     # Parse column formatters
     formatters = formattools.parse_options(options.format)
@@ -141,19 +141,19 @@ def main():
     sortby = [s.split('|') if '|' in s else s for s in options.sort]
 
     # Verify aggregate are defined columns
-    for aggregate in options.aggregate:
-        if aggregate not in columns:
-            parser.error("aggregate column %s not found in column-list" 
-                    % aggregate)
+    for groupby in options.groupby:
+        if groupby not in columns:
+            parser.error("groupby column %s not found in column-list" 
+                    % groupby)
 
     # Validate suppress-detail selection
     if options.suppressdetail:
-        if not len(options.aggregate):
+        if not len(options.groupby):
             parser.error("Cannot suppress if no aggregation is declared")
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns,descriptions,options.aggregate,
-            aggregatemethods, options.suppressdetail, calculations, sortby,
+    grid = DataGrid(data,renderer,columns,descriptions,options.groupby,
+            aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
     pager(grid.render())
 

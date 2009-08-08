@@ -20,6 +20,6 @@
 Application MetaData
 """
 
-name = 'DataGrid'
-version = '0.1'
+NAME = 'DataGrid'
+VERSION = '0.1'
 

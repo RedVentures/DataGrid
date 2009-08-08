@@ -18,7 +18,7 @@
 #------------------------------------------------------------------------#
 
 import sys
-from itertools import chain, groupby
+import itertools
 from collections import Mapping
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
@@ -31,10 +31,10 @@ class DataGrid(object):
     data = tuple()
 
     # Columns we want to aggregate on (or group by)
-    aggregate = tuple()
+    groupby = tuple()
 
     # How we intend to summarize each column for each aggregation
-    aggregatemethods = {}
+    aggregate = {}
 
     # Format methods applied to each column value
     columnformatters = {}
@@ -80,21 +80,21 @@ class DataGrid(object):
     # -- Methods -- #
 
     def __init__(self, data, renderer, rawColumns=[], descriptions=dict(),
-            aggregate=tuple(), aggregatemethods={}, suppressdetail=False,
+            groupby=tuple(), aggregate={}, suppressdetail=False,
             calculatedcolumns={}, sortby=[], columns=tuple(), columnformatters={}):
         """
         Setup DataGrid instance
         """
         # check supplied args
-        if not isinstance(aggregatemethods, Mapping):
-            raise TypeError('aggregatemethods must be a Mapping object (ie dict)')
+        if not isinstance(aggregate, Mapping):
+            raise TypeError('aggregate must be a Mapping object (ie dict)')
 
         # setup datagrid instance
         self.data = tuple(data)         # use tuples for performance
         self.renderer = renderer
         self.columns = columns or tuple()
         self.suppressdetail = suppressdetail
-        self.aggregate = tuple(aggregate)
+        self.groupby = tuple(groupby)
         self.calculatedcolumns = calculatedcolumns
         self.descriptions = descriptions
 
@@ -104,15 +104,15 @@ class DataGrid(object):
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(chain(rawColumns, self.calculatedcolumns.keys()))
+            self._allcolumns = tuple(itertools.chain(rawColumns, self.calculatedcolumns.keys()))
         else: self._allcolumns = rawColumns or tuple()     # default to tuple
         
         # alias for easier readability below
         idx = self._allcolumns.index        
         
         # change column names to indexes
-        self.aggregatemethods = dict((idx(k), v) 
-                for k, v in aggregatemethods.iteritems())
+        self.aggregate = dict((idx(k), v) 
+                for k, v in aggregate.iteritems())
         self.columnformatters = dict((idx(k), v)
                 for k, v in columnformatters.iteritems())
 
@@ -140,14 +140,14 @@ class DataGrid(object):
 
         # build table pieces and glue together
         head = self.renderer.head(self)
-        body = self.render_body(self.data, self.aggregate)
+        body = self.render_body(self.data, self.groupby)
         tail = self.renderer.tail(
                 self, self.render_cells(self.generate_aggregate_row(self.data)))
 
         # render table and return
         return self.renderer.table(self, head, body, tail)
 
-    def render_body(self,data,aggregate=[],aggregateRow=None):
+    def render_body(self,data,groupby=[],aggregateRow=None):
         """
         Render table body segment
 
@@ -155,11 +155,11 @@ class DataGrid(object):
         data.  Aggregated sets, however, will call render_body for each 
         aggregation name/value pair.
         """
-        aggregateLen = len(aggregate)
+        groupbyLen = len(groupby)
 
-        if aggregateLen:
+        if groupbyLen:
             # get unique values for aggregation requested
-            idx = self._allcolumns.index(aggregate[0])
+            idx = self._allcolumns.index(groupby[0])
 
             # create method to group by
             keyfunc = lambda x: x[idx]
@@ -167,7 +167,7 @@ class DataGrid(object):
             # group data into chunks of aggregated data
             output = []
             data = sorted(data, key=keyfunc)
-            for value, subData in groupby(data, keyfunc):
+            for value, subData in itertools.groupby(data, keyfunc):
                
                 # we will be looking at this more than once, so we need a concrete
                 #   list (tuple), not just an iterator
@@ -175,11 +175,11 @@ class DataGrid(object):
 
                 # this config gets sent to renderer.row for displaying aggregate 
                 #   row information (name, value, etc)
-                rowArgs = dict(name=aggregate[0], value=value, level=aggregateLen)
+                rowArgs = dict(name=groupby[0], value=value, level=groupbyLen)
                
                 # build aggregate summary row
                 rowData = self.generate_aggregate_row(subData, aggregateRow)
-                rowData[self._allcolumns.index(aggregate[0])] = value
+                rowData[self._allcolumns.index(groupby[0])] = value
 
                 # if details are suppressed, decrement out agg-level
                 if self.suppressdetail: rowArgs['level'] -= 1
@@ -189,7 +189,7 @@ class DataGrid(object):
 
                 # render remainder of rows beneath aggregation level
                 if rowArgs['level'] > 0:
-                    rowOutput += self.render_body(subData, aggregate[1:], rowData)
+                    rowOutput += self.render_body(subData, groupby[1:], rowData)
 
                 # append rendered data to output buffer
                 output.append((rowData, rowOutput))
@@ -240,9 +240,9 @@ class DataGrid(object):
         rowData = rowModel or ['' for x in self._allcolumns]
 
         # generate aggregate-row values
-        if len(self.aggregatemethods):
+        if len(self.aggregate):
             columnValues = zip(*data)
-            for i, m in self.aggregatemethods.iteritems():
+            for i, m in self.aggregate.iteritems():
                 rowData[i] = str(m([v for v in columnValues[i] if v != '']))
         return rowData
 
