@@ -23,17 +23,17 @@ from subprocess import check_call, CalledProcessError
 
 def phpdir():
     """Locate PHP's include-dir"""
-    with tmpfile() as buffer:
+    with tmpfile() as phpinfo:
         try:
-            check_call(['php -r "echo get_include_path();"'], stdout=buffer,
+            check_call(['php -r "echo get_include_path();"'], stdout=phpinfo,
                     shell=True)
-            buffer.seek(0)
+            phpinfo.seek(0)
 
             # attempt to find best match for php include dir
-            include_path = buffer.read().split(':')
+            include_path = phpinfo.read().split(':')
 
             # find the least significant dir that includes the name php
-            return [dir for dir in include_path if 'php' in dir][-1]
+            return [dir_ for dir_ in include_path if 'php' in dir_][-1]
         except CalledProcessError:
             return False
                 
