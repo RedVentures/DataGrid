@@ -16,9 +16,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
+"""Data handling and manipulation tools"""
+
 from functools import partial
 from itertools import ifilter, izip, starmap
 from abc import ABCMeta
+
 
 class TypeOrValueError(Exception):
     """Meta exception including both TypeError and ValueError exceptions"""
@@ -27,6 +30,7 @@ class TypeOrValueError(Exception):
 # Register Type/ValueError Exceptions as part of this ABC
 TypeOrValueError.register(TypeError)
 TypeOrValueError.register(ValueError)
+
 
 def multi_sorted(data, sortcolumns, key=None):
     """
@@ -47,15 +51,18 @@ def multi_sorted(data, sortcolumns, key=None):
     """
 
     # Default key function if none is given
-    if key is None: key = lambda column, data: data[column]
+    if key is None: 
+        key = lambda column, data: data[column]
 
     # Apply sorted iterator for each given sort column/direction
     for column, direction in reversed(sortcolumns):
         data = sorted(data, key=partial(key, column))
-        if direction == 'desc': data = reversed(data)
+        if direction == 'desc': 
+            data = reversed(data)
 
     # Return sorting iterator
     return data
+
 
 def set_column_types(data, types):
     """
@@ -66,25 +73,27 @@ def set_column_types(data, types):
     >>> list(i)
     [(1.0, 'abc', 0), (4.0, 'b', 1)]
     """
-    # by using an iterator, if we hit the except clause below, we should
+    # By using an iterator, if we hit the except clause below, we should
     # output the same rows twice (assuming the exception is not hit on the
     # first row
     data = iter(data)
 
     for row in data:
-        # apply type mapping to current row and yield
-        try: yield tuple(starmap(lambda f,v: f(v), izip(types,row)))
+        # Apply type mapping to current row and yield
+        try: 
+            yield tuple(starmap(lambda f, v: f(v), izip(types, row)))
 
-        # we found a problem with the types mapping.
-        # either we have the wrong number of args, or a column was
-        # incorrectly mapped.  This will likely happen on every row,
-        # so we should yield the remainder with no transformations
+        # We found a problem with the types mapping. 
+        # This will likely happen again, so we should yield the remainder 
+        # with no transformations
         except TypeOrValueError:
             types = [str]*len(row)
-            for row in data: yield row
+            for row in data: 
+                yield row
             break
 
-def get_column_types(iter):
+
+def get_column_types(columns):
     """
     Determine column types from content in each column
 
@@ -92,9 +101,10 @@ def get_column_types(iter):
     >>> get_column_types([[1,'2',3,'a'],[2,'3','z','b']])
     [<type 'float'>, <type 'float'>, <type 'str'>, <type 'str'>]
     """
-    return [column_type(col) for col in zip(*iter)]
+    return [column_type(col) for col in zip(*columns)]
 
-def column_type(iter):
+
+def column_type(values):
     """
     Guess column type from data-therin (ie: str or float)
 
@@ -110,12 +120,10 @@ def column_type(iter):
     >>> column_type(['1', '1a', '1b'])
     <type 'str'>
     """
-    for x in filter(None, iter):
-        # assume float, but wrap-up early if we find a string
-        if type(x) == str and not (
-                x.count('.') <= 1 and x.replace('.','').isdigit()):
+    for value in ifilter(None, values):
+        # Assume float, but wrap-up early if we find a string
+        if type(value) == str and not (
+                value.count('.') <= 1 and value.replace('.','').isdigit()):
             return str
     return float
-
-
 
