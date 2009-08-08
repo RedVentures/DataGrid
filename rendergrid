@@ -18,11 +18,21 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-import sys, csv
+"""
+Simple command-line application for using DataGrid.  For usage info:
+    ./rendergrid --help
+
+Non-Python applications (ie php-bindings) use this executable
+"""
+
+import sys
+import csv
 from pydoc import pager
 from optparse import OptionParser, OptionGroup
+
 from datagrid.core import DataGrid
 from datagrid import datatools, formattools
+
 
 def main():
     """Command-line interface main method"""
@@ -86,7 +96,8 @@ def main():
         renderer = sys.modules[options.renderer]
 
         # Check for 'Renderer' class, otherwise use loaded module
-        if hasattr(renderer, 'Renderer'): renderer = renderer.Renderer()
+        if hasattr(renderer, 'Renderer'):
+            renderer = renderer.Renderer()
     except ImportError:
         parser.error("%s table renderer could not be found" 
                 % options.renderer)
@@ -103,7 +114,8 @@ def main():
         parser.error("%s does not exist, or is inaccessable" % args[0])
 
     # Setup column types
-    if options.type: types = options.type
+    if options.type:
+        types = options.type
     else:
         data = list(data)
         types = options.type or datatools.get_column_types(data)
@@ -122,7 +134,7 @@ def main():
             # materialize methods
             for key, method in aggregate.items():
                 if key not in columns:
-                    parser.error("aggregate column %s not found in column-list" 
+                    parser.error("aggregate column %s not found in column-list"
                             % key)
                 aggregate[key] = vars(datagrid.aggregate)[method]
     except ValueError:
@@ -152,13 +164,14 @@ def main():
             parser.error("Cannot suppress if no aggregation is declared")
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data,renderer,columns,descriptions,options.groupby,
+    grid = DataGrid(data, renderer, columns, descriptions, options. groupby,
             aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
     pager(grid.render())
 
 
 # Run if called directly
-if __name__ == '__main__': main()
+if __name__ == '__main__':
+    main()
 
 
