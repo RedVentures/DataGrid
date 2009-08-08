@@ -19,12 +19,17 @@
 
 """HTML Table Rendering Module"""
 
-def table(config, head, body, tail):
+
+def table(config, thead, tbody, tfoot):
+    """
+    Generate HTML table from pregenerated head/body/tail sections
+    """
     return """
         <table class='helper-gridview' cols='%s'>
             %s<tbody>%s</tbody>%s
         </table>
-        """ % (len(config.columns), head, body, tail)
+        """ % (len(config.columns), thead, tbody, tfoot)
+
 
 def row(config, cells, level=0, name=None, value=None):
     """
@@ -32,18 +37,19 @@ def row(config, cells, level=0, name=None, value=None):
     
     Example (flat table):
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'aggregate')([])
+    >>> cfg = namedtuple('Cfg', 'groupby')([])
     >>> row(cfg, '<td></td>')
     '<tr><td></td></tr>'
     """
-    if config.aggregate:
-        indent = ((len(config.aggregate) - level) * 5) + 2
+    if config.groupby:
         if name is None:
-            return "<tr class='l=%s'><td></td>%s</tr>" % (level, cells)
+            return "<tr class='l-%s'><td></td>%s</tr>" % (level, cells)
         else:
-            return "<tr class='l-%s'><td><i>%s:</i><span>%s</span></td>%s</tr>" \
-                % (level, name, value, cells)
+            group_name = ("<span>%s</span>" * 2) % (name, value)
+            return "<tr class='l-%s'><td>%s</td>%s</tr>" % \
+                    (level, group_name, cells)
     else: return "<tr>%s</tr>" % cells
+
 
 def cell(config, data, column): 
     """
@@ -55,13 +61,14 @@ def cell(config, data, column):
     """
     return "<td>%s</td>" % data
 
+
 def head(config):
     """
     Generate table head segment
 
     Example:
     >>> from collections import namedtuple
-    >>> Cfg = namedtuple('Cfg', 'columns aggregate descriptions')
+    >>> Cfg = namedtuple('Cfg', 'columns groupby descriptions')
     >>> cfg = Cfg(('Heading',), [], {})
     >>> head(cfg)
     '<thead><tr><th>Heading</th></tr></thead>'
@@ -79,8 +86,9 @@ def head(config):
             cells.append("<th>%s</th>" % col)
 
     # glue pieces together and return
-    return ("<thead><tr>%s</tr></thead>" if not config.aggregate else
+    return ("<thead><tr>%s</tr></thead>" if not config.groupby else
                  "<thead><tr><th></th>%s</tr></thead>") % ''.join(cells)
+
 
 def tail(config, cells):
     """
@@ -88,10 +96,10 @@ def tail(config, cells):
 
     Example:
     >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'aggregate')([])
+    >>> cfg = namedtuple('Cfg', 'groupby')([])
     >>> tail(cfg,"<td></td>")
     '<tfoot><tr><td></td></tr></tfoot>'
     """
-    return ("<tfoot><tr>%s</tr></tfoot>" if not config.aggregate else 
+    return ("<tfoot><tr>%s</tr></tfoot>" if not config.groupby else 
                  "<tfoot><tr><td></td>%s</tr></tfoot>") % cells
 

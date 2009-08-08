@@ -21,6 +21,7 @@
 from abc import ABCMeta, abstractmethod
 
 class Renderer(object):
+    """Abstract base class for class-based datagrid renderers"""
     __metaclass__ = ABCMeta
 
     def setup(self, config):
