@@ -32,6 +32,8 @@ def percent(value, precision=0):
     >>> percent(0.125,2)
     '12.50%'
     """
-    if value == '': return ''
-    return ("%." + str(precision) + "f%%") % (100*value)
+    # Avoid exceptions from empty cells
+    if value == '': 
+        return ''
+    return ("%." + str(precision) + "f%%") % (100 * float(value))
 

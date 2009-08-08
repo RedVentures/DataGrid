@@ -18,7 +18,7 @@
 
 """Tools for dealing with column formatting options"""
 
-def str_formatter(str):
+def str_formatter(string):
     """
     Return str formatter from given string
 
@@ -27,7 +27,8 @@ def str_formatter(str):
     >>> f(10)
     '10.0'
     """
-    return lambda v: str % v
+    return lambda v: string % v
+
 
 def parse_options(formatters):
     """
@@ -44,7 +45,8 @@ def parse_options(formatters):
     # create dictionary from simple list, setting the first item in each list
     # as the dictionary key... the remaining values are set as the value at
     # that key
-    formatters = dict((y[0], y[1:]) for y in (x.split('|') for x in formatters))
+    formatters = dict((y[0], y[1:]) 
+            for y in (x.split('|') for x in formatters))
 
     # generate/load format methods
     if len(formatters):
@@ -63,15 +65,18 @@ def parse_options(formatters):
                 # if this is not a string formatter, look in format module
                 else: methods[i] = vars(datagrid.format)[method]
 
-            # consolidate function into one callable, so that when we call 
+            # Consolidate function into one callable, so that when we call 
             # returned function c, it's really calling a then passing the 
             # results through b.    (given we have method list [a,b])
-            formatters[key] = reduce(lambda a,b: lambda x: b(a(x)), methods)
+            formatters[key] = reduce(_create_flow, methods)
 
     # return parsed formatters dictionary
     return formatters
 
 
-
-
+def _create_flow(function_a, function_b):
+    """
+    Generate lambda to be used in formatter flow
+    """
+    return lambda x: function_b(function_a(x))
 
