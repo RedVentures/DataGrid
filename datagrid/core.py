@@ -17,9 +17,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-import sys
+"""
+The module provides the main DataGrid class.
+"""
+
 import itertools
 from collections import Mapping
+
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
 
@@ -34,10 +38,10 @@ class DataGrid(object):
     groupby = tuple()
 
     # How we intend to summarize each column for each aggregation
-    aggregate = {}
+    aggregate = dict()
 
     # Format methods applied to each column value
-    columnformatters = {}
+    formatters = dict()
 
     # Dictionary describing each column's purpose/meaning
     descriptions = dict()
@@ -50,6 +54,7 @@ class DataGrid(object):
     suppressdetail = False
     sortby = tuple()    # list of columns to sort on
 
+    _calculatedcolumns = dict()
     _columns = tuple()      # columns to display
     _displaycolumns = tuple()   # indexes of columns to display
     _allcolumns = tuple()   # all columns (calculated and raw)
@@ -60,7 +65,8 @@ class DataGrid(object):
 
     # Calculated Columns
     @property
-    def calculatedcolumns(self): return self._calculatedcolumns
+    def calculatedcolumns(self): 
+        return self._calculatedcolumns
 
     @calculatedcolumns.setter
     def calculatedcolumns(self, value):
@@ -71,17 +77,19 @@ class DataGrid(object):
 
     # Display columns
     @property
-    def columns(self): return self._columns or ['']*len(self._displaycolumns)
+    def columns(self): 
+        return self._columns or ['']*len(self._displaycolumns)
 
     @columns.setter
     def columns(self, value):
-       self._columns = value or tuple() 
+        self._columns = value or tuple() 
 
     # -- Methods -- #
 
-    def __init__(self, data, renderer, rawColumns=[], descriptions=dict(),
-            groupby=tuple(), aggregate={}, suppressdetail=False,
-            calculatedcolumns={}, sortby=[], columns=tuple(), columnformatters={}):
+    def __init__(self, data, renderer, raw_columns=list(), descriptions=dict(),
+            groupby=tuple(), aggregate=dict(), suppressdetail=False,
+            calculatedcolumns=dict(), sortby=list(), columns=tuple(), 
+            formatters=dict()):
         """
         Setup DataGrid instance
         """
@@ -98,14 +106,16 @@ class DataGrid(object):
         self.calculatedcolumns = calculatedcolumns
         self.descriptions = descriptions
 
-        # when getting calculated column values, we to know what columns contain
-        #   raw data versus calculated data
-        self._rawcolumns = rawColumns or tuple()
+        # when getting calculated column values, we to know what columns 
+        #   contain raw data versus calculated data
+        self._rawcolumns = raw_columns or tuple()
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(itertools.chain(rawColumns, self.calculatedcolumns.keys()))
-        else: self._allcolumns = rawColumns or tuple()     # default to tuple
+            self._allcolumns = tuple(itertools.chain(raw_columns, 
+                self.calculatedcolumns.keys()))
+        else: 
+            self._allcolumns = raw_columns or tuple()     # default to tuple
         
         # alias for easier readability below
         idx = self._allcolumns.index        
@@ -113,11 +123,11 @@ class DataGrid(object):
         # change column names to indexes
         self.aggregate = dict((idx(k), v) 
                 for k, v in aggregate.iteritems())
-        self.columnformatters = dict((idx(k), v)
-                for k, v in columnformatters.iteritems())
+        self.formatters = dict((idx(k), v)
+                for k, v in formatters.iteritems())
 
-        # normalize sortby list -- if sort item is string, assume we want ASC sort
-        #   otherwise, use supplied sort direction
+        # normalize sortby list -- if sort item is string, assume we want 
+        #   ascending sort, otherwise, use supplied sort direction
         self.sortby = [
                 (idx(k), 'asc') if isinstance(k, str) else (idx(k[0]), k[1]) 
                 for k in sortby]
@@ -127,27 +137,31 @@ class DataGrid(object):
         Begin render process
         """
         # make sure we have display columns
-        if not len(self.columns): self.columns = self._allcolumns
+        if not len(self.columns): 
+            self.columns = self._allcolumns
 
         # materialize display column into numerical indexes
         if len(self._allcolumns):
-            self._displaycolumns = tuple(self._allcolumns.index(k) for k in self.columns)
+            self._displaycolumns = tuple(self._allcolumns.index(k) 
+                    for k in self.columns)
         else:
             self._allcolumns = self._displaycolumns = range(len(self.data[0]))
 
         # run renderer setup logic (if we have any)
-        if hasattr(self.renderer, 'setup'): self.renderer.setup(self)
+        if hasattr(self.renderer, 'setup'): 
+            self.renderer.setup(self)
 
         # build table pieces and glue together
         head = self.renderer.head(self)
         body = self.render_body(self.data, self.groupby)
         tail = self.renderer.tail(
-                self, self.render_cells(self.generate_aggregate_row(self.data)))
+                self, self.render_cells(
+                    self.generate_aggregate_row(self.data)))
 
         # render table and return
         return self.renderer.table(self, head, body, tail)
 
-    def render_body(self,data,groupby=[],aggregateRow=None):
+    def render_body(self, data, groupby=list(), aggregate_row=None):
         """
         Render table body segment
 
@@ -155,9 +169,9 @@ class DataGrid(object):
         data.  Aggregated sets, however, will call render_body for each 
         aggregation name/value pair.
         """
-        groupbyLen = len(groupby)
+        groupby_len = len(groupby)
 
-        if groupbyLen:
+        if groupby_len:
             # get unique values for aggregation requested
             idx = self._allcolumns.index(groupby[0])
 
@@ -167,32 +181,33 @@ class DataGrid(object):
             # group data into chunks of aggregated data
             output = []
             data = sorted(data, key=keyfunc)
-            for value, subData in itertools.groupby(data, keyfunc):
+            for value, subdata in itertools.groupby(data, keyfunc):
                
-                # we will be looking at this more than once, so we need a concrete
-                #   list (tuple), not just an iterator
-                subData = tuple(subData)
+                # we will be looking at this more than once, so we need a 
+                #   concrete list (tuple), not just an iterator
+                subdata = tuple(subdata)
 
-                # this config gets sent to renderer.row for displaying aggregate 
-                #   row information (name, value, etc)
-                rowArgs = dict(name=groupby[0], value=value, level=groupbyLen)
+                # this config gets sent to renderer.row for displaying 
+                #   aggregate row information (name, value, etc)
+                rowargs = dict(name=groupby[0], value=value, level=groupby_len)
                
                 # build aggregate summary row
-                rowData = self.generate_aggregate_row(subData, aggregateRow)
-                rowData[self._allcolumns.index(groupby[0])] = value
+                rowdata = self.generate_aggregate_row(subdata, aggregate_row)
+                rowdata[self._allcolumns.index(groupby[0])] = value
 
                 # if details are suppressed, decrement out agg-level
-                if self.suppressdetail: rowArgs['level'] -= 1
+                if self.suppressdetail: rowargs['level'] -= 1
 
                 # generate aggregate row
-                rowOutput = self.render_row(rowData, **rowArgs)
+                rowoutput = self.render_row(rowdata, **rowargs)
 
                 # render remainder of rows beneath aggregation level
-                if rowArgs['level'] > 0:
-                    rowOutput += self.render_body(subData, groupby[1:], rowData)
+                if rowargs['level'] > 0:
+                    rowoutput += self.render_body(subdata, groupby[1:], 
+                            rowdata)
 
                 # append rendered data to output buffer
-                output.append((rowData, rowOutput))
+                output.append((rowdata, rowoutput))
 
             # sort aggregate row sorting and return compiled string
             output = multi_sorted(output, self.sortby, lambda c, d: d[0][c])
@@ -217,12 +232,13 @@ class DataGrid(object):
             data = [dataDict[k] for k in self._allcolumns]
 
         # formatted columns
-        if self.columnformatters:
+        if self.formatters:
             data = list(data)
-            for column, formatter in self.columnformatters.iteritems():
+            for column, formatter in self.formatters.iteritems():
                 if data[column] != '': data[column] = formatter(data[column])
 
-        # Return block of rendered cells (use renderer.cell for actual rendering)
+        # Return block of rendered cells (use renderer.cell for actual 
+        #   rendering)
         return ''.join(self.renderer.cell(self, data[k], i) 
                 for i, k in enumerate(self._displaycolumns))
 
@@ -232,17 +248,18 @@ class DataGrid(object):
         """
         return self.renderer.row(self, self.render_cells(data), **kargs)
 
-    def generate_aggregate_row(self, data, rowModel=None):
+    def generate_aggregate_row(self, data, rowmodel=None):
         """
         Generate aggregate row summary data
         """
         # prepopulate with empty data
-        rowData = rowModel or ['' for x in self._allcolumns]
+        rowdata = rowmodel or [''] * len(self._allcolumns)
 
         # generate aggregate-row values
         if len(self.aggregate):
-            columnValues = zip(*data)
-            for i, m in self.aggregate.iteritems():
-                rowData[i] = str(m([v for v in columnValues[i] if v != '']))
-        return rowData
+            column_values = zip(*data)
+            for i, method in self.aggregate.iteritems():
+                rowdata[i] = str(method([v 
+                    for v in column_values[i] if v != '']))
+        return rowdata
 
