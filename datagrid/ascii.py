@@ -18,7 +18,6 @@
 
 """ASCII Table Rendering Module"""
 
-from itertools import izip
 import datagrid.renderer
 
 class Renderer(datagrid.renderer.Renderer):
@@ -27,10 +26,9 @@ class Renderer(datagrid.renderer.Renderer):
     """
 
     # Internal storage
-    _currentRow = []
-    _headRow = []
-    _bodyRows = []
-    _tailRow = []
+    _currentrow = []
+    _bodyrows = []
+    _tailrow = []
 
     # calculated column widths (for proper column alignment)
     columnwidths = []
@@ -45,6 +43,7 @@ class Renderer(datagrid.renderer.Renderer):
     padding = ' ' * 3
 
     def setup(self, config):
+        """Prepare renderer to render new table."""
         self.config = config
 
         # initial column widths from headers
@@ -52,10 +51,11 @@ class Renderer(datagrid.renderer.Renderer):
             
         # find number of aggregation levels
         self.levels = len(self.config.groupby)
-        if config.suppressdetail: self.levels -= 1 # detail row does not count
+        if config.suppressdetail: 
+            self.levels -= 1 # detail row does not count
 
-
-    def table(self, *args):
+    def table(self, config, head, body, tail): 
+        """Generate table from cached values and return string."""
         # Build table header
         head = self._head()
 
@@ -63,22 +63,24 @@ class Renderer(datagrid.renderer.Renderer):
         body = ''.join(self._generate_rows())
 
         # Build footer (or tail) or table
-        tail = self._tail(''.join(self._cell(*a) for a in self._tailRow))
+        # pylint: disable-msg=w0142
+        tail = self._tail(''.join(self._cell(*a) for a in self._tailrow))
 
-        return self._table(head, body, tail)
+        return head + body + tail
 
-    def row(self, *args, **kargs):
+    # pylint: disable-msg=w0221
+    def row(self, *args, **kargs): 
         """
         core-facing row method.
         capture what we have in our cell collector and give it a home
         in the bodyrows list, then clear the collector to leave room
         for the next set of cells.
         """
-        self._bodyRows.append((args[2:], kargs, self._currentRow))
-        self._currentRow = []
+        self._bodyrows.append((args[2:], kargs, self._currentrow))
+        self._currentrow = []
         return ''
 
-    def cell(self, config, data, column):
+    def cell(self, config, data, column): 
         """
         formatter that is called to render cell data
         for the ascii module, we simply capture this so we can output it
@@ -88,14 +90,14 @@ class Renderer(datagrid.renderer.Renderer):
         data = str(data)
 
         # add to list of rows to process
-        self._currentRow.append((data, column))
+        self._currentrow.append((data, column))
 
         # pit against previous length champion
         self.columnwidths[column] = max(self.columnwidths[column], len(data))
 
         return ''   # datagrid.core needs to think this worked properly
 
-    def head(self, *args):
+    def head(self, config): 
         """
         core-facing head method, all we usually use here is config, but
         we already have that stored on the object, so we can do nothing
@@ -103,35 +105,24 @@ class Renderer(datagrid.renderer.Renderer):
         """
         return ''
 
-    def tail(self, *args):
+    def tail(self, config, cells): 
         """
         core-facing tail method, capture what we need to call this 
         'for real' later
         """
-        self._tailRow = (self._currentRow)
-        self._currentRow = []
+        self._tailrow = (self._currentrow)
+        self._currentrow = []
 
     def _generate_rows(self):
-        """
-        Generate row from cached data.
-        """
-        for args, kargs, cells in self._bodyRows:
+        """Generate row from cached data."""
+        for args, kargs, cells in self._bodyrows:
             # generate cells for row
+            # pylint: disable-msg=w0142
             cells = ''.join(self._cell(*cellArgs) for cellArgs in cells) 
 
             # return generated row
+            # pylint: disable-msg=w0142
             yield self._row(cells, *args, **kargs)
-
-    def _table(self, head, body, tail):
-        """
-        Generate ASCII table
-
-        Example:
-        >>> r = Renderer()
-        >>> r._table('head', 'body', 'tail')
-        'headbodytail'
-        """
-        return head + body + tail
 
     def _row(self, cells, level=0, name=None, value=None):
         """
@@ -146,11 +137,14 @@ class Renderer(datagrid.renderer.Renderer):
         'table cells\\n'
         """
         if self.levels:
-            indent = ((self.levels - level) * '|').ljust(self.levels + 1) + ' '
-            row = indent + cells + '\n'
-            if level > 0: return indent + name + ': ' + value + '\n' + row
-            else: return row
-        else: return cells + '\n'
+            indent = self.aggregate_indent(level)
+            row = '%s%s\n' % (indent, cells)
+            if level > 0: 
+                return '%s%s: %s\n%s' % (indent, name, value, row)
+            else: 
+                return row
+        else: 
+            return '%s\n' % cells
 
     def _cell(self, data, column):
         """
@@ -213,7 +207,7 @@ class Renderer(datagrid.renderer.Renderer):
         indent = self.aggregate_indent()
         return indent + border + '\n' + indent + cells
 
-    def column_width(self, i):
+    def column_width(self, index):
         """
         Return column width for requested column
 
@@ -225,8 +219,10 @@ class Renderer(datagrid.renderer.Renderer):
         >>> r.column_width(1)
         0
         """
-        try: return self.columnwidths[i]
-        except IndexError: return 0
+        try: 
+            return self.columnwidths[index]
+        except IndexError: 
+            return 0
         
     def aggregate_indent(self, level=None):
         """
@@ -244,7 +240,10 @@ class Renderer(datagrid.renderer.Renderer):
         """
         if self.levels:
             try:
-                return ((self.levels - level) * '|').ljust(self.levels + 1) + ' '
-            except: return ' ' * (self.levels + 2)
-        else: return ''
+                level_markers = (self.levels - level) * '|'
+                return level_markers.ljust(self.levels + 1) + ' '
+            except TypeError: 
+                return ' ' * (self.levels + 2)
+        else: 
+            return ''
 
