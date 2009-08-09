@@ -196,7 +196,8 @@ class DataGrid(object):
                 rowdata[self._allcolumns.index(groupby[0])] = value
 
                 # if details are suppressed, decrement out agg-level
-                if self.suppressdetail: rowargs['level'] -= 1
+                if self.suppressdetail: 
+                    rowargs['level'] -= 1
 
                 # generate aggregate row
                 rowoutput = self.render_row(rowdata, **rowargs)
@@ -223,19 +224,20 @@ class DataGrid(object):
         """
         # Find calculated column values and apply formatting for given row
         if self.calculatedcolumns:
-            dataDict = dict(zip(self._rawcolumns, data))
+            data_dict = dict(zip(self._rawcolumns, data))
 
             # calculated columns
             if self.calculatedcolumns:
-                dataDict = calculatevalues(dataDict, self.calculatedcolumns)
+                data_dict = calculatevalues(data_dict, self.calculatedcolumns)
 
-            data = [dataDict[k] for k in self._allcolumns]
+            data = [data_dict[k] for k in self._allcolumns]
 
         # formatted columns
         if self.formatters:
             data = list(data)
             for column, formatter in self.formatters.iteritems():
-                if data[column] != '': data[column] = formatter(data[column])
+                if data[column] != '': 
+                    data[column] = formatter(data[column])
 
         # Return block of rendered cells (use renderer.cell for actual 
         #   rendering)

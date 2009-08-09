@@ -31,7 +31,7 @@ from pydoc import pager
 from optparse import OptionParser, OptionGroup
 
 from datagrid.core import DataGrid
-from datagrid import datatools, formattools
+from datagrid import datatools, formattools, aggregatetools
 
 
 def main():
@@ -125,21 +125,12 @@ def main():
 
     # Parse aggregate methods
     try:
-        aggregate = dict(m.split('|') for m in options.aggregate)
-        
-        # load aggregate methods
-        if aggregate:
-            import datagrid.aggregate
-            
-            # materialize methods
-            for key, method in aggregate.items():
-                if key not in columns:
-                    parser.error("aggregate column %s not found in column-list"
-                            % key)
-                aggregate[key] = vars(datagrid.aggregate)[method]
+        aggregate = aggregatetools.parse_options(options.aggregate)
+    except KeyError:
+        parser.error("Invalid aggregation method or column name")
     except ValueError:
-        parser.error("Invalid format supplied to --aggregate option")
-
+        parser.error("Invalid format passed to --aggregate method")
+        
     # Parse column formatters
     formatters = formattools.parse_options(options.format)
 
