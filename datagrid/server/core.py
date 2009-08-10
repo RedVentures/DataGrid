@@ -26,11 +26,17 @@ class HTTPServer:
     """
     Simple HTTP Server
     """
-    def __init__(self,handler=None,port=8080):
+
+    # internal SocketServer instance
+    server = None
+
+    def __init__(self, handler=None, port=8080):
+        """Configure Server Setup"""
         self.port = port
         self.handler = handler or DefaultHandler
 
     def run(self):
+        """Start Server"""
         self.server = SocketServer.ThreadingTCPServer(
                 ('localhost', self.port), self.handler)
         print "serving at http://localhost:", self.port
@@ -49,9 +55,11 @@ class DefaultHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
     The DefaultHandler serves up DataGrid results using native classes
     """
     def do_GET(self):
+        """Process HTTP server get request"""
         if self.path == '/hello':
             self.request.send('Hello World!')
         else:
             # serve files, and directory listings by following self.path from
             # current working directory
             SimpleHTTPServer.SimpleHTTPRequestHandler.do_GET(self)
+

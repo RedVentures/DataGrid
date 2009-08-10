@@ -18,8 +18,8 @@
 
 """Aggregate Method Library"""
 
-import __builtin__
 from operator import countOf
+
 
 def count(values): 
     """
@@ -32,6 +32,7 @@ def count(values):
     return ', '.join(str(countOf(values, x)) + ' ' + str(x) 
             for x in sorted(set(values)))
 
+
 def avg(values): 
     """
     Average Values
@@ -42,15 +43,4 @@ def avg(values):
     2
     """
     return sum(values) / len(values)
-
-def sum(values): 
-    """
-    Sum Values
-    
-    Example:
-    >>> result = sum([1,2,3])
-    >>> int(result)
-    6
-    """
-    return __builtin__.sum(float(x) for x in values)
 
