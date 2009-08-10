@@ -18,6 +18,10 @@
 
 """Tools for handling aggregation options"""
 
+import __builtin__
+
+import datagrid.aggregate
+
 def parse_options(aggregation):
     """
     Parse string aggregation options and return a format suitable for
@@ -36,9 +40,13 @@ def parse_options(aggregation):
     # Replace string aggregation requests from dictionary with function
     # from datagrid.aggregate module
     if aggregation:
-        import datagrid.aggregate
-        for key, method in aggregation.iteritems():
-            aggregation[key] = vars(datagrid.aggregate)[method]
+        for key, method_name in aggregation.iteritems():
+            # Look for method from aggregate first and __builtin__ second
+            try:
+                method = vars(datagrid.aggregate)[method_name]
+            except KeyError:
+                method = vars(__builtin__)[method_name]
+            aggregation[key] = method
 
     return aggregation
 

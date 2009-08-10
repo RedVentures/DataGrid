@@ -19,10 +19,9 @@
 """Aggregate Method Library"""
 
 import __builtin__
-from __builtin__ import len, min, max
 from operator import countOf
 
-def count(iter): 
+def count(values): 
     """
     Count Unique Values
     
@@ -30,10 +29,10 @@ def count(iter):
     >>> count(['red', 'green', 'red', 'blue'])
     '1 blue, 1 green, 2 red'
     """
-    return ', '.join(str(countOf(iter, x)) + ' ' + str(x) 
-            for x in sorted(set(iter)))
+    return ', '.join(str(countOf(values, x)) + ' ' + str(x) 
+            for x in sorted(set(values)))
 
-def avg(iter): 
+def avg(values): 
     """
     Average Values
     
@@ -42,9 +41,9 @@ def avg(iter):
     >>> int(result)
     2
     """
-    return sum(iter) / len(iter)
+    return sum(values) / len(values)
 
-def sum(iter): 
+def sum(values): 
     """
     Sum Values
     
@@ -53,5 +52,5 @@ def sum(iter):
     >>> int(result)
     6
     """
-    return __builtin__.sum(float(x) for x in iter)
+    return __builtin__.sum(float(x) for x in values)
 
