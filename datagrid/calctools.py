@@ -18,8 +18,11 @@
 
 """DataGrid Calculation Tools"""
 
-# Error generated while trying to run calculatevalues method
-class CalculatedValueError(Exception): pass
+
+class CalculatedValueError(Exception): 
+    """Error generated if calculatedvalues method fails"""
+    pass
+
 
 def calculatevalues(data, calculations):
     """
@@ -33,36 +36,42 @@ def calculatevalues(data, calculations):
     >>> len(formulas)
     1
     """
-
-    # copy calculations to avoid destruction
+    # Copy calculations to avoid destruction
     calculations = calculations.copy()
 
     while True:
-        # get count of calculations we have left to run
+        # Get count of calculations we have left to run
         start = len(calculations)   
         for key, calc in calculations.items():
 
-            # attempt to run calculation
-            try: data[key] = calc(data)
-            except KeyError:    # we may get this missing val from some
-                continue        # other calculated value, so continue for now
+            # Attempt to run calculation
+            try: 
+                data[key] = calc(data)
+            except KeyError:
+                # Apparently we are missing a value, presumably calculated.
+                # Skip for now, we may find this in another round
+                continue 
             except ValueError:
-                data[key] = None    # data is not in a format we expect, set as null
+                # Data is not in a format we expect, set as None
+                data[key] = None    
 
-            # calculation was a success, remove from list
+            # Calculation was a success, remove from list
             del calculations[key]
 
-        # check how many calculations we have left
+        # Check how many calculations we have left
         end = len(calculations) 
-        if end == 0: break      # we must be finished, exit loop
-        elif end == start:      # no calculations have sucessfully been run
-            raise CalculatedValueError()    # exit with exception
+        if end == 0: 
+            # We must be finished, exit loop
+            break
+        elif end == start:
+            # No calculations have sucessfully been run.  Exit with exception
+            raise CalculatedValueError()
 
-    # return initial data-row with addition of newly calculated values
+    # Return initial data-row with addition of newly calculated values
     return data
 
 
-def formula(calcString):
+def formula(calc_string):
     """
     Generate formula to run on given data
 
@@ -72,9 +81,10 @@ def formula(calcString):
     2.0
     """
     # replace place-holders with dictionary refs
-    calcString = calcString.replace('{', 'float(d["').replace('}', '"])')
+    calc_string = calc_string.replace('{', 'float(d["').replace('}', '"])')
 
     # create new function and return
-    exec 'f = lambda d: ' + calcString
-    return f
+    calc_method = None
+    exec 'calc_method = lambda d: ' + calc_string  # pylint: disable-msg=W0122
+    return calc_method
 
