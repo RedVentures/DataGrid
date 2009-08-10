@@ -48,7 +48,8 @@ def main():
             const='datagrid.renderer.ascii', dest='renderer',
             help='Render Text (ASCII) table [default]')
     parser.add_option('--renderer', dest='renderer', 
-            default='datagrid.renderer.ascii', help='Use custom table renderer')
+            default='datagrid.renderer.ascii', 
+            help='Use custom table renderer')
     
     # Report data options
     datagroup = OptionGroup(parser, 'Data defination and manipulation options')
@@ -58,29 +59,28 @@ def main():
             help='Set the column header') 
     datagroup.add_option('-g', '--groupby', action='append',
             help='Set the report aggregation', default=[])
-    datagroup.add_option('-a', '--aggregate', action='append',
-            help='Set the aggregation method for a given column.  '\
-                    'Example: --aggregate="column|sum"',
-            default=[])
+    datagroup.add_option('-a', '--aggregate', action='append', default=[],
+            help='Set the aggregation method for a given column.  '
+                    'Example: --aggregate="column|sum"')
     datagroup.add_option('--calculate', action='append', default=[],
-            help='Add column by running the given calculation.  '\
+            help='Add column by running the given calculation.  '
                     'Example: --calculate="c|{a}+{b}"')
     datagroup.add_option('--columndescription', action='append', default=[],
-            help='Provide a description for the given column.  '\
+            help='Provide a description for the given column.  '
                     'Example: --columndescription="c|Really helpful info."')
     datagroup.add_option('-s', '--sort', action='append', default=[],
             help='Set the sort column(s)')
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
     datagroup.add_option('--type', action='append', default=[],
-            help='Set the type (str|float) of a column.  '\
-                    'If no --type declarations are made, each column-type '\
+            help='Set the type (str|float) of a column.  '
+                    'If no --type declarations are made, each column-type '
                     'is guessed')
 
     # Display options
     displaygroup = OptionGroup(parser, 'Data display options')
     displaygroup.add_option('-d', '--display', action='append', default=[],
-            help='Set display column.  '\
+            help='Set display column.  '
                     '(Optional - if not set, all columns are used)')
     displaygroup.add_option('-f', '--format', action='append', default=[],
             help='Set column formatters')
@@ -144,13 +144,13 @@ def main():
     sortby = [s.split('|') if '|' in s else s for s in options.sort]
 
     # Verify aggregate are defined columns
-    for groupby in options.groupby:
-        if groupby not in columns:
-            parser.error("groupby column %s not found in column-list" 
-                    % groupby)
+    invalid_group_options = set(options.groupby) - set(columns)
+    if invalid_group_options:
+        parser.error("groupby column(s): '%s' not found in column list" %
+                "', '".join(invalid_group_options))
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data, renderer, columns, descriptions, options. groupby,
+    grid = DataGrid(data, renderer, columns, descriptions, options.groupby,
             aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
     pager(grid.render())
