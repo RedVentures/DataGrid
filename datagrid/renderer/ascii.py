@@ -18,9 +18,9 @@
 
 """ASCII Table Rendering Module"""
 
-import datagrid.renderer
+import datagrid.renderer.abstract
 
-class Renderer(datagrid.renderer.Renderer):
+class Renderer(datagrid.renderer.abstract.Renderer):
     """
     ASCII/Text Table Renderer
     """

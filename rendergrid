@@ -42,13 +42,13 @@ def main():
 
     # Ordinary (or generic) options
     parser.add_option('--html', action='store_const', 
-            const='datagrid.html', dest='renderer',
+            const='datagrid.renderer.html', dest='renderer',
             help='Render HTML table')
     parser.add_option('--text', action='store_const',
-            const='datagrid.ascii', dest='renderer',
+            const='datagrid.renderer.ascii', dest='renderer',
             help='Render Text (ASCII) table [default]')
     parser.add_option('--renderer', dest='renderer', 
-            default='datagrid.ascii', help='Use custom table renderer')
+            default='datagrid.renderer.ascii', help='Use custom table renderer')
     
     # Report data options
     datagroup = OptionGroup(parser, 'Data defination and manipulation options')
