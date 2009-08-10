@@ -153,9 +153,14 @@ class DataGrid(object):
 
         # build table pieces and glue together
         head = self.renderer.head(self)
-        body = self.render_body(self.data, self.groupby)
-        tail = self.renderer.tail(
-                self, self.render_cells(
+
+        # render body if we are suppressing detail on a flat set
+        if not self.suppressdetail or self.groupby:
+            body = self.render_body(self.data, self.groupby)
+        else:
+            body = ''
+
+        tail = self.renderer.tail(self, self.render_cells(
                     self.generate_aggregate_row(self.data)))
 
         # render table and return

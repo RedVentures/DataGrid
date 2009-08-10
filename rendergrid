@@ -149,11 +149,6 @@ def main():
             parser.error("groupby column %s not found in column-list" 
                     % groupby)
 
-    # Validate suppress-detail selection
-    if options.suppressdetail:
-        if not len(options.groupby):
-            parser.error("Cannot suppress if no aggregation is declared")
-
     # Create datagrid instance and render to stdout
     grid = DataGrid(data, renderer, columns, descriptions, options. groupby,
             aggregate, options.suppressdetail, calculations, sortby,
