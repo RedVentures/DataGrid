@@ -144,10 +144,11 @@ def main():
     sortby = [s.split('|') if '|' in s else s for s in options.sort]
 
     # Verify aggregate are defined columns
-    invalid_group_options = set(options.groupby) - set(columns)
-    if invalid_group_options:
-        parser.error("groupby column(s): '%s' not found in column list" %
-                "', '".join(invalid_group_options))
+    if options.groupby and columns:
+        invalid_group_options = set(options.groupby) - set(columns)
+        if invalid_group_options:
+            parser.error("groupby column(s): '%s' not found in column list" %
+                    "', '".join(invalid_group_options))
 
     # Create datagrid instance and render to stdout
     grid = DataGrid(data, renderer, columns, descriptions, options.groupby,

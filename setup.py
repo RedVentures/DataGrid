@@ -42,7 +42,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'install':
 setup(
         name = about.NAME,
         version = about.VERSION,
-        packages = ['datagrid'],
+        packages = ['datagrid', 'datagrid.renderer'],
         data_files = data_files
      )
 
