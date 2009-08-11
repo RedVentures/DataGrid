@@ -19,7 +19,7 @@
 """Data handling and manipulation tools"""
 
 from functools import partial
-from itertools import ifilter, izip, starmap
+from itertools import ifilter
 from abc import ABCMeta
 
 
@@ -28,8 +28,8 @@ class TypeOrValueError(Exception):
     __metaclass__ = ABCMeta
 
 # Register Type/ValueError Exceptions as part of this ABC
-TypeOrValueError.register(TypeError)
-TypeOrValueError.register(ValueError)
+TypeOrValueError.register(TypeError)   # pylint: disable-msg=e1101 
+TypeOrValueError.register(ValueError)  # pylint: disable-msg=e1101
 
 
 def multi_sorted(data, sortcolumns, key=None):
@@ -71,7 +71,7 @@ def set_column_types(data, types):
     Example:
     >>> i = set_column_types([['1','abc','0'],['4','b','1']],(float,str,int))
     >>> list(i)
-    [(1.0, 'abc', 0), (4.0, 'b', 1)]
+    [[1.0, 'abc', 0], [4.0, 'b', 1]]
     """
     # By using an iterator, if we hit the except clause below, we should
     # output the same rows twice (assuming the exception is not hit on the
@@ -81,7 +81,7 @@ def set_column_types(data, types):
     for row in data:
         # Apply type mapping to current row and yield
         try: 
-            yield tuple(starmap(lambda f, v: f(v), izip(types, row)))
+            yield map(lambda f, v: f(v), types, row)
 
         # We found a problem with the types mapping. 
         # This will likely happen again, so we should yield the remainder 
