@@ -18,9 +18,42 @@
 
 """Format Method Library"""
 
+def number(value, precision=0, delim=','):
+    """
+    Format value as number with thousands sep. with fixed precision.
+
+    Example:
+    >>> number(1000.5)
+    '1,000'
+    >>> number(10000.123, 2)
+    '10,000.12'
+    >>> number('100')
+    '100'
+    """
+    # Return empty values with no change
+    if value == '':
+        return ''
+    value = reversed(list(("%." + str(precision) + "f") % float(value)))
+    
+    # Rewrite decimal portion
+    new_value = []
+    if precision:
+        for character in value:
+            new_value.append(character)
+            if character == '.':
+                break
+    
+    # Add thousands delim every three characters
+    new_value.extend("%s%s" % (s, delim) if i and not i % 3 else s 
+            for i, s in enumerate(value))
+
+    # Put value back together before we return
+    return ''.join(reversed(new_value))
+
+
 def percent(value, precision=0):
     """
-    Format incoming value as percentage
+    Format value as percentage
 
     Example:
     >>> percent(0.95)
@@ -35,5 +68,5 @@ def percent(value, precision=0):
     # Avoid exceptions from empty cells
     if value == '': 
         return ''
-    return ("%." + str(precision) + "f%%") % (100 * float(value))
+    return "%s%%" % number(100 * float(value), precision)
 
