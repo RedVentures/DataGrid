@@ -131,6 +131,11 @@ def main():
     except ValueError:
         parser.error("Invalid format passed to --aggregate method")
         
+    # Preset formatters from what type of columns we have
+    for key, columntype in enumerate(types):
+        if columntype is float: 
+            options.format.insert(0, '%s|plain_number' % columns[key])
+
     # Parse column formatters
     formatters = formattools.parse_options(options.format)
 

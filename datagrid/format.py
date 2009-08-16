@@ -18,6 +18,18 @@
 
 """Format Method Library"""
 
+def plain_number(value):
+    """
+    Format float or other numeric value as integer (in string form)
+
+    Example:
+    >>> plain_number(100.2)
+    '100'
+    >>> plain_number(12.0)
+    '12'
+    """
+    return str(int(value))
+
 def number(value, precision=0, delim=','):
     """
     Format value as number with thousands sep. with fixed precision.
@@ -58,15 +70,29 @@ def percent(value, precision=0):
     Example:
     >>> percent(0.95)
     '95%'
-    >>> percent(0.125,1)
+    >>> percent(0.125, 1)
     '12.5%'
     >>> percent(0.125)
     '12%'
-    >>> percent(0.125,2)
+    >>> percent(0.125, 2)
     '12.50%'
     """
     # Avoid exceptions from empty cells
     if value == '': 
         return ''
     return "%s%%" % number(100 * float(value), precision)
+
+def currency(value):
+    """
+    Format value as currency
+
+    Example:
+    >>> currency(123.2)
+    '$123.20'
+    >>> currency(1)
+    '$1.00'
+    >>> currency(12322.127)
+    '$12,322.13'
+    """
+    return "$%s" % number(value, 2)
 
