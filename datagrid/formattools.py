@@ -63,7 +63,21 @@ def parse_options(formatters):
                     methods[i] = str_formatter(method[1:-1])
 
                 # if this is not a string formatter, look in format module
-                else: methods[i] = vars(datagrid.format)[method]
+                else:
+                    # if parameters were passed with method name
+                    if ':' in method: 
+                        # parse parameters and pass to formatter
+                        method, parameters = method.split(':')
+
+                        method = vars(datagrid.format)[method]
+                        parameters = [p.strip() for p in parameters.split(',')]
+                        
+                        # pass through params given on console
+                        methods[i] = lambda x: method(x, *parameters)
+
+                    # no parameters were found with method
+                    else:
+                        methods[i] = vars(datagrid.format)[method]
 
             # Consolidate function into one callable, so that when we call 
             # returned function c, it's really calling a then passing the 

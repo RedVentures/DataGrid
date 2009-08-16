@@ -37,14 +37,15 @@ class DataGrid {
 
     /* -- Class Constants -- */
 
-    const DEFAULT_RENDERER = 'datagrid.html';
+    const DEFAULT_RENDERER = 'datagrid.renderer.html';
 
-    const OPT_AGGREGATE = 'aggregate';
-    const OPT_AGGREGATEMETHOD ='aggregatemethod';
+    const OPT_GROUPBY = 'groupby';
+    const OPT_AGGREGATE ='aggregate';
     const OPT_AUTOCOLUMN = 'autocolumn';
     const OPT_CALCULATE = 'calculate';
     const OPT_DESCRIPTION = 'columndescription';
     const OPT_DISPLAY = 'display';
+    const OPT_FORMAT = 'format';
     const OPT_RENDERER = 'renderer';
     const OPT_SORT = 'sort';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
@@ -74,11 +75,11 @@ class DataGrid {
      *
      * Format:
      *      # boolean options
-     *          KEY => TRUE                       // becomes: --KEY
+     *          KEY => TRUE                  // becomes: --KEY
      *      # key/val option
-     *          KEY => VAL                        // becomes: --KEY="VAL"
+     *          KEY => VAL                   // becomes: --KEY="VAL"
      *      # key/val option with multiple values
-     *          KEY => array(V1, V2)              // becomes: --KEY="V1" --KEY="V2"
+     *          KEY => array(V1, V2)         // becomes: --KEY="V1" --KEY="V2"
      *
      * Run 'rendergrid --help' for documentation and list of command-line args
      *
@@ -205,21 +206,22 @@ class DataGrid {
             $this->flags[self::OPT_DESCRIPTION] = array();
 
         // set method for each given column
-        $this->flags[self::OPT_DESCRIPTION][$columnName] = "$columnName|$description";
+        $this->flags[self::OPT_DESCRIPTION][$columnName] 
+            = "$columnName|$description";
 
         return $this;
 
     }
 
     /**
-     * Set columns to aggregate data on
+     * Set columns to grou data on
      *
-     * @param array $aggregate - list of columns to aggregate on
+     * @param array $groupby - list of columns to group on
      * @return DataGrid
      */
-    public function aggregate( array $aggregate ) {
+    public function groupby( array $groupby ) {
 
-        $this->flags[self::OPT_AGGREGATE] = $aggregate;
+        $this->flags[self::OPT_GROUPBY] = $groupby;
         return $this;
         
     }
@@ -242,7 +244,7 @@ class DataGrid {
 
         // Check for errors
         if ( $returnCode ) {
-            $e = new DataGrid_Exception();
+            $e = new DataGrid_Exception($command);
             $e->commandOutput = $output;
             $e->commandAttempted = $command;
             throw $e;
@@ -263,13 +265,61 @@ class DataGrid {
     public function setAggregationMethod( array $columnList, $method ) {
 
         // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_AGGREGATEMETHOD] )
-                || !is_array( $this->flags[self::OPT_AGGREGATEMETHOD] ) )
-            $this->flags[self::OPT_AGGREGATEMETHOD] = array();
+        if ( empty( $this->flags[self::OPT_AGGREGATE] )
+                || !is_array( $this->flags[self::OPT_AGGREGATE] ) )
+            $this->flags[self::OPT_AGGREGATE] = array();
 
         // set method for each given column
-        foreach ( $columnList as $column ) 
-            $this->flags[self::OPT_AGGREGATEMETHOD][$column] = "$column|$method";
+        foreach ( $columnList as $col ) 
+            $this->flags[self::OPT_AGGREGATE][$col] = "$col|$method";
+
+        return $this;
+
+    }
+
+    /**
+     * Set formatting to be used when rendering a column
+     *
+     * Formatting is determined by the formatting chain requested here.
+     * Available formatters include 'percent' and 'number'.
+     *
+     * Example DataSet:
+     *      ColA    ColB    ColC
+     *      13213   2       3
+     *      4       0.95    1232
+     *  
+     * Example:
+     *      $g->setColumnFormatting('ColA', 'number');
+     *
+     *      would produce the following values for ColA:
+     *      13,213 and 4
+     *
+     *      $g->setColumnFormatting('ColB', 'percent');
+     *
+     *      would produce the following values for ColB:
+     *      200% and 95%
+     *
+     * @param string $column - Name of column to set formatting for
+     * @param string $method1 - Formatting method to use
+     * @param string $method2 - (optional) Second formatting method
+     * @param string $methodN - (optional) Etc.
+     *
+     * @return DataGrid
+     */
+    public function setColumnFormatting() {
+
+        // get options since we have declare none
+        $args = func_get_args();
+        $column = array_shift($args);
+
+        // make sure we already have an array
+        if ( empty( $this->flags[self::OPT_FORMAT] )
+                || !is_array( $this->flags[self::OPT_FORMAT] ) )
+            $this->flags[self::OPT_FORMAT] = array();
+
+        // set column formatting
+        $this->flags[self::OPT_FORMAT][$column] 
+            = "$column|" . implode('|', $args);
 
         return $this;
 

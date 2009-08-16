@@ -39,11 +39,13 @@ $data = array(
 
 // create new instance and set some configurations
 $grid = DataGrid::create($data);
-$grid->aggregate( array( 'LastName' ) );
+$grid->groupby( array( 'LastName' ) );
 $grid->setAggregationMethod( array( 'Age' ), 'avg' );
 $grid->addCalculatedColumn( 'TwiceAge', '{Age}*2' );
 $grid->addColumnDescription( 'Age', 'How many years since birth' );
 $grid->setDisplayColumns( array( 'FirstName', 'Age', 'LastName', 'TwiceAge' ) );
+$grid->setColumnFormatting( 'Age', 'number' );
+$grid->setColumnFormatting( 'TwiceAge', 'number:2' );
 
 // output rendered grid
 print $grid->render();
