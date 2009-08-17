@@ -27,8 +27,10 @@ def plain_number(value):
     '100'
     >>> plain_number(12.0)
     '12'
+    >>> plain_number('12.123123123123')
+    '12'
     """
-    return str(int(value))
+    return '%.0f' % float(value)
 
 def number(value, precision=0, delim=','):
     """

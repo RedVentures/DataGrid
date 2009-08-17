@@ -32,8 +32,9 @@ DataGrid::$executable = '../../rendergrid';
 
 // create new instance and set some configurations
 $grid = DataGrid::createFromFile('../bank-data.csv', true);
-$grid->aggregate( array('region', 'mortgage') );
+$grid->groupby( array('region', 'mortgage') );
 $grid->setAggregationMethod( array( 'age', 'children' ), 'avg' );
+$grid->setAggregationMethod( array( 'region' ), 'count' );
 $grid->addColumnDescription( 'children', 'How many children they have' );
 $grid->sortBy( array( 'income' ) );
 $grid->suppressdetail();
