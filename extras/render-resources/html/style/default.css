@@ -1,0 +1,19 @@
+
+.datagrid               {width: 100%; margin-top: 2em; border-collapse: collapse;}
+
+.datagrid th, .datagrid td
+                        {padding-top: 0.5em;}
+
+.datagrid th            {border-bottom: 2px solid #333; text-align: left;
+                         background: #ccc; font-size: normal;}
+.datagrid td            {border: 1px solid #ccc; border-top-width: 0px;
+                         border-left-color: #eee; border-right-color: #eee;
+                         font-size: smaller; background-color: #ddd;}
+.datagrid .l-0 td       {padding: 0em; background-color: #fff}
+.datagrid tr.l-0:hover td {background-color: #eee}
+
+.datagrid tr td:first-child span:first-child
+                        {font-weight: bold; margin-right: 0.5em;}
+.datagrid tr td:first-child span:first-child:after
+                        {content: ':';}
+
