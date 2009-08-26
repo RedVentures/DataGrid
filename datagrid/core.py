@@ -192,9 +192,15 @@ class DataGrid(object):
                 #   concrete list (tuple), not just an iterator
                 subdata = tuple(subdata)
 
+                # format aggregate value
+                if idx in self.formatters:
+                    fvalue = self.formatters[idx](value)
+                else:
+                    fvalue = value
+
                 # this config gets sent to renderer.row for displaying 
                 #   aggregate row information (name, value, etc)
-                rowargs = dict(name=groupby[0], value=value, level=groupby_len)
+                rowargs = dict(name=groupby[0], value=fvalue, level=groupby_len)
                
                 # build aggregate summary row
                 rowdata = self.generate_aggregate_row(subdata, aggregate_row)
