@@ -204,7 +204,7 @@ class DataGrid(object):
                
                 # build aggregate summary row
                 rowdata = self.generate_aggregate_row(subdata, aggregate_row)
-                rowdata[self._allcolumns.index(groupby[0])] = value
+                rowdata[idx] = value
 
                 # if details are suppressed, decrement out agg-level
                 if self.suppressdetail: 
