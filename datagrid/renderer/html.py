@@ -25,7 +25,7 @@ def table(config, thead, tbody, tfoot):
     Generate HTML table from pregenerated head/body/tail sections
     """
     return """
-        <table class='helper-gridview' cols='%s'>
+        <table class='datagrid' cols='%s'>
             %s<tbody>%s</tbody>%s
         </table>
         """ % (len(config.columns), thead, tbody, tfoot)
