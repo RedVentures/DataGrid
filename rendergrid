@@ -164,6 +164,10 @@ def main():
 
 # Run if called directly
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except IOError: 
+        # allow graceful use of piping
+        pass
 
 
