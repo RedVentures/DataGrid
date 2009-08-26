@@ -6,6 +6,7 @@
 
 .datagrid th            {border-bottom: 2px solid #333; text-align: left;
                          background: #ccc; font-size: normal;}
+.datagrid tfoot td      {border-top: 2px solid #333;}
 .datagrid td            {border: 1px solid #ccc; border-top-width: 0px;
                          border-left-color: #eee; border-right-color: #eee;
                          font-size: smaller; background-color: #ddd;}
