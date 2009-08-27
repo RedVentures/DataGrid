@@ -41,6 +41,14 @@ DataGrid = {
                 rows[i].children_expanded = true;
                 rows[i].aggregate_level = aggregate_level;
 
+                // Set row indent
+                rows[i].childNodes[0].style.paddingLeft 
+                    = (((child_bucket.length - 1) * 2) + 1) + 'em';
+
+                // Set row color
+                shade = 100 + (child_bucket.length * 25);
+                rows[i].style.backgroundColor = "rgb(" + shade + ", " + shade + ", " + shade + ")";
+
                 // Set onclick handler
                 row = rows[i];
                 rows[i].addEventListener('click', 

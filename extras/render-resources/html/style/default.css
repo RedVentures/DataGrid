@@ -9,7 +9,7 @@
 .datagrid tfoot td      {border-top: 2px solid #333;}
 .datagrid td            {border: 1px solid #ccc; border-top-width: 0px;
                          border-left-color: #eee; border-right-color: #eee;
-                         font-size: smaller; background-color: #ddd;}
+                         font-size: smaller;}
 .datagrid .l-0 td       {padding: 0em; background-color: #fff}
 .datagrid tr.l-0:hover td {background-color: #eee}
 
