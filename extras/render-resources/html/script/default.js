@@ -7,9 +7,6 @@ DataGrid = {
 
         // Initialize all found datagrids
         for (var i = 0; i < tables.length; i++) {
-            console.log("initializing table");
-            console.log(tables[i]);
-
             DataGrid.init_table(tables[i]);
         }
     },
