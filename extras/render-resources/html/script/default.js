@@ -64,7 +64,9 @@ var DataGrid = {
 
             // Drop child rows in bucket (if one exists)
             for (var k = 0; k < child_bucket.length; k++) {
-                child_bucket[k].child_rows.push(row);
+                if (child_bucket[k] != row) {
+                    child_bucket[k].child_rows.push(row);
+                }
                 if ((child_bucket[k].aggregate_level - 1) == aggregate_level) {
                     child_bucket[k].child_rows_direct.push(row);
                 }
@@ -96,7 +98,7 @@ var DataGrid = {
 
     // Set display style property on given rows
     set_row_display: function(rows, display) {
-        for (var i = 1; i < rows.length; i++ ) {
+        for (var i = 0; i < rows.length; i++ ) {
             rows[i].style.display = display;
         }
     },
