@@ -1,17 +1,19 @@
-
+/*global window */
+/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
+"use strict";
 var DataGrid = {
     
-    init: function() {
+    init : function () {
         // Fetch all DataGrid instances to setup
         var tables = window.DataGrid.get_tables();
 
         // Initialize all found datagrids
-        for (var i = 0; i < tables.length; i++) {
+        for (var i = 0; i < tables.length; i += 1) {
             window.DataGrid.init_table(tables[i]);
         }
     },
 
-    init_table: function(table) {
+    init_table : function (table) {
         // Skip if table is invalid
         if (!table) { 
             return false;
@@ -25,7 +27,7 @@ var DataGrid = {
         var child_bucket = [];
         var current_level = 99;
 
-        for (var i = 0; i < rows.length; i++) {
+        for (var i = 0; i < rows.length; i += 1) {
             // Get current row
             var row = rows[i];
 
@@ -35,7 +37,7 @@ var DataGrid = {
             // Have we changed aggregation levels?
             if (aggregate_level !== 0) {
                 if (aggregate_level >= current_level) {
-                    for (var j = aggregate_level; j >= current_level; j--) {
+                    for (var j = aggregate_level; j >= current_level; j -= 1) {
                         child_bucket.pop();
                     }
                 } 
@@ -63,11 +65,11 @@ var DataGrid = {
             }
 
             // Drop child rows in bucket (if one exists)
-            for (var k = 0; k < child_bucket.length; k++) {
-                if (child_bucket[k] != row) {
+            for (var k = 0; k < child_bucket.length; k += 1) {
+                if (child_bucket[k] !== row) {
                     child_bucket[k].child_rows.push(row);
                 }
-                if ((child_bucket[k].aggregate_level - 1) == aggregate_level) {
+                if ((child_bucket[k].aggregate_level - 1) === aggregate_level) {
                     child_bucket[k].child_rows_direct.push(row);
                 }
             }
@@ -75,14 +77,14 @@ var DataGrid = {
     },
 
     // Find and return all datagrid tables
-    get_tables: function() {
+    get_tables : function () {
         // Fetch all tables and examine classes
         var tables = document.getElementsByTagName('table');
 
         // Find ids for datagrid instances
         var result = [];
-        for (var i = 0; i < tables.length; i++) {
-            if (tables[i].className == 'datagrid') {
+        for (var i = 0; i < tables.length; i += 1) {
+            if (tables[i].className === 'datagrid') {
                 result[tables.length] = tables[i];
             }
         }
@@ -91,20 +93,20 @@ var DataGrid = {
     },
 
     // Generate aggregate row background color
-    generate_background: function(level) {
+    generate_background : function (level) {
         var shade = 100 + (level * 25);
         return "rgb(" + shade + ", " + shade + ", " + shade + ")";
     },
 
     // Set display style property on given rows
-    set_row_display: function(rows, display) {
-        for (var i = 0; i < rows.length; i++ ) {
+    set_row_display : function (rows, display) {
+        for (var i = 0; i < rows.length; i += 1) {
             rows[i].style.display = display;
         }
     },
 
     // Show/Hide decendant rows
-    toggle_row: function(e) {
+    toggle_row : function (e) {
         // Get source element
         var evnt = e || window.event;
         var row = evnt.currentTarget || evnt.srcElement;
@@ -121,7 +123,7 @@ var DataGrid = {
     },
 
     // Universal event binder
-    register_event: function(elem, evnt, fun) {
+    register_event : function (elem, evnt, fun) {
         if (elem.addEventListener) {
             elem.addEventListener(evnt, fun, false);
         } else if (elem.attachEvent) {
@@ -134,3 +136,4 @@ var DataGrid = {
 // Setup after page loads
 DataGrid.register_event(window, 'load', DataGrid.init);
 
+/* vim: set ft=javascript ts=4 sw=4 et */
