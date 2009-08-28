@@ -1,99 +1,84 @@
 
-DataGrid = {
+var DataGrid = {
     
     init: function() {
         // Fetch all DataGrid instances to setup
-        tables = DataGrid.get_tables();
+        var tables = window.DataGrid.get_tables();
 
         // Initialize all found datagrids
         for (var i = 0; i < tables.length; i++) {
-            DataGrid.init_table(tables[i]);
+            window.DataGrid.init_table(tables[i]);
         }
     },
 
     init_table: function(table) {
         // Skip if table is invalid
-        if (!table) return false;
+        if (!table) { 
+            return false;
+        }
 
         // Fetch all table body rows
-        rows = table.getElementsByTagName('tbody')[0]
+        var rows = table.getElementsByTagName('tbody')[0]
             .getElementsByTagName('tr');
         
         // aggregate row refs to attach child row to
-        child_bucket = [];
-        current_level = 99;
+        var child_bucket = [];
+        var current_level = 99;
 
         for (var i = 0; i < rows.length; i++) {
+            // Get current row
+            var row = rows[i];
+
             // Aggregation level of current row
-            aggregate_level = parseInt(rows[i].className.substr(2));
+            var aggregate_level = parseInt(row.className.substr(2), 10);
             
             // Have we changed aggregation levels?
-            if (aggregate_level != 0) {
+            if (aggregate_level !== 0) {
                 if (aggregate_level >= current_level) {
-                    for (var j = aggregate_level; j >= current_level; j--) 
+                    for (var j = aggregate_level; j >= current_level; j--) {
                         child_bucket.pop();
+                    }
                 } 
-                child_bucket.push(rows[i]);
+                child_bucket.push(row);
 
                 // Add child_rows array to row
-                rows[i].child_rows = [];
-                rows[i].child_rows_direct = [];
-                rows[i].children_expanded = true;
-                rows[i].aggregate_level = aggregate_level;
+                row.child_rows = [];
+                row.child_rows_direct = [];
+                row.children_expanded = true;
+                row.aggregate_level = aggregate_level;
 
                 // Set row indent
-                rows[i].childNodes[0].style.paddingLeft 
-                    = (((child_bucket.length - 1) * 2) + 1) + 'em';
+                row.childNodes[0].style
+                    .paddingLeft = (((child_bucket.length - 1) * 2) + 1) + 'em';
 
                 // Set row color
-                shade = 100 + (child_bucket.length * 25);
-                rows[i].style.backgroundColor = "rgb(" + shade + ", " + shade + ", " + shade + ")";
+                var bg = window.DataGrid.generate_background(child_bucket.length);
+                row.style.backgroundColor = bg;
 
                 // Set onclick handler
-                row = rows[i];
-                rows[i].addEventListener('click', 
-                    function(e) {
-
-                        // Get source element
-                        if( !e ) e = window.event;
-                        var row = e.currentTarget || e.srcElement;
-                        
-                        // toggle rows in bucket
-                        if (row.children_expanded) {
-                            for (var i = 1; i < row.child_rows.length; i++) {
-                                row.child_rows[i].style.display = 'none';
-                            }
-                        } else {
-                            for (var i = 0; i < row.child_rows_direct.length; i++) {
-                                row.child_rows_direct[i].style.display = '';
-                            }
-                        }
-
-                        // Toggle expanded bit
-                        row.children_expanded = !row.children_expanded;
-
-                    }, false);
+                window.DataGrid.register_event(row, 'click', window.DataGrid.toggle_row);
 
                 // Update aggregation level pointer
                 current_level = aggregate_level;
             }
 
             // Drop child rows in bucket (if one exists)
-            for (var j = 0; j < child_bucket.length; j++) {
-                child_bucket[j].child_rows.push(rows[i]);
-                if ((child_bucket[j].aggregate_level - 1) == aggregate_level) {
-                    child_bucket[j].child_rows_direct.push(rows[i]);
+            for (var k = 0; k < child_bucket.length; k++) {
+                child_bucket[k].child_rows.push(row);
+                if ((child_bucket[k].aggregate_level - 1) == aggregate_level) {
+                    child_bucket[k].child_rows_direct.push(row);
                 }
             }
         }
     },
 
+    // Find and return all datagrid tables
     get_tables: function() {
         // Fetch all tables and examine classes
-        tables = document.getElementsByTagName('table');
+        var tables = document.getElementsByTagName('table');
 
         // Find ids for datagrid instances
-        var result = new Array();
+        var result = [];
         for (var i = 0; i < tables.length; i++) {
             if (tables[i].className == 'datagrid') {
                 result[tables.length] = tables[i];
@@ -101,13 +86,49 @@ DataGrid = {
         }
 
         return result;
+    },
+
+    // Generate aggregate row background color
+    generate_background: function(level) {
+        var shade = 100 + (level * 25);
+        return "rgb(" + shade + ", " + shade + ", " + shade + ")";
+    },
+
+    // Set display style property on given rows
+    set_row_display: function(rows, display) {
+        for (var i = 1; i < rows.length; i++ ) {
+            rows[i].style.display = display;
+        }
+    },
+
+    // Show/Hide decendant rows
+    toggle_row: function(e) {
+        // Get source element
+        var evnt = e || window.event;
+        var row = evnt.currentTarget || evnt.srcElement;
+        
+        // toggle rows in bucket
+        if (row.children_expanded) {
+            window.DataGrid.set_row_display(row.child_rows, 'none');
+        } else {
+            window.DataGrid.set_row_display(row.child_rows_direct, '');
+        }
+
+        // Toggle expanded bit
+        row.children_expanded = !row.children_expanded;
+    },
+
+    // Universal event binder
+    register_event: function(elem, evnt, fun) {
+        if (elem.addEventListener) {
+            elem.addEventListener(evnt, fun, false);
+        } else if (elem.attachEvent) {
+            elem.attachEvent('on' + evnt, fun);
+        }
     }
 
-}
+};
 
-// Start after page loads
-if (window.addEventListener)
-    window.addEventListener('load', DataGrid.init, false);
-else if (window.attachEvent)
-    window.attachEvent('onload', DataGrid.init);
+// Setup after page loads
+DataGrid.register_event(window, 'load', DataGrid.init);
 
