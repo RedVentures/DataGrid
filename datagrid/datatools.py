@@ -73,24 +73,15 @@ def set_column_types(data, types):
     >>> list(i)
     [[1.0, 'abc', 0], [4.0, 'b', 1]]
     """
-    # By using an iterator, if we hit the except clause below, we should
-    # output the same rows twice (assuming the exception is not hit on the
-    # first row
-    data = iter(data)
-
     for row in data:
         # Apply type mapping to current row and yield
         try: 
             yield map(lambda f, v: f(v), types, row)
 
         # We found a problem with the types mapping. 
-        # This will likely happen again, so we should yield the remainder 
-        # with no transformations
+        # yield the with no transformations
         except TypeOrValueError:
-            types = [str]*len(row)
-            for row in data: 
-                yield row
-            break
+            yield row
 
 
 def get_column_types(columns):
