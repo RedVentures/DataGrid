@@ -52,7 +52,9 @@ def multi_sorted(data, sortcolumns, key=None):
 
     # Default key function if none is given
     if key is None: 
-        key = lambda column, data: data[column]
+        key = lambda column, data: \
+                str.lower(data[column]) \
+                if isinstance(data[column], str) else data[column]
 
     # Apply sorted iterator for each given sort column/direction
     for column, direction in reversed(sortcolumns):
