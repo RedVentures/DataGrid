@@ -32,9 +32,9 @@ DataGrid::$executable = '../../rendergrid';
 
 // create some fake data
 $data = array(
-    array( 'FirstName' => 'Bob',  'LastName' => 'Smith', 'Age' => '32'), 
-    array( 'FirstName' => 'Fred', 'LastName' => 'Smith', 'Age' => '25'), 
-    array( 'FirstName' => 'John', 'LastName' => 'Doe',   'Age' => '53')
+    array( 'FirstName' => 'Bob',  'LastName' => 'Smith', 'Age' => '32', 'Object' => new stdClass), 
+    array( 'FirstName' => 'Fred', 'LastName' => 'Smith', 'Age' => '25', 'Object' => new stdClass), 
+    array( 'FirstName' => 'John', 'LastName' => 'Doe',   'Age' => '53', 'Object' => new stdClass)
 );
 
 // create new instance and set some configurations

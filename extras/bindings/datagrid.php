@@ -113,7 +113,16 @@ class DataGrid {
             fputcsv( $fp, array_keys( (array) current( $data ) ) );
 
             // Write body of datafile
-            foreach ( $data as $record ) fputcsv( $fp, (array) $record );
+            foreach ( $data as $record ) {
+                // convert objects to string 'object' (for php 5.2)
+                $record = (array) $record;
+                foreach ( $record as $key => $value ) {
+                    if ( is_object( $value ) ) $record[$key] = 'object';
+                } 
+
+                // write to csv
+                fputcsv( $fp, $record );
+            }
         } catch ( DataGrid_Exception $e ) {
             // Cleanup created file
             fclose( $fp );
