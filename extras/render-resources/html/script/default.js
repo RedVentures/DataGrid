@@ -1,15 +1,25 @@
 /*global window */
-/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, regexp: true, strict: true, newcap: true, immed: true */
+/*jslint white: true, browser: true, undef: true, nomen: true, eqeqeq: true, 
+ * plusplus: true, bitwise: true, regexp: true, strict: true, newcap: true, 
+ * immed: true */
 "use strict";
 var DataGrid = {
     
+    init_hooks : [],
+
     init : function () {
         // Fetch all DataGrid instances to setup
         var tables = window.DataGrid.get_tables();
 
         // Initialize all found datagrids
         for (var i = 0; i < tables.length; i += 1) {
+            if (!tables[i]) continue;   // Skip undefined
             window.DataGrid.init_table(tables[i]);
+
+            // Fire all init hooks
+            for (var j = 0; j < window.DataGrid.init_hooks.length; j += 1) {
+                window.DataGrid.init_hooks[j](tables[i]);
+            }
         }
     },
 
@@ -120,6 +130,11 @@ var DataGrid = {
 
         // Toggle expanded bit
         row.children_expanded = !row.children_expanded;
+    },
+
+    // Register event to fire on each datagrid everytime init is called
+    register_init : function (method) {
+        window.DataGrid.init_hooks[window.DataGrid.init_hooks.length] = method;
     },
 
     // Universal event binder
