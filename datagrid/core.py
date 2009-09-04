@@ -28,6 +28,7 @@ from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
 
 class DataGrid(object):
+    """Core DataGrid Class"""
    
     # -- Attributes -- #
 

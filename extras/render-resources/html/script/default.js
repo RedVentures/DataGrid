@@ -119,7 +119,7 @@ var DataGrid = {
     toggle_row : function (e) {
         // Get source element
         var evnt = e || window.event;
-        var row = evnt.currentTarget || evnt.srcElement;
+        var row = evnt.currentTarget || evnt.srcElement.parentNode;
         
         // toggle rows in bucket
         if (row.children_expanded) {
