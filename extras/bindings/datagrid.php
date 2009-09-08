@@ -47,6 +47,7 @@ class DataGrid {
     const OPT_DISPLAY = 'display';
     const OPT_FORMAT = 'format';
     const OPT_RENDERER = 'renderer';
+    const OPT_RENDEREROPTION = 'rendereroption';
     const OPT_SORT = 'sort';
     const OPT_SUPPRESSDETAIL = 'suppressdetail';
 
@@ -188,13 +189,9 @@ class DataGrid {
      */
     public function addCalculatedColumn( $columnName, $formula ) {
 
-        // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_CALCULATE] )
-                || !is_array( $this->flags[self::OPT_CALCULATE] ) )
-            $this->flags[self::OPT_CALCULATE] = array();
-
         // set method for each given column
-        $this->flags[self::OPT_CALCULATE][$columnName] = "$columnName|$formula";
+        $this->_appendFlagValue( self::OPT_CALCULATE, 
+            "$columnName|$formula", $columnName );
 
         return $this;
 
@@ -209,14 +206,8 @@ class DataGrid {
      */
     public function addColumnDescription( $columnName, $description ) {
 
-        // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_DESCRIPTION] )
-                || !is_array( $this->flags[self::OPT_DESCRIPTION] ) )
-            $this->flags[self::OPT_DESCRIPTION] = array();
-
-        // set method for each given column
-        $this->flags[self::OPT_DESCRIPTION][$columnName] 
-            = "$columnName|$description";
+        $this->_appendFlagValue( self::OPT_DESCRIPTION, 
+            "$columnName|$description", $columnName );
 
         return $this;
 
@@ -273,14 +264,10 @@ class DataGrid {
      */
     public function setAggregationMethod( array $columnList, $method ) {
 
-        // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_AGGREGATE] )
-                || !is_array( $this->flags[self::OPT_AGGREGATE] ) )
-            $this->flags[self::OPT_AGGREGATE] = array();
-
         // set method for each given column
-        foreach ( $columnList as $col ) 
-            $this->flags[self::OPT_AGGREGATE][$col] = "$col|$method";
+        foreach ( $columnList as $col )
+            $this->_appendFlagValue( self::OPT_AGGREGATE, 
+                "$col|$method", $col );
 
         return $this;
 
@@ -321,14 +308,8 @@ class DataGrid {
         $args = func_get_args();
         $column = array_shift($args);
 
-        // make sure we already have an array
-        if ( empty( $this->flags[self::OPT_FORMAT] )
-                || !is_array( $this->flags[self::OPT_FORMAT] ) )
-            $this->flags[self::OPT_FORMAT] = array();
-
-        // set column formatting
-        $this->flags[self::OPT_FORMAT][$column] 
-            = "$column|" . implode('|', $args);
+        $this->_appendFlagValue( self::OPT_FORMAT, 
+            "$column|" . implode('|', $args), $column );
 
         return $this;
 
@@ -346,6 +327,26 @@ class DataGrid {
 
         // set columns list
         $this->flags[self::OPT_DISPLAY] = $columnList;
+
+        return $this;
+
+    }
+
+    /**
+     * Set renderer configuration option
+     * 
+     * Example (set html class of datagrid with HTML renderer):
+     *      $grid->setRendererOption( 'html_class', 'myDataGridClass' );
+     *
+     * @param string $key
+     * @param string $value
+     * @return DataGrid
+     */
+    public function setRendererOption( $key, $value ) {
+
+        // make sure we already have an array
+        $this->_appendFlagValue( self::OPT_RENDEREROPTION, 
+            "$key|$value", $key );
 
         return $this;
 
@@ -388,6 +389,30 @@ class DataGrid {
 
     
     /* -- Private Methods -- */
+
+    /**
+     * Append value to array-style flag
+     *
+     * @param string $flag
+     * @param string $value
+     * @param string $key (unique key for value)
+     */
+    private function _appendFlagValue( $flag, $value, $key = '' ) {
+
+        // make sure we already have an array
+        if ( empty( $this->flags[$flag] )
+                || !is_array( $this->flags[$flag] ) ) {
+            $this->flags[$flag] = array();
+        }
+
+        // Append/Replace value
+        if ( empty( $key ) ) {
+            $this->flags[$flag][] = $value;
+        } else {
+            $this->flags[$flag][$key] = $value;
+        }
+
+    }
 
     /**
      * Build shell-exec string
