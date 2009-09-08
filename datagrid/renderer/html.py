@@ -19,87 +19,98 @@
 
 """HTML Table Rendering Module"""
 
+import datagrid.renderer.abstract
 
-def table(config, thead, tbody, tfoot):
+class Renderer(datagrid.renderer.abstract.Renderer):
     """
-    Generate HTML table from pregenerated head/body/tail sections
+    HTML Table Renderer
     """
-    return """
-        <table class='datagrid' cols='%s'>
-            %s<tbody>%s</tbody>%s
-        </table>
-        """ % (len(config.columns), thead, tbody, tfoot)
+
+    # Options
+    html_id = 'datagrid'        # Table ID ATTR
+    html_class = 'datagrid'     # HTML Class ATTR 
+
+    def table(self, config, thead, tbody, tfoot):
+        """
+        Generate HTML table from pregenerated head/body/tail sections
+        """
+        return """
+            <table id='%s' class='%s' cols='%s'>
+                %s<tbody>%s</tbody>%s
+            </table>
+            """ % (self.html_id, self.html_class, 
+                    len(config.columns), thead, tbody, tfoot)
 
 
-def row(config, cells, level=0, name=None, value=None):
-    """
-    Generate table row segment
-    
-    Example (flat table):
-    >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'groupby')([])
-    >>> row(cfg, '<td></td>')
-    '<tr><td></td></tr>'
-    """
-    if config.groupby:
-        if name is None:
-            return "<tr class='l-%s'><td></td>%s</tr>" % (level, cells)
-        else:
-            group_name = ("<span>%s</span>" * 2) % (name, value)
-            return "<tr class='l-%s'><td>%s</td>%s</tr>" % \
-                    (level, group_name, cells)
-    else: return "<tr>%s</tr>" % cells
+    def row(self, config, cells, level=0, name=None, value=None):
+        """
+        Generate table row segment
+        
+        Example (flat table):
+        >>> from collections import namedtuple
+        >>> cfg = namedtuple('Cfg', 'groupby')([])
+        >>> row(cfg, '<td></td>')
+        '<tr><td></td></tr>'
+        """
+        if config.groupby:
+            if name is None:
+                return "<tr class='l-%s'><td></td>%s</tr>" % (level, cells)
+            else:
+                group_name = ("<span>%s</span>" * 2) % (name, value)
+                return "<tr class='l-%s'><td>%s</td>%s</tr>" % \
+                        (level, group_name, cells)
+        else: return "<tr>%s</tr>" % cells
 
 
-def cell(config, data, column): 
-    """
-    Generate table cell segment
+    def cell(self, config, data, column): 
+        """
+        Generate table cell segment
 
-    Example:
-    >>> cell(None,'foo',2)
-    '<td>foo</td>'
-    """
-    return "<td>%s</td>" % data
-
-
-def head(config):
-    """
-    Generate table head segment
-
-    Example:
-    >>> from collections import namedtuple
-    >>> Cfg = namedtuple('Cfg', 'columns groupby descriptions')
-    >>> cfg = Cfg(('Heading',), [], {})
-    >>> head(cfg)
-    '<thead><tr><th>Heading</th></tr></thead>'
-    >>> cfg = Cfg(('Heading',), [], {'Heading': 'Hello World!'})
-    >>> head(cfg)
-    '<thead><tr><th title="Hello World!">Heading</th></tr></thead>'
-    """
-    # build list of cells
-    cells = []
-    for col in config.columns:
-        try:
-            cells.append("<th title=\"%s\">%s</th>" 
-                    % (config.descriptions[col], col))
-        except KeyError:    # title was not found, omit
-            cells.append("<th>%s</th>" % col)
-
-    # glue pieces together and return
-    return ("<thead><tr>%s</tr></thead>" if not config.groupby else
-                 "<thead><tr><th></th>%s</tr></thead>") % ''.join(cells)
+        Example:
+        >>> cell(None,'foo',2)
+        '<td>foo</td>'
+        """
+        return "<td>%s</td>" % data
 
 
-def tail(config, cells):
-    """
-    Generate table tail segment
+    def head(self, config):
+        """
+        Generate table head segment
 
-    Example:
-    >>> from collections import namedtuple
-    >>> cfg = namedtuple('Cfg', 'groupby')([])
-    >>> tail(cfg,"<td></td>")
-    '<tfoot><tr><td></td></tr></tfoot>'
-    """
-    return ("<tfoot><tr>%s</tr></tfoot>" if not config.groupby else 
-                 "<tfoot><tr><td></td>%s</tr></tfoot>") % cells
+        Example:
+        >>> from collections import namedtuple
+        >>> Cfg = namedtuple('Cfg', 'columns groupby descriptions')
+        >>> cfg = Cfg(('Heading',), [], {})
+        >>> head(cfg)
+        '<thead><tr><th>Heading</th></tr></thead>'
+        >>> cfg = Cfg(('Heading',), [], {'Heading': 'Hello World!'})
+        >>> head(cfg)
+        '<thead><tr><th title="Hello World!">Heading</th></tr></thead>'
+        """
+        # build list of cells
+        cells = []
+        for col in config.columns:
+            try:
+                cells.append("<th title=\"%s\">%s</th>" 
+                        % (config.descriptions[col], col))
+            except KeyError:    # title was not found, omit
+                cells.append("<th>%s</th>" % col)
+
+        # glue pieces together and return
+        return ("<thead><tr>%s</tr></thead>" if not config.groupby else
+                     "<thead><tr><th></th>%s</tr></thead>") % ''.join(cells)
+
+
+    def tail(self, config, cells):
+        """
+        Generate table tail segment
+
+        Example:
+        >>> from collections import namedtuple
+        >>> cfg = namedtuple('Cfg', 'groupby')([])
+        >>> tail(cfg,"<td></td>")
+        '<tfoot><tr><td></td></tr></tfoot>'
+        """
+        return ("<tfoot><tr>%s</tr></tfoot>" if not config.groupby else 
+                     "<tfoot><tr><td></td>%s</tr></tfoot>") % cells
 

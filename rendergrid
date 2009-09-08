@@ -47,9 +47,10 @@ def main():
     parser.add_option('--text', action='store_const',
             const='datagrid.renderer.ascii', dest='renderer',
             help='Render Text (ASCII) table [default]')
-    parser.add_option('--renderer', dest='renderer', 
+    parser.add_option('--renderer',
             default='datagrid.renderer.ascii', 
             help='Use custom table renderer')
+    parser.add_option('--rendereroption', action='append', default=[])
     
     # Report data options
     datagroup = OptionGroup(parser, 'Data defination and manipulation options')
@@ -84,6 +85,7 @@ def main():
                     '(Optional - if not set, all columns are used)')
     displaygroup.add_option('-f', '--format', action='append', default=[],
             help='Set column formatters')
+    displaygroup.add_option('-o', '--output', help='Save output to file')
 
     # Parse options
     parser.add_option_group(datagroup)
@@ -98,6 +100,12 @@ def main():
         # Check for 'Renderer' class, otherwise use loaded module
         if hasattr(renderer, 'Renderer'):
             renderer = renderer.Renderer()
+            
+            # Set requested renderer options
+            for option in options.rendereroption:
+                key, value = option.split('|')
+                setattr(renderer, key, value)
+            
     except ImportError:
         parser.error("%s table renderer could not be found" 
                 % options.renderer)
@@ -159,7 +167,12 @@ def main():
     grid = DataGrid(data, renderer, columns, descriptions, options.groupby,
             aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
-    pager(grid.render())
+
+    if options.output:
+        with open(options.output, 'w') as outfile:
+            outfile.write(grid.render())
+    else:
+        pager(grid.render())
 
 
 # Run if called directly
