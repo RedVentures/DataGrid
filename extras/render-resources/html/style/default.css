@@ -18,3 +18,9 @@
 .datagrid tr td:first-child span:first-child:after
                         {content: ':';}
 
+.datagrid .datagrid_button
+                        {cursor: pointer; border-top: 2px solid #777; border-left: 1px outset #777;
+                         background: #ddd;}
+.datagrid .datagrid_button:hover
+                        {background: #ddf !important;}
+

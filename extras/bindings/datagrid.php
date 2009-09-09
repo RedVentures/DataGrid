@@ -434,7 +434,7 @@ class DataGrid {
                 $flagString .= " --$key";
             } elseif ( is_string( $val ) ) {    // Single Key/Val option
                 $flagString .= " --$key='" . addslashes( $val ) . "'";
-            } elseif ( is_array( $val ) ) {     // List of Key/Val options
+            } elseif ( is_array( $val ) || is_object( $val ) ) {     // List of Key/Val options
                 foreach ( $val as $v ) 
                     $flagString .= " --$key='" . addslashes( $v ) . "'";
             }
@@ -451,10 +451,28 @@ class DataGrid {
      * @return string (json)
      */
     private function _jsonConfig() {
-        list($tmp, $id) = explode('|', $this->flags[self::OPT_RENDEREROPTION]['html_id']);
+        list($tmp, $id) = explode('|', $this->_getValue(self::OPT_RENDEREROPTION, 'html_id'));
 
-        return "<script type='text/javascript'>DataGrid_Config['$id'] = " 
+        return "<script type='text/javascript'>
+            if (typeof DataGrid_Config == 'undefined') DataGrid_Config = {};
+            DataGrid_Config['$id'] = " 
             . json_encode($this->flags) . "</script>";
+    }
+
+    /**
+     * Get flag value at optional key position
+     *
+     * @param string $flag
+     * @param string $key
+     * @return mixed
+     */
+    private function _getValue($flag, $key=null) {
+        $node = $this->flags[$flag];
+        if (is_object($node)) {
+            return $node->$key;
+        } else {
+            return $node[$key];
+        }
     }
 
 }

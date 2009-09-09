@@ -39,7 +39,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return """
             <table id='%s' class='%s' cols='%s'>%s<tbody>%s</tbody>%s</table>
             <script type='text/javascript'>
-                if (!DataGrid_Meta) DataGrid_Meta = {};
+                if (typeof DataGrid_Meta == 'undefined') DataGrid_Meta = {};
                 DataGrid_Meta['%s'] = %s;
             </script>
             """ % (self.html_id, self.html_class, 

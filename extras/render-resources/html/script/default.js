@@ -86,6 +86,40 @@ var DataGrid = {
         }
     },
 
+    // Reload JS (send config back to alter display)
+    reload_table : function(table) {
+        if (window.XMLHttpRequest) {
+            xhr = new XMLHttpRequest()
+        } else {
+            xhr = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4) {
+                // Create new node
+                var newGridParent = document.createElement('div');
+
+                // Check for expired reports
+                if (xhr.responseText == 'expired') {
+                    if (confirm("Report results have expired, click OK to reload report")) {
+                        location = location;
+                    }
+                    return;
+                }
+
+                newGridParent.innerHTML = xhr.responseText;
+                newGrid = newGridParent.getElementsByTagName('table')[0];
+
+                // Replace old with new
+                table.parentNode.replaceChild(newGrid, table);
+                window.DataGrid.init();
+            }
+        }
+
+        xhr.open('GET', '/ajax/datagrid.php?id=' + table.id 
+                + '&config=' + escape(JSON.stringify(DataGrid_Config[table.id]))) 
+        xhr.send(null);
+    },
+
     // Find and return all datagrid tables
     get_tables : function () {
         // Fetch all tables and examine classes
