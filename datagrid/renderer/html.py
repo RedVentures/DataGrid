@@ -19,6 +19,8 @@
 
 """HTML Table Rendering Module"""
 
+import json
+
 import datagrid.renderer.abstract
 
 class Renderer(datagrid.renderer.abstract.Renderer):
@@ -35,11 +37,22 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         Generate HTML table from pregenerated head/body/tail sections
         """
         return """
-            <table id='%s' class='%s' cols='%s'>
-                %s<tbody>%s</tbody>%s
-            </table>
+            <table id='%s' class='%s' cols='%s'>%s<tbody>%s</tbody>%s</table>
+            <script type='text/javascript'>
+                if (!DataGrid_Meta) DataGrid_Meta = {};
+                DataGrid_Meta['%s'] = %s;
+            </script>
             """ % (self.html_id, self.html_class, 
-                    len(config.columns), thead, tbody, tfoot)
+                    len(config.columns), thead, tbody, tfoot, 
+                    self.html_id, self.metadata(config))
+
+
+    def metadata(self, config):
+        """
+        Report MetaData (JS)
+        """
+        return json.dumps({
+            'allcolumns': config._allcolumns})
 
 
     def row(self, config, cells, level=0, name=None, value=None):

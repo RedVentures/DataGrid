@@ -250,6 +250,9 @@ class DataGrid {
             throw $e;
         }
 
+        // Append JS Config Object
+        $output .= $this->_jsonConfig();
+
         // Output rendered datagrid
         return $output;
 
@@ -440,6 +443,18 @@ class DataGrid {
         // Glue the pieces together
         return self::$executable . " $flagString {$this->dataFile}";
 
+    }
+
+    /**
+     * JSON version of currently selected configs
+     *
+     * @return string (json)
+     */
+    private function _jsonConfig() {
+        list($tmp, $id) = explode('|', $this->flags[self::OPT_RENDEREROPTION]['html_id']);
+
+        return "<script type='text/javascript'>DataGrid_Config['$id'] = " 
+            . json_encode($this->flags) . "</script>";
     }
 
 }
