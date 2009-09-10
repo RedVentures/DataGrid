@@ -58,9 +58,9 @@ def multi_sorted(data, sortcolumns, key=None):
 
     # Apply sorted iterator for each given sort column/direction
     for column, direction in reversed(sortcolumns):
-        data = sorted(data, key=partial(key, column))
-        if direction == 'desc': 
-            data = reversed(data)
+        # Apply Sort
+        data = sorted(data, key=partial(key, column), 
+                reverse=(direction == 'desc'))
 
     # Return sorting iterator
     return data
