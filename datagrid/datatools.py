@@ -74,6 +74,9 @@ def set_column_types(data, types):
     >>> i = set_column_types([['1','abc','0'],['4','b','1']],(float,str,int))
     >>> list(i)
     [[1.0, 'abc', 0], [4.0, 'b', 1]]
+    >>> i = set_column_types([['1', 'a']], (float, float))
+    >>> list(i)
+    [[1.0, 'a']]
     """
     for row in data:
         # Apply type mapping to current row and yield
@@ -81,9 +84,16 @@ def set_column_types(data, types):
             yield map(lambda f, v: f(v), types, row)
 
         # We found a problem with the types mapping. 
-        # yield the with no transformations
+        #   attempt to salvage what we can
         except TypeOrValueError:
-            yield row
+            new_row = [];
+            for i, col in enumerate(row):
+                try:
+                    col = types[i](col)
+                except TypeOrValueError:
+                    pass
+                new_row.append(col)
+            yield new_row
 
 
 def get_column_types(columns):
