@@ -29,6 +29,9 @@ var DataGrid = {
             return false;
         }
 
+        // Set loading bit
+        DataGrid_Meta[table.id]['_busy'] = false;
+
         // Fetch all table body rows
         var rows = table.getElementsByTagName('tbody')[0]
             .getElementsByTagName('tr');
@@ -88,6 +91,11 @@ var DataGrid = {
 
     // Reload JS (send config back to alter display)
     reload_table : function(table) {
+        // Skip if busy
+        if (DataGrid.is_busy(table)) return;
+
+        DataGrid.mark_busy(table);
+        
         if (window.XMLHttpRequest) {
             xhr = new XMLHttpRequest()
         } else {
@@ -112,6 +120,9 @@ var DataGrid = {
                 // Replace old with new
                 table.parentNode.replaceChild(newGrid, table);
                 window.DataGrid.init();
+
+                // Clear loading message
+                DataGrid.mark_free(table);
             }
         }
 
@@ -178,6 +189,51 @@ var DataGrid = {
         } else if (elem.attachEvent) {
             elem.attachEvent('on' + evnt, fun);
         }
+    },
+
+    // Mark table as busy
+    mark_busy : function (table) {
+        DataGrid_Meta[table.id]['_busy'] = true;
+
+        var tablePos = window.DataGrid.get_position(table);
+        loadingBlock = document.createElement('div');
+        loadingBlock.style.margin = '2em';
+        loadingBlock.style.background = '#aca';
+        loadingBlock.style.padding = '.5em 2em';
+        loadingBlock.style.border = '2px solid #8a8';
+        loadingBlock.style.position = 'absolute';
+        loadingBlock.style.left = tablePos[0] + 'px';
+        loadingBlock.style.top = tablePos[1] + 'px';
+        loadingBlock.innerHTML = 'Loading.  Please wait...';
+
+        // Store ref so we can remove when finished
+        DataGrid_Meta[table.id]['_busyBlock'] = loadingBlock;
+        
+        // Display loading message
+        document.body.appendChild(loadingBlock);
+    },
+
+    // Mark table as free
+    mark_free : function (table) {
+        DataGrid_Meta[table.id]['_busy'] = false;
+        document.body.removeChild(DataGrid_Meta[table.id]['_busyBlock']);
+    },
+
+    // Check if table is busy
+    is_busy : function (table) {
+        return DataGrid_Meta[table.id]['_busy'];
+    },
+
+    // Get arbitrary elem position
+    get_position : function(elem) {
+        var curleft = curtop = 0;
+        if (elem.offsetParent) {
+            do {
+                curleft += elem.offsetLeft;
+                curtop += elem.offsetTop;
+            } while (elem = elem.offsetParent);
+        }
+        return [curleft, curtop];
     }
 
 };
