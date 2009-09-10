@@ -32,12 +32,19 @@ var DataGrid = {
         // Init loading bit
         DataGrid_Meta[table.id]['_busy'] = false;
 
+        // Make sure we have display columns listed
+        if (typeof DataGrid_Config[table.id]['display'] == 'undefined'
+                || DataGrid_Config[table.id].display.length == 0) {
+            DataGrid_Config[table.id].display = DataGrid_Meta[table.id].allcolumns;
+        }
+        
         // No further processing is required for flat datasets
         if (typeof DataGrid_Config[table.id]['groupby'] == 'undefined'
-                || DataGrid_Config[table.id]['groupby'].length == 0)
+                || DataGrid_Config[table.id]['groupby'].length == 0) {
             // Init group by for further functionality
             DataGrid_Config[table.id].groupby = [];
             return;
+        }
 
         // Fetch all table body rows
         var rows = table.getElementsByTagName('tbody')[0]
