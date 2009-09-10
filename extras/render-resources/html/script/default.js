@@ -29,8 +29,15 @@ var DataGrid = {
             return false;
         }
 
-        // Set loading bit
+        // Init loading bit
         DataGrid_Meta[table.id]['_busy'] = false;
+
+        // No further processing is required for flat datasets
+        if (typeof DataGrid_Config[table.id]['groupby'] == 'undefined'
+                || DataGrid_Config[table.id]['groupby'].length == 0)
+            // Init group by for further functionality
+            DataGrid_Config[table.id].groupby = [];
+            return;
 
         // Fetch all table body rows
         var rows = table.getElementsByTagName('tbody')[0]
