@@ -18,6 +18,22 @@
 
 """Format Method Library"""
 
+from functools import partial
+
+
+def _handle_format_error(method):
+    """
+    Decorator to handle various exceptions we receive from formatting
+    """
+    def new_method(method, *args, **kargs):
+        try:
+            return method(*args, **kargs)
+        except TypeError:
+            return '--'
+    return partial(new_method, method)
+
+
+@_handle_format_error
 def plain_number(value):
     """
     Format float or other numeric value as integer (in string form)
@@ -32,6 +48,8 @@ def plain_number(value):
     """
     return '%.0f' % float(value)
 
+
+@_handle_format_error
 def number(value, precision=0, delim=','):
     """
     Format value as number with thousands sep. with fixed precision.
@@ -65,6 +83,7 @@ def number(value, precision=0, delim=','):
     return ''.join(reversed(new_value))
 
 
+@_handle_format_error
 def percent(value, precision=0):
     """
     Format value as percentage
@@ -84,6 +103,8 @@ def percent(value, precision=0):
         return ''
     return "%s%%" % number(100 * float(value), precision)
 
+
+@_handle_format_error
 def currency(value):
     """
     Format value as currency

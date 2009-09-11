@@ -18,6 +18,17 @@
 
 """DataGrid Calculation Tools"""
 
+from abc import ABCMeta
+
+
+class CalculationFailureError(Exception):
+    """Meta exception including Value, Type, and ZeroDivision Errors"""
+    __metaclass__ = ABCMeta
+
+# Register Type/Value/ZeroDivision Errors as part of this ABC
+for Err in [TypeError, ValueError, ZeroDivisionError]:
+    CalculationFailureError.register(Err)
+
 
 class CalculatedValueError(Exception): 
     """Error generated if calculatedvalues method fails"""
@@ -35,6 +46,10 @@ def calculatevalues(data, calculations):
     True
     >>> len(formulas)
     1
+    >>> formulas = {'c': lambda d: d['a'] + d['b']}
+    >>> r = calculatevalues({'a': 1, 'b': ''}, formulas)
+    >>> r == {'a': 1, 'b': '', 'c': '--'}
+    True
     """
     # Copy calculations to avoid destruction
     calculations = calculations.copy()
@@ -51,9 +66,9 @@ def calculatevalues(data, calculations):
                 # Apparently we are missing a value, presumably calculated.
                 # Skip for now, we may find this in another round
                 continue 
-            except ValueError:
-                # Data is not in a format we expect, set as None
-                data[key] = None    
+            except CalculationFailureError:
+                # Data is not in a format we expect, set as '--' (or null)
+                data[key] = '--'    
 
             # Calculation was a success, remove from list
             del calculations[key]
