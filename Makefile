@@ -10,7 +10,7 @@ testpyunit:
 
 clean:
 	@find . -name '*.pyc' | xargs rm -f
-	@rm -rf build
+	@rm -rf MANIFEST dist build
 
 server:
 	@python extras/demo/server.py

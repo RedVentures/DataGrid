@@ -38,7 +38,7 @@ def parse_options(formatters):
     Example:
     >>> formatters = parse_options(['colA|percent','colB|%.0f|percent'])
     >>> type(formatters['colA'])
-    <type 'function'>
+    <type 'functools.partial'>
     >>> type(formatters['colB'])
     <type 'function'>
     """

@@ -97,10 +97,11 @@ class DataGrid {
      * @param array|Traversable $data
      * @param array $flags - Optional flags configuring datagrid instance
      */
-    public static function create( $data, array $flags = array() ) {
+    public static function create( $data, array $flags = array(), 
+            $tmpDir = '/tmp' ) {
         
         // Open tempfile and write new csv file
-        $fileName = tempnam( '/tmp', 'datagrid' );
+        $fileName = tempnam( $tmpDir, 'datagrid' );
         $fp = fopen( $fileName, 'w' );
 
         // We cannot always consume any entire array into memory, so always
