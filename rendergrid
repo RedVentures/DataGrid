@@ -27,6 +27,7 @@ Non-Python applications (ie php-bindings) use this executable
 
 import sys
 import csv
+import gzip
 from pydoc import pager
 from optparse import OptionParser, OptionGroup
 
@@ -112,7 +113,12 @@ def main():
 
     # Attempt to load datafile
     try:
-        data = csv.reader(open(args[0]))    # load data file
+        # open file (compressed or raw)
+        if args[0].endswith('.gz'):
+            data = csv.reader(gzip.open(args[0], 'rb'))    # load data file
+        else:
+            data = csv.reader(open(args[0]))    # load data file
+            
         columns = data.next() if options.autocolumn else options.column
     except StopIteration: 
         parser.error("Data file is empty")
