@@ -52,6 +52,7 @@ def main():
             default='datagrid.renderer.ascii', 
             help='Use custom table renderer')
     parser.add_option('--rendereroption', action='append', default=[])
+    parser.add_option('--stdin', action='store_true')
     
     # Report data options
     datagroup = OptionGroup(parser, 'Data defination and manipulation options')
@@ -113,8 +114,10 @@ def main():
 
     # Attempt to load datafile
     try:
-        # open file (compressed or raw)
-        if args[0].endswith('.gz'):
+        # map data(stdin, compressed, or raw)
+        if options.stdin:
+            data = csv.reader(sys.stdin)
+        elif args[0].endswith('.gz'):
             data = csv.reader(gzip.open(args[0], 'rb'))    # load data file
         else:
             data = csv.reader(open(args[0]))    # load data file
