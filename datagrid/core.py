@@ -27,6 +27,11 @@ from collections import Mapping
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
 
+
+class ColumnDoesNotExistError(Exception):
+    pass
+
+
 class DataGrid(object):
     """Core DataGrid Class"""
    
@@ -143,8 +148,12 @@ class DataGrid(object):
 
         # materialize display column into numerical indexes
         if len(self._allcolumns):
-            self._displaycolumns = tuple(self._allcolumns.index(k) 
-                    for k in self.columns)
+            self._displaycolumns = []
+            try:
+                for column in self.columns:
+                    self._displaycolumns.append(self._allcolumns.index(column))
+            except ValueError:
+                raise ColumnDoesNotExistError(column)
         else:
             self._allcolumns = self._displaycolumns = range(len(self.data[0]))
 

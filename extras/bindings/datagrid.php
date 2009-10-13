@@ -245,9 +245,13 @@ class DataGrid {
 
         // Check for errors
         if ( $returnCode ) {
-            $e = new DataGrid_Exception($command);
-            $e->commandOutput = $output;
-            $e->commandAttempted = $command;
+            $errorMessage = 
+                "<div style='font-weight: bold'>Command:</div>
+                 <div style='margin: 1em;'>$command</div>
+                 <div style='font-weight: bold'>Failed with the following output:</div>
+                 <pre>$output</pre>";
+
+            $e = new DataGrid_Exception($errorMessage);
             throw $e;
         }
 
@@ -442,7 +446,7 @@ class DataGrid {
         }
 
         // Glue the pieces together
-        return self::$executable . " $flagString {$this->dataFile}";
+        return self::$executable . " $flagString {$this->dataFile} 2>&1";
 
     }
 

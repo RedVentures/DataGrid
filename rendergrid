@@ -31,7 +31,7 @@ import gzip
 from pydoc import pager
 from optparse import OptionParser, OptionGroup
 
-from datagrid.core import DataGrid
+from datagrid.core import DataGrid, ColumnDoesNotExistError
 from datagrid import datatools, formattools, aggregatetools
 
 
@@ -177,11 +177,14 @@ def main():
             aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
 
-    if options.output:
-        with open(options.output, 'w') as outfile:
-            outfile.write(grid.render())
-    else:
-        pager(grid.render())
+    try:
+        if options.output:
+            with open(options.output, 'w') as outfile:
+                outfile.write(grid.render())
+        else:
+            pager(grid.render())
+    except ColumnDoesNotExistError, e:
+        parser.error("Column '%s' could not be found!" % e)
 
 
 # Run if called directly

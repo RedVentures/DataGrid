@@ -92,6 +92,8 @@ def set_column_types(data, types):
                     col = types[i](col)
                 except TypeOrValueError:
                     pass
+                except IndexError:
+                    pass
                 new_row.append(col)
             yield new_row
 

@@ -104,7 +104,7 @@ var DataGrid = {
     },
 
     // Reload JS (send config back to alter display)
-    reload_table : function(table) {
+    reload_table : function(table, additional_params) {
         // Skip if busy
         if (DataGrid.is_busy(table)) return;
 
@@ -141,7 +141,8 @@ var DataGrid = {
         }
 
         xhr.open('GET', '/ajax/datagrid.php?id=' + table.id 
-                + '&config=' + escape(JSON.stringify(DataGrid_Config[table.id]))) 
+                + '&config=' + escape(JSON.stringify(DataGrid_Config[table.id]))
+                + (additional_params ? '&' + additional_params : ''));
         xhr.send(null);
     },
 
