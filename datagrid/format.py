@@ -97,11 +97,16 @@ def percent(value, precision=0):
     '12%'
     >>> percent(0.125, 2)
     '12.50%'
+    >>> percent('--')
+    '--'
     """
     # Avoid exceptions from empty cells
     if value == '': 
         return ''
-    return "%s%%" % number(100 * float(value), precision)
+    try:
+        return "%s%%" % number(100 * float(value), precision)
+    except ValueError:
+        return '--'
 
 
 @_handle_format_error
