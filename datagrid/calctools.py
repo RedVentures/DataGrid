@@ -26,7 +26,7 @@ class CalculationFailureError(Exception):
     __metaclass__ = ABCMeta
 
 # Register Type/Value/ZeroDivision Errors as part of this ABC
-for Err in [TypeError, ValueError, ZeroDivisionError]:
+for Err in [TypeError, ValueError]:
     CalculationFailureError.register(Err)
 
 
@@ -50,6 +50,10 @@ def calculatevalues(data, calculations):
     >>> r = calculatevalues({'a': 1, 'b': ''}, formulas)
     >>> r == {'a': 1, 'b': '', 'c': '--'}
     True
+    >>> formulas = {'c': lambda d: d['a'] / d['b']}
+    >>> r = calculatevalues({'a': 0, 'b': 0}, formulas)
+    >>> r == {'a': 0, 'b': 0, 'c': 0}
+    True
     """
     # Copy calculations to avoid destruction
     calculations = calculations.copy()
@@ -62,6 +66,8 @@ def calculatevalues(data, calculations):
             # Attempt to run calculation
             try: 
                 data[key] = calc(data)
+            except ZeroDivisionError:
+                data[key] = 0
             except KeyError:
                 # Apparently we are missing a value, presumably calculated.
                 # Skip for now, we may find this in another round
