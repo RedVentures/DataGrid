@@ -35,38 +35,6 @@ class ColumnDoesNotExistError(Exception):
 class DataGrid(object):
     """Core DataGrid Class"""
    
-    # -- Attributes -- #
-
-    # List of data rows we are going to render
-    data = tuple()
-
-    # Columns we want to aggregate on (or group by)
-    groupby = tuple()
-
-    # How we intend to summarize each column for each aggregation
-    aggregate = dict()
-
-    # Format methods applied to each column value
-    formatters = dict()
-
-    # Dictionary describing each column's purpose/meaning
-    descriptions = dict()
-
-    # Class/Module we will use to render our datagrid (ie: datagrid.html)
-    renderer = None
-
-    # Should we hide bottom level rows (the true data rows) and only 
-    # display the aggregated data
-    suppressdetail = False
-    sortby = tuple()    # list of columns to sort on
-
-    _calculatedcolumns = dict()
-    _columns = tuple()      # columns to display
-    _displaycolumns = tuple()   # indexes of columns to display
-    _allcolumns = tuple()   # all columns (calculated and raw)
-    _rawcolumns = tuple()   # columns containing raw data
-
-    
     # -- Properties -- #
 
     # Calculated Columns
@@ -99,6 +67,8 @@ class DataGrid(object):
         """
         Setup DataGrid instance
         """
+        self._displaycolumns = tuple()
+
         # check supplied args
         if not isinstance(aggregate, Mapping):
             raise TypeError('aggregate must be a Mapping object (ie dict)')
