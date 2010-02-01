@@ -64,9 +64,7 @@ class DataGrid(object):
             groupby=tuple(), aggregate=dict(), suppressdetail=False,
             calculatedcolumns=dict(), sortby=list(), columns=tuple(), 
             formatters=dict()):
-        """
-        Setup DataGrid instance
-        """
+        """Setup DataGrid instance"""
         self._displaycolumns = tuple()
 
         # check supplied args
@@ -109,9 +107,7 @@ class DataGrid(object):
                 for k in sortby]
 
     def render(self):
-        """
-        Begin render process
-        """
+        """Begin render process"""
         # make sure we have display columns
         if not len(self.columns): 
             self.columns = self._allcolumns
@@ -147,13 +143,11 @@ class DataGrid(object):
         return self.renderer.table(self, head, body, tail)
 
     def render_body(self, data, groupby=list(), aggregate_row=None):
-        """
-        Render table body segment
+        """Render table body segment
 
         For flat data sets (unaggregated), this includes the entire body of
         data.  Aggregated sets, however, will call render_body for each 
-        aggregation name/value pair.
-        """
+        aggregation name/value pair."""
         groupby_len = len(groupby)
 
         if groupby_len:
@@ -210,9 +204,7 @@ class DataGrid(object):
             return ''.join(self.render_row(row) for row in data)
     
     def render_cells(self, data):
-        """
-        Render cell-block using given data
-        """
+        """Render cell-block using given data"""
         # Find calculated column values and apply formatting for given row
         if self.calculatedcolumns:
             data_dict = dict(zip(self._rawcolumns, data))
@@ -236,15 +228,11 @@ class DataGrid(object):
                 for i, k in enumerate(self._displaycolumns))
 
     def render_row(self, data, **kargs):
-        """
-        Render table-row
-        """
+        """Render table-row"""
         return self.renderer.row(self, self.render_cells(data), **kargs)
 
     def generate_aggregate_row(self, data, rowmodel=None):
-        """
-        Generate aggregate row summary data
-        """
+        """Generate aggregate row summary data"""
         # prepopulate with empty data
         rowdata = rowmodel or [''] * len(self._allcolumns)
 
