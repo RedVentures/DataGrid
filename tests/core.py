@@ -80,7 +80,7 @@ class TestRenderInteract(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures"""
-        self.grid = DataGrid(testData, StackTestRenderer(), testCols)
+        self.grid = DataGrid(testData, testCols)
     
     def tearDown(self):
         """Cleanup and prep for next run"""
@@ -95,7 +95,7 @@ class TestRenderInteract(unittest.TestCase):
                 'table']                        # Wrap up table render
 
         # Test simple render
-        self.grid.render()
+        self.grid.render(StackTestRenderer())
         self.assertEquals(testLog, self.grid.renderer.callLog)
 
     def testRenderAggregate(self):
@@ -110,7 +110,7 @@ class TestRenderInteract(unittest.TestCase):
 
         # Test simple render
         self.grid.groupby = ['one']
-        self.grid.render()
+        self.grid.render(StackTestRenderer())
         self.assertEquals(testLog, self.grid.renderer.callLog)
 
 
@@ -121,13 +121,13 @@ class TestOutput(unittest.TestCase):
 
     def setUp(self):
         """Setup for all tests in class"""
-        self.grid = DataGrid(testData, EchoRenderer(), testCols)
+        self.grid = DataGrid(testData, testCols)
 
     def testBasicRender(self): 
         # Output of test run should look like this
         expected = "[t][h/][r][c]1[/c][c]2[/c][c]3[/c][/r]" \
                 "[r][c]4[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
-        self.assertEquals(expected, self.grid.render())
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
     def testHideColumn(self): 
         # Output of test run should look like this
@@ -136,7 +136,7 @@ class TestOutput(unittest.TestCase):
 
         # Only show first two columns
         self.grid.columns = ('one', 'two')
-        self.assertEquals(expected, self.grid.render())
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
 
 # Run tests if called from console
