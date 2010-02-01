@@ -22,7 +22,7 @@ The module provides the main DataGrid class.
 """
 
 import itertools
-from collections import Mapping
+from collections import Mapping, defaultdict
 
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
@@ -37,6 +37,7 @@ class DataGrid(object):
     """Tabular Data Rendering Object.
 
     Provides:
+
         __init__: receive incoming params and set instance defaults
         render: return compiled representation of tabular data
         
@@ -46,35 +47,9 @@ class DataGrid(object):
         _compile_aggregate_data: aggregate summary data
     """
 
-    # -- Properties -- #
-
-    # Calculated Columns
-    @property
-    def calculatedcolumns(self): 
-        return self._calculatedcolumns
-
-    @calculatedcolumns.setter
-    def calculatedcolumns(self, value):
-        # materialize all methods supplied for calculated columns
-        self._calculatedcolumns = dict(
-                (k, formula(v) if isinstance(v, str) else v) 
-                for k, v in value.iteritems())
-
-    # Display columns
-    @property
-    def columns(self): 
-        return self._columns or ['']*len(self._displaycolumns)
-
-    @columns.setter
-    def columns(self, value):
-        self._columns = value or tuple() 
-
-    # -- Methods -- #
-
-    def __init__(self, data, labels=list(), descriptions=dict(),
-            groupby=tuple(), aggregate=dict(), suppressdetail=False,
-            calculatedcolumns=dict(), sortby=list(), columns=tuple(), 
-            formatters=dict()):
+    def __init__(self, data, labels=None, descriptions=None, groupby=None, 
+            aggregate=None, suppressdetail=False, calculatedcolumns=None, 
+            sortby=None, columns=None, formatters=None):
         """Receive incoming params and set instance defaults.
         
         Params:
@@ -89,51 +64,70 @@ class DataGrid(object):
             sortby: how we will sort the data for display
             columns: display columns to include in rendered output
             formatters: final-pass formatting of columns (ie: currency, percent)
+
+        Example:
+        >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
+        >>> d.data
+        [[1, 2, 3], [4, 5, 6]]
+        >>> d.labels
+        ['col-a', 'col-b', 'col-c']
         """
-        self._displaycolumns = tuple()
-
-        # check supplied args
-        if not isinstance(aggregate, Mapping):
-            raise TypeError('aggregate must be a Mapping object (ie dict)')
-
-        # setup datagrid instance
-        self.data = tuple(data)         # use tuples for performance
-        self.renderer = None
-        self.columns = columns or tuple()
+        self.data = list(data)
+        self.labels = labels or []
+        self.descriptions = descriptions or {}
+        self.groupby = groupby or []
+        self.aggregate = aggregate or {}
         self.suppressdetail = suppressdetail
-        self.groupby = tuple(groupby)
-        self.calculatedcolumns = calculatedcolumns
-        self.descriptions = descriptions
+        self.calculatedcolumns = calculatedcolumns or {}
+        self.sortby = sortby or []
+        self.columns = columns or []
+        self.formatters = formatters or {}
+        self.renderer = None
+
+        # working 'private' vars
+        self._rawcolumns = None
+        self._allcolumns = None
+        self._displaycolumns = None
+
+
+    def render(self, renderer):
+        """Compile data into requested tabular form (via renderer).
+        
+        Params:
+            renderer: object/module used to render data into requested form
+        
+        Example:
+        >>> import datagrid.renderer.ascii
+        >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
+        >>> d.render(datagrid.renderer.ascii.Renderer())
+        """
+        self.renderer = renderer
 
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
-        self._rawcolumns = labels or tuple()
+        self._rawcolumns = self.labels or defaultdict(str)
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(itertools.chain(labels, 
+            self._allcolumns = tuple(itertools.chain(self.labels, 
                 self.calculatedcolumns.keys()))
         else: 
-            self._allcolumns = labels or tuple()     # default to tuple
+            self._allcolumns = self.labels
         
         # alias for easier readability below
         idx = self._allcolumns.index        
         
         # change column names to indexes
         self.aggregate = dict((idx(k), v) 
-                for k, v in aggregate.iteritems())
+                for k, v in self.aggregate.iteritems())
         self.formatters = dict((idx(k), v)
-                for k, v in formatters.iteritems())
+                for k, v in self.formatters.iteritems())
 
         # normalize sortby list -- if sort item is string, assume we want 
         #   ascending sort, otherwise, use supplied sort direction
         self.sortby = [
                 (idx(k), 'asc') if isinstance(k, str) else (idx(k[0]), k[1]) 
-                for k in sortby]
-
-    def render(self, renderer):
-        """Begin render process"""
-        self.renderer = renderer
+                for k in self.sortby]
 
         # make sure we have display columns
         if not len(self.columns): 
