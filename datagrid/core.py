@@ -29,12 +29,23 @@ from datagrid.datatools import multi_sorted
 
 
 class ColumnDoesNotExistError(Exception):
+    """Requested display column not found in given dataset."""
     pass
 
 
 class DataGrid(object):
-    """Core DataGrid Class"""
-   
+    """Tabular Data Rendering Object.
+
+    Provides:
+        __init__: receive incoming params and set instance defaults
+        render: return compiled representation of tabular data
+        
+        _render_body: render grouped segment of data
+        _render_cells: render block of cells within a single row
+        _render_row: render row of data
+        _compile_aggregate_data: aggregate summary data
+    """
+
     # -- Properties -- #
 
     # Calculated Columns
@@ -60,11 +71,26 @@ class DataGrid(object):
 
     # -- Methods -- #
 
-    def __init__(self, data, renderer, raw_columns=list(), descriptions=dict(),
+    def __init__(self, data, renderer, labels=list(), descriptions=dict(),
             groupby=tuple(), aggregate=dict(), suppressdetail=False,
             calculatedcolumns=dict(), sortby=list(), columns=tuple(), 
             formatters=dict()):
-        """Setup DataGrid instance"""
+        """Receive incoming params and set instance defaults.
+        
+        Params:
+            data: two-dimensional dataset to render
+            renderer: object/module used to render data
+            labels: column name list (for all columns)
+            descriptions: long description of what is contained in a column
+            groupby: group data into given sets
+            aggregate: method to aggregate data in each column for grouped rows
+            suppressdetail: (bool) exclude detail-level row from render
+            calculatedcolumns: new columns composed from given calculation of 
+                existing columns
+            sortby: how we will sort the data for display
+            columns: display columns to include in rendered output
+            formatters: final-pass formatting of columns (ie: currency, percent)
+        """
         self._displaycolumns = tuple()
 
         # check supplied args
@@ -82,14 +108,14 @@ class DataGrid(object):
 
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
-        self._rawcolumns = raw_columns or tuple()
+        self._rawcolumns = labels or tuple()
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(itertools.chain(raw_columns, 
+            self._allcolumns = tuple(itertools.chain(labels, 
                 self.calculatedcolumns.keys()))
         else: 
-            self._allcolumns = raw_columns or tuple()     # default to tuple
+            self._allcolumns = labels or tuple()     # default to tuple
         
         # alias for easier readability below
         idx = self._allcolumns.index        
@@ -132,21 +158,21 @@ class DataGrid(object):
 
         # render body if we are suppressing detail on a flat set
         if not self.suppressdetail or self.groupby:
-            body = self.render_body(self.data, self.groupby)
+            body = self._render_body(self.data, self.groupby)
         else:
             body = ''
 
-        tail = self.renderer.tail(self, self.render_cells(
-                    self.generate_aggregate_row(self.data)))
+        tail = self.renderer.tail(self, self._render_cells(
+                    self._compile_aggregate_data(self.data)))
 
         # render table and return
         return self.renderer.table(self, head, body, tail)
 
-    def render_body(self, data, groupby=list(), aggregate_row=None):
+    def _render_body(self, data, groupby=list(), aggregate_row=None):
         """Render table body segment
 
         For flat data sets (unaggregated), this includes the entire body of
-        data.  Aggregated sets, however, will call render_body for each 
+        data.  Aggregated sets, however, will call _render_body for each 
         aggregation name/value pair."""
         groupby_len = len(groupby)
 
@@ -177,7 +203,7 @@ class DataGrid(object):
                 rowargs = dict(name=groupby[0], value=fvalue, level=groupby_len)
                
                 # build aggregate summary row
-                rowdata = self.generate_aggregate_row(subdata, aggregate_row)
+                rowdata = self._compile_aggregate_data(subdata, aggregate_row)
                 rowdata[idx] = value
 
                 # if details are suppressed, decrement out agg-level
@@ -185,11 +211,11 @@ class DataGrid(object):
                     rowargs['level'] -= 1
 
                 # generate aggregate row
-                rowoutput = self.render_row(rowdata, **rowargs)
+                rowoutput = self._render_row(rowdata, **rowargs)
 
                 # render remainder of rows beneath aggregation level
                 if rowargs['level'] > 0:
-                    rowoutput += self.render_body(subdata, groupby[1:], 
+                    rowoutput += self._render_body(subdata, groupby[1:], 
                             rowdata)
 
                 # append rendered data to output buffer
@@ -201,9 +227,9 @@ class DataGrid(object):
         else:
             # sort data and display
             data = multi_sorted(data, self.sortby)
-            return ''.join(self.render_row(row) for row in data)
+            return ''.join(self._render_row(row) for row in data)
     
-    def render_cells(self, data):
+    def _render_cells(self, data):
         """Render cell-block using given data"""
         # Find calculated column values and apply formatting for given row
         if self.calculatedcolumns:
@@ -227,11 +253,11 @@ class DataGrid(object):
         return ''.join(self.renderer.cell(self, data[k], i) 
                 for i, k in enumerate(self._displaycolumns))
 
-    def render_row(self, data, **kargs):
+    def _render_row(self, data, **kargs):
         """Render table-row"""
-        return self.renderer.row(self, self.render_cells(data), **kargs)
+        return self.renderer.row(self, self._render_cells(data), **kargs)
 
-    def generate_aggregate_row(self, data, rowmodel=None):
+    def _compile_aggregate_data(self, data, rowmodel=None):
         """Generate aggregate row summary data"""
         # prepopulate with empty data
         rowdata = rowmodel or [''] * len(self._allcolumns)
