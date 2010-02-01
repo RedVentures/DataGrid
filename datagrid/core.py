@@ -71,7 +71,7 @@ class DataGrid(object):
 
     # -- Methods -- #
 
-    def __init__(self, data, renderer, labels=list(), descriptions=dict(),
+    def __init__(self, data, labels=list(), descriptions=dict(),
             groupby=tuple(), aggregate=dict(), suppressdetail=False,
             calculatedcolumns=dict(), sortby=list(), columns=tuple(), 
             formatters=dict()):
@@ -79,7 +79,6 @@ class DataGrid(object):
         
         Params:
             data: two-dimensional dataset to render
-            renderer: object/module used to render data
             labels: column name list (for all columns)
             descriptions: long description of what is contained in a column
             groupby: group data into given sets
@@ -99,7 +98,7 @@ class DataGrid(object):
 
         # setup datagrid instance
         self.data = tuple(data)         # use tuples for performance
-        self.renderer = renderer
+        self.renderer = None
         self.columns = columns or tuple()
         self.suppressdetail = suppressdetail
         self.groupby = tuple(groupby)
@@ -132,8 +131,10 @@ class DataGrid(object):
                 (idx(k), 'asc') if isinstance(k, str) else (idx(k[0]), k[1]) 
                 for k in sortby]
 
-    def render(self):
+    def render(self, renderer):
         """Begin render process"""
+        self.renderer = renderer
+
         # make sure we have display columns
         if not len(self.columns): 
             self.columns = self._allcolumns

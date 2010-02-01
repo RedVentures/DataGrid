@@ -173,16 +173,16 @@ def main():
                     "', '".join(invalid_group_options))
 
     # Create datagrid instance and render to stdout
-    grid = DataGrid(data, renderer, columns, descriptions, options.groupby,
+    grid = DataGrid(data, columns, descriptions, options.groupby,
             aggregate, options.suppressdetail, calculations, sortby,
             options.display, formatters)
 
     try:
         if options.output:
             with open(options.output, 'w') as outfile:
-                outfile.write(grid.render())
+                outfile.write(grid.render(renderer))
         else:
-            pager(grid.render())
+            pager(grid.render(renderer))
     except ColumnDoesNotExistError, e:
         parser.error("Column '%s' could not be found!" % e)
 
