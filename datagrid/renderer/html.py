@@ -24,18 +24,16 @@ import json
 import datagrid.renderer.abstract
 
 class Renderer(datagrid.renderer.abstract.Renderer):
-    """
-    HTML Table Renderer
-    """
+    """HTML Table Renderer"""
+    
+    def __init__(self):
+        """Initialize renderer options."""
+        self.html_id = 'datagrid'        # Table ID ATTR
+        self.html_class = 'datagrid'     # HTML Class ATTR 
 
-    # Options
-    html_id = 'datagrid'        # Table ID ATTR
-    html_class = 'datagrid'     # HTML Class ATTR 
 
     def table(self, config, thead, tbody, tfoot):
-        """
-        Generate HTML table from pregenerated head/body/tail sections
-        """
+        """Generate HTML table from pregenerated head/body/tail sections"""
         return """
             <table id='%s' class='%s' cols='%s'>%s<tbody>%s</tbody>%s</table>
             <script type='text/javascript'>
@@ -48,16 +46,13 @@ class Renderer(datagrid.renderer.abstract.Renderer):
 
 
     def metadata(self, config):
-        """
-        Report MetaData (JS)
-        """
+        """Report MetaData (JS)"""
         return json.dumps({
             'allcolumns': config._allcolumns})
 
 
     def row(self, config, cells, level=0, name=None, value=None):
-        """
-        Generate table row segment
+        """Generate table row segment
         
         Example (flat table):
         >>> from collections import namedtuple
@@ -76,8 +71,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
 
 
     def cell(self, config, data, column): 
-        """
-        Generate table cell segment
+        """Generate table cell segment
 
         Example:
         >>> cell(None,'foo',2)
@@ -87,8 +81,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
 
 
     def head(self, config):
-        """
-        Generate table head segment
+        """Generate table head segment
 
         Example:
         >>> from collections import namedtuple
@@ -115,8 +108,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
 
 
     def tail(self, config, cells):
-        """
-        Generate table tail segment
+        """Generate table tail segment
 
         Example:
         >>> from collections import namedtuple
