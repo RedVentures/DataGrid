@@ -23,6 +23,7 @@ The module provides the main DataGrid class.
 
 import itertools
 from collections import Mapping, defaultdict
+from string import ascii_letters
 
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
@@ -93,26 +94,35 @@ class DataGrid(object):
     def render(self, renderer):
         """Compile data into requested tabular form (via renderer).
         
+        TODO: Give this method some much needed cleanup
+
         Params:
             renderer: object/module used to render data into requested form
         
         Example:
         >>> import datagrid.renderer.ascii
         >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
-        >>> d.render(datagrid.renderer.ascii.Renderer())
+        >>> renderer = datagrid.renderer.ascii.Renderer()
+        >>> type(d.render(renderer))
+        <type 'str'>
+        >>> d = DataGrid([[1,2,3],[4,5,6]])
+        >>> type(d.render(renderer))
+        <type 'str'>
         """
         self.renderer = renderer
 
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
-        self._rawcolumns = self.labels or defaultdict(str)
+        # TODO: Move this magic to it's own function
+        self._rawcolumns = self.labels or [ascii_letters[x] 
+                for x in range(len(self.data[0]))]
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
-            self._allcolumns = tuple(itertools.chain(self.labels, 
+            self._allcolumns = tuple(itertools.chain(self._rawcolumns, 
                 self.calculatedcolumns.keys()))
         else: 
-            self._allcolumns = self.labels
+            self._allcolumns = self._rawcolumns
         
         # alias for easier readability below
         idx = self._allcolumns.index        
