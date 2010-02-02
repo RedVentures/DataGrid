@@ -22,8 +22,9 @@ The module provides the main DataGrid class.
 """
 
 import itertools
+from copy import copy
 from collections import Mapping, defaultdict
-from string import ascii_letters
+from string import ascii_uppercase
 
 from datagrid.calctools import formula, calculatevalues
 from datagrid.datatools import multi_sorted
@@ -134,9 +135,7 @@ class DataGrid(object):
         """Prepare instance for render."""
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
-        # TODO: Move this magic to it's own function
-        self._rawcolumns = self.labels or [ascii_letters[x] 
-                for x in range(len(self.data[0]))]
+        self._rawcolumns = pad_column_names(len(self.data[0]), self.labels)
 
         # append any calculated columns to our list of columns we have
         if self.calculatedcolumns:
@@ -277,4 +276,39 @@ class DataGrid(object):
                 rowdata[i] = str(method([v 
                     for v in column_values[i] if v != '']))
         return rowdata
+
+
+def pad_column_names(width, columns=None):
+    """Return columns list with any missing columns filled with generated names.
+    
+    Example:
+    >>> pad_column_names(5, ['mycol', 'yourcol'])
+    ['mycol', 'yourcol', 'C', 'D', 'E']
+    >>> pad_column_names(5)
+    ['A', 'B', 'C', 'D', 'E']
+    """
+    if not columns:
+        columns = []
+    else:
+        columns = copy(columns)
+    initial_len = len(columns)
+
+    # name generating generator
+    def mknames():
+        for block in (itertools.product(ascii_uppercase, repeat=x) 
+                for x in itertools.count(1)):
+            for name in block:
+                yield name
+
+    # fill column list
+    names = mknames()
+    for idx in itertools.count(1):
+        name = ''.join(names.next())
+        if idx <= initial_len:
+            continue
+        if idx > width:
+            break
+        columns.append(name)
+
+    return columns
 
