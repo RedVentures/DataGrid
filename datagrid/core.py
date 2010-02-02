@@ -38,10 +38,10 @@ class DataGrid(object):
     """Tabular Data Rendering Object.
 
     Provides:
-
         __init__: receive incoming params and set instance defaults
         render: return compiled representation of tabular data
         
+        _normalize: prepare instance vars for render
         _render_body: render grouped segment of data
         _render_cells: render block of cells within a single row
         _render_row: render row of data
@@ -94,8 +94,6 @@ class DataGrid(object):
     def render(self, renderer):
         """Compile data into requested tabular form (via renderer).
         
-        TODO: Give this method some much needed cleanup
-
         Params:
             renderer: object/module used to render data into requested form
         
@@ -109,8 +107,31 @@ class DataGrid(object):
         >>> type(d.render(renderer))
         <type 'str'>
         """
-        self.renderer = renderer
+        self._normalize()
 
+        # run renderer setup logic (if we have any)
+        self.renderer = renderer
+        if hasattr(self.renderer, 'setup'): 
+            self.renderer.setup(self)
+
+        # build table pieces and glue together
+        head = self.renderer.head(self)
+
+        # render body if we are suppressing detail on a flat set
+        if not self.suppressdetail or self.groupby:
+            body = self._render_body(self.data, self.groupby)
+        else:
+            body = ''
+
+        tail = self.renderer.tail(self, self._render_cells(
+                    self._compile_aggregate_data(self.data)))
+
+        # render table and return
+        return self.renderer.table(self, head, body, tail)
+
+
+    def _normalize(self):
+        """Prepare instance for render."""
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
         # TODO: Move this magic to it's own function
@@ -154,24 +175,6 @@ class DataGrid(object):
         else:
             self._allcolumns = self._displaycolumns = range(len(self.data[0]))
 
-        # run renderer setup logic (if we have any)
-        if hasattr(self.renderer, 'setup'): 
-            self.renderer.setup(self)
-
-        # build table pieces and glue together
-        head = self.renderer.head(self)
-
-        # render body if we are suppressing detail on a flat set
-        if not self.suppressdetail or self.groupby:
-            body = self._render_body(self.data, self.groupby)
-        else:
-            body = ''
-
-        tail = self.renderer.tail(self, self._render_cells(
-                    self._compile_aggregate_data(self.data)))
-
-        # render table and return
-        return self.renderer.table(self, head, body, tail)
 
     def _render_body(self, data, groupby=list(), aggregate_row=None):
         """Render table body segment
