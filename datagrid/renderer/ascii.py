@@ -25,22 +25,24 @@ class Renderer(datagrid.renderer.abstract.Renderer):
     ASCII/Text Table Renderer
     """
 
-    # Internal storage
-    _currentrow = []
-    _bodyrows = []
-    _tailrow = []
+    def __init__(self):
+        """Initialize instance vars."""
+        # Internal storage
+        self._currentrow = []
+        self._bodyrows = []
+        self._tailrow = []
 
-    # calculated column widths (for proper column alignment)
-    columnwidths = []
+        # calculated column widths (for proper column alignment)
+        self.columnwidths = []
 
-    # calculated aggregation depth
-    levels = 0
-    
-    # Reference to datagrid.core.DataGrid object that is using renderer 
-    config = None
-    
-    # Cell padding 
-    padding = ' ' * 3
+        # calculated aggregation depth
+        self.levels = 0
+        
+        # Reference to datagrid.core.DataGrid object that is using renderer 
+        self.config = None
+        
+        # Cell padding 
+        self.padding = ' ' * 3
 
     def setup(self, config):
         """Prepare renderer to render new table."""
@@ -70,8 +72,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
 
     # pylint: disable-msg=w0221
     def row(self, *args, **kargs): 
-        """
-        core-facing row method.
+        """Core-facing row method.
         capture what we have in our cell collector and give it a home
         in the bodyrows list, then clear the collector to leave room
         for the next set of cells.
@@ -81,11 +82,9 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return ''
 
     def cell(self, config, data, column): 
-        """
-        formatter that is called to render cell data
+        """Formatter that is called to render cell data
         for the ascii module, we simply capture this so we can output it
-            once we've seen what the all cells look like
-        """
+            once we've seen what the all cells look like"""
         # make sure we have the right format
         data = str(data)
 
@@ -98,18 +97,14 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return ''   # datagrid.core needs to think this worked properly
 
     def head(self, config): 
-        """
-        core-facing head method, all we usually use here is config, but
+        """Core-facing head method, all we usually use here is config, but
         we already have that stored on the object, so we can do nothing
-        now.
-        """
+        now."""
         return ''
 
     def tail(self, config, cells): 
-        """
-        core-facing tail method, capture what we need to call this 
-        'for real' later
-        """
+        """Core-facing tail method, capture what we need to call this 
+        'for real' later"""
         self._tailrow = (self._currentrow)
         self._currentrow = []
 
@@ -125,8 +120,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
             yield self._row(cells, *args, **kargs)
 
     def _row(self, cells, level=0, name=None, value=None):
-        """
-        Generate ASCII Table Row
+        """Generate ASCII Table Row
 
         Example:
         >>> from collections import namedtuple
@@ -147,8 +141,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
             return '%s\n' % cells
 
     def _cell(self, data, column):
-        """
-        Generate ASCII Table Cell
+        """Generate ASCII Table Cell
         
         Example:
         >>> r = Renderer()
@@ -168,8 +161,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return justify(self.column_width(column)) + self.padding
 
     def _head(self):
-        """
-        Generate the Header Row
+        """Generate the Header Row
 
         Example:
         >>> from collections import namedtuple
@@ -189,8 +181,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return indent + heading + '\n' + indent + border + '\n'
 
     def _tail(self, cells):
-        """
-        Generate the Footer Row
+        """Generate the Footer Row
 
         Example:
         >>> from collections import namedtuple
@@ -208,8 +199,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         return indent + border + '\n' + indent + cells
 
     def column_width(self, index):
-        """
-        Return column width for requested column
+        """Return column width for requested column
 
         Example:
         >>> r = Renderer()
@@ -225,8 +215,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
             return 0
         
     def aggregate_indent(self, level=None):
-        """
-        Get aggregate row prefix
+        """Get aggregate row prefix
         
         >>> from collections import namedtuple
         >>> Cfg = namedtuple('Cfg', 'aggregate')
