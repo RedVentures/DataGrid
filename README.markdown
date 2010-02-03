@@ -42,7 +42,7 @@ Render of basic table with ascii renderer:
 
 Usage (rendergrid exec)
 -----------------------
-Render a csv file from headers:
+Render a csv file with headers:
     rendergrid -A myfile.csv
 
 For more help with the rendergrid executable:
