@@ -146,6 +146,16 @@ class TestOutput(unittest.TestCase):
         self.grid.formatters = {'one': lambda x: x.zfill(2)} 
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
+    def testSortByRender(self): 
+        # Output of test run should look like this
+        expected = ("[t][h/]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c][/c][c][/c][/f]"
+                "[/t]")
+        self.grid.sortby = [('one', 'desc')]
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
+
 
 class TestCalculatedOutput(unittest.TestCase):
 
@@ -174,6 +184,16 @@ class TestCalculatedOutput(unittest.TestCase):
                 "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
                 "[/t]")
         self.grid.formatters = {'four': format.number}
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
+
+    def testSortByRender(self): 
+        # Output of test run should look like this
+        expected = ("[t][h/]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][c]11.0[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]" 
+                "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
+                "[/t]")
+        self.grid.sortby = [('four', 'desc')]
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
         
