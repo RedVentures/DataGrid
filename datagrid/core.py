@@ -90,6 +90,7 @@ class DataGrid(object):
         self._rawcolumns = None
         self._allcolumns = None
         self._displaycolumns = None
+        self._calculatedcolumns = None
 
 
     def render(self, renderer):
@@ -137,10 +138,15 @@ class DataGrid(object):
         #   contain raw data versus calculated data
         self._rawcolumns = pad_column_names(len(self.data[0]), self.labels)
 
+        # materialize calculated column methods
+        self._calculatedcolumns = dict(
+                (k, formula(v) if isinstance(v, str) else v)
+                for k, v in self.calculatedcolumns.iteritems())
+
         # append any calculated columns to our list of columns we have
-        if self.calculatedcolumns:
+        if self._calculatedcolumns:
             self._allcolumns = tuple(itertools.chain(self._rawcolumns, 
-                self.calculatedcolumns.keys()))
+                self._calculatedcolumns.keys()))
         else: 
             self._allcolumns = self._rawcolumns
         
@@ -239,12 +245,12 @@ class DataGrid(object):
     def _render_cells(self, data):
         """Render cell-block using given data"""
         # Find calculated column values and apply formatting for given row
-        if self.calculatedcolumns:
+        if self._calculatedcolumns:
             data_dict = dict(zip(self._rawcolumns, data))
 
             # calculated columns
-            if self.calculatedcolumns:
-                data_dict = calculatevalues(data_dict, self.calculatedcolumns)
+            if self._calculatedcolumns:
+                data_dict = calculatevalues(data_dict, self._calculatedcolumns)
 
             data = [data_dict[k] for k in self._allcolumns]
 
