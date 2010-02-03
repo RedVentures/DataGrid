@@ -20,6 +20,7 @@
 
 import unittest
 from datagrid.core import DataGrid
+from datagrid import format
 
 
 # -- TEST FIXTURES -- #
@@ -61,7 +62,7 @@ class EchoRenderer(object):
         return "[r]" + cells + "[/r]"
 
     def cell(self, config, data, column): 
-        return "[c]" + data + "[/c]"
+        return "[c]%s[/c]" % data
 
     def head(self, config): 
         return "[h/]"
@@ -138,7 +139,44 @@ class TestOutput(unittest.TestCase):
         self.grid.columns = ('one', 'two')
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
+    def testFormattedRender(self): 
+        # Output of test run should look like this
+        expected = "[t][h/][r][c]01[/c][c]2[/c][c]3[/c][/r]" \
+                "[r][c]04[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
+        self.grid.formatters = {'one': lambda x: x.zfill(2)} 
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
+
+class TestCalculatedOutput(unittest.TestCase):
+
+    # Grid fixture
+    grid = None
+
+    def setUp(self):
+        """Setup for all tests in class"""
+        self.grid = DataGrid(testData, testCols)
+        self.grid.calculatedcolumns = {"four": "{two}+{three}"}
+
+    def testBasicRender(self):
+        # Output of test run should look like this
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]" 
+                "[r][c]4[/c][c]5[/c][c]6[/c][c]11.0[/c][/r]"
+                "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
+                "[/t]")
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
+
+    def testFormattedRender(self):
+       # Output of test run should look like this
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5[/c][/r]" 
+                "[r][c]4[/c][c]5[/c][c]6[/c][c]11[/c][/r]"
+                "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
+                "[/t]")
+        self.grid.formatters = {'four': format.number}
+        self.assertEquals(expected, self.grid.render(EchoRenderer()))
+
+        
 # Run tests if called from console
 if __name__ == '__main__':
     unittest.main()

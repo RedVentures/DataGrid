@@ -30,6 +30,8 @@ def _handle_format_error(method):
             return method(*args, **kargs)
         except TypeError:
             return '--'
+        except ValueError:
+            return '--'
     return partial(new_method, method)
 
 
@@ -61,6 +63,8 @@ def number(value, precision=0, delim=','):
     '10,000.12'
     >>> number('100')
     '100'
+    >>> number('--')
+    '--'
     """
     # Return empty values with no change
     if value == '':
