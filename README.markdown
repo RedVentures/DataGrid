@@ -10,6 +10,7 @@ which utilize the rendergrid script for access to the datagrid from php.
 Features
 --------
 Currently supported features:
+
 *   Sorting
 *   Grouping
 *   Aggregation of data at group & totals levels
