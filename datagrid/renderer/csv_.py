@@ -26,49 +26,35 @@ import datagrid.renderer.abstract
 
 
 class Renderer(datagrid.renderer.abstract.Renderer):
-    """
-    CSV Table renderer
-    """
+    """CSV Table renderer"""
     def __init__(self):
         self.currentrow = []
 
     def table(self, config, head, body, foot):
-        """
-        Generate CSV file from head/body csv chunks
-        """
+        """Generate CSV file from head/body csv chunks"""
         return ''.join([head, body, foot])
 
     def row(self, config, cells, level=0, name=None, value=None):
-        """
-        Generate CSV row from list of cell values
-        """
+        """Generate CSV row from list of cell values"""
         rowdata, self.currentrow = self.currentrow, []
         return _makecsvrow(rowdata)
 
     def cell(self, config, data, column):
-        """
-        Echo value back to datagrid core
-        """
+        """Echo value back to datagrid core"""
         self.currentrow.append(data)
         return ''
 
     def head(self, config):
-        """
-        Build header row for CSV table
-        """
+        """Build header row for CSV table"""
         return _makecsvrow(config.columns)
 
     def tail(self, config, data):
-        """
-        CSV file requires no tail record.. skip
-        """
+        """CSV file requires no tail record.. skip"""
         return ''
 
 
 def _makecsvrow(data):
-    """
-    Build string with csv row from list of data
-    """
+    """Build string with csv row from list of data"""
     buf = StringIO()
     csv.writer(buf).writerow(data)
     csvrow = buf.getvalue()

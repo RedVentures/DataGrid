@@ -36,8 +36,7 @@ class CalculatedValueError(Exception):
 
 
 def calculatevalues(data, calculations):
-    """
-    Calculate given formulas on data
+    """Calculate given formulas on data
 
     Example:
     >>> formulas = {'c': lambda d: 3}
@@ -93,8 +92,7 @@ def calculatevalues(data, calculations):
 
 
 def formula(calc_string):
-    """
-    Generate formula to run on given data
+    """Generate formula to run on given data
 
     Example:
     >>> f = formula('{a} + {b}')

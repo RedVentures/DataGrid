@@ -16,9 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #------------------------------------------------------------------------#
 
-"""
-Application MetaData
-"""
+"""Application MetaData"""
 
 NAME = 'DataGrid'
 VERSION = '0.1'

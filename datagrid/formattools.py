@@ -31,8 +31,7 @@ def str_formatter(string):
 
 
 def parse_options(formatters):
-    """
-    Parse format options passed to rendergrid and return the format required
+    """Parse format options passed to rendergrid and return the format required
     for datagrid.core
 
     Example:
@@ -89,8 +88,6 @@ def parse_options(formatters):
 
 
 def _create_flow(function_a, function_b):
-    """
-    Generate lambda to be used in formatter flow
-    """
+    """Generate lambda to be used in formatter flow"""
     return lambda x: function_b(function_a(x))
 

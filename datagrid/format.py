@@ -22,9 +22,7 @@ from functools import partial
 
 
 def _handle_format_error(method):
-    """
-    Decorator to handle various exceptions we receive from formatting
-    """
+    """Decorator to handle various exceptions we receive from formatting"""
     def new_method(method, *args, **kargs):
         try:
             return method(*args, **kargs)
@@ -37,8 +35,7 @@ def _handle_format_error(method):
 
 @_handle_format_error
 def plain_number(value):
-    """
-    Format float or other numeric value as integer (in string form)
+    """Format float or other numeric value as integer (in string form)
 
     Example:
     >>> plain_number(100.2)
@@ -53,8 +50,7 @@ def plain_number(value):
 
 @_handle_format_error
 def number(value, precision=0, delim=','):
-    """
-    Format value as number with thousands sep. with fixed precision.
+    """Format value as number with thousands sep. with fixed precision.
 
     Example:
     >>> number(1000.5)
@@ -89,8 +85,7 @@ def number(value, precision=0, delim=','):
 
 @_handle_format_error
 def percent(value, precision=0):
-    """
-    Format value as percentage
+    """Format value as percentage
 
     Example:
     >>> percent(0.95)
@@ -115,8 +110,7 @@ def percent(value, precision=0):
 
 @_handle_format_error
 def currency(value):
-    """
-    Format value as currency
+    """Format value as currency
 
     Example:
     >>> currency(123.2)

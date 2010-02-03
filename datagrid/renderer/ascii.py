@@ -21,9 +21,7 @@
 import datagrid.renderer.abstract
 
 class Renderer(datagrid.renderer.abstract.Renderer):
-    """
-    ASCII/Text Table Renderer
-    """
+    """ASCII/Text Table Renderer"""
 
     def __init__(self):
         """Initialize instance vars."""

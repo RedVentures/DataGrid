@@ -23,8 +23,7 @@ import __builtin__
 import datagrid.aggregate
 
 def parse_options(aggregation):
-    """
-    Parse string aggregation options and return a format suitable for
+    """Parse string aggregation options and return a format suitable for
     datagrid.core
     
     Example:

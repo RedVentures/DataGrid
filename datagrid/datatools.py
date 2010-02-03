@@ -33,8 +33,7 @@ TypeOrValueError.register(ValueError)  # pylint: disable-msg=e1101
 
 
 def multi_sorted(data, sortcolumns, key=None):
-    """
-    Sort 2D dataset by given columns and key function
+    """Sort 2D dataset by given columns and key function
 
     Params:
         - data: 2-dimensional dataset to be sorted
@@ -67,8 +66,7 @@ def multi_sorted(data, sortcolumns, key=None):
 
 
 def set_column_types(data, types):
-    """
-    Map types to columns on give data (generator) 
+    """Map types to columns on give data (generator) 
 
     Example:
     >>> i = set_column_types([['1','abc','0'],['4','b','1']],(float,str,int))
@@ -99,8 +97,7 @@ def set_column_types(data, types):
 
 
 def get_column_types(columns):
-    """
-    Determine column types from content in each column
+    """Determine column types from content in each column
 
     Example:
     >>> get_column_types([[1,'2',3,'a'],[2,'3','z','b']])
@@ -110,8 +107,7 @@ def get_column_types(columns):
 
 
 def column_type(values):
-    """
-    Guess column type from data-therin (ie: str or float)
+    """Guess column type from data-therin (ie: str or float)
 
     Example:
     >>> column_type([1,2,3])

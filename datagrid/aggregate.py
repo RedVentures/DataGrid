@@ -22,8 +22,7 @@ from operator import countOf
 
 
 def count(values): 
-    """
-    Count Unique Values
+    """Count Unique Values
     
     Example:
     >>> count(['red', 'green', 'red', 'blue'])
@@ -34,8 +33,7 @@ def count(values):
 
 
 def avg(values): 
-    """
-    Average Values
+    """Average Values
     
     Example:
     >>> result = avg([1,2,3])
