@@ -7,6 +7,15 @@ main purpose of this project, and an executable (rendergrid) that uses the
 library for shell-level access to the library.  There are also PHP bindings 
 which utilize the rendergrid script for access to the datagrid from php.
 
+Features
+--------
+Currently supported features:
+*   Sorting
+*   Grouping
+*   Aggregation of data at group & totals levels
+*   Calculated columns: Add new columns derived from raw data.
+*   Column formatting 
+
 Installation
 ------------
 The installation process will install the library in python's site-packages 
