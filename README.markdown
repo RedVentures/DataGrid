@@ -17,6 +17,16 @@ Currently supported features:
 *   Calculated columns: Add new columns derived from raw data.
 *   Column formatting 
 
+Requirements
+------------
+Core DataGrid library and rendergrid exec:
+
+*   Python 2.6+
+
+PHP Bindings:
+
+*   PHP 5.2+
+
 Installation
 ------------
 The installation process will install the library in python's site-packages 
