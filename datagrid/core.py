@@ -1,6 +1,6 @@
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
-# Copyright (C) 2009 Adam Wagner <awagner@redventures.com>
+# Copyright (C) 2009-2010 Adam Wagner <awagner@redventures.com>
 #                    Kenny Parnell <kparnell@redventures.com>
 #
 # This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,6 @@
 
 import itertools
 from copy import copy
-from collections import Mapping, defaultdict
 from string import ascii_uppercase
 
 from datagrid.calctools import formula, calculatevalues
