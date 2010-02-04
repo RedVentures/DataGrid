@@ -135,7 +135,7 @@ class DataGrid(object):
         """Prepare instance for render."""
         # when getting calculated column values, we to know what columns 
         #   contain raw data versus calculated data
-        self._rawcolumns = pad_column_names(len(self.data[0]), self.labels)
+        self._rawcolumns = generate_column_names(len(self.data[0]), self.labels)
 
         # materialize calculated column methods
         self._calculatedcolumns = dict(
@@ -287,13 +287,13 @@ class DataGrid(object):
         return rowdata
 
 
-def pad_column_names(width, columns=None):
+def generate_column_names(width, columns=None):
     """Return columns list with any missing columns filled with generated names.
     
     Example:
-    >>> pad_column_names(5, ['mycol', 'yourcol'])
+    >>> generate_column_names(5, ['mycol', 'yourcol'])
     ['mycol', 'yourcol', 'C', 'D', 'E']
-    >>> pad_column_names(5)
+    >>> generate_column_names(5)
     ['A', 'B', 'C', 'D', 'E']
     """
     if not columns:
@@ -302,8 +302,8 @@ def pad_column_names(width, columns=None):
         columns = copy(columns)
     initial_len = len(columns)
 
-    # name generating generator
     def mknames():
+        """Name generating generator."""
         for block in (itertools.product(ascii_uppercase, repeat=x) 
                 for x in itertools.count(1)):
             for name in block:
