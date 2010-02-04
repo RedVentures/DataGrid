@@ -32,6 +32,11 @@ class ColumnDoesNotExistError(Exception):
     pass
 
 
+class NothingToRenderError(Exception):
+    """Tried to render datagrid with no data."""
+    pass
+
+
 class DataGrid(object):
     """Tabular Data Rendering Object.
 
@@ -106,6 +111,11 @@ class DataGrid(object):
         >>> type(d.render(renderer))
         <type 'str'>
         """
+        # make sure we have something to render
+        if not len(self.data):
+            raise NothingToRenderError()
+
+        # prepare for render
         self._normalize()
 
         # run renderer setup logic (if we have any)
