@@ -123,8 +123,9 @@ class DataGrid(object):
         else:
             body = ''
 
-        tail = self.renderer.tail(self, self._render_cells(
-                    self._compile_aggregate_data(self.data)))
+        taildata = self._add_calculated_columns(
+                self._compile_aggregate_data(self.data))
+        tail = self.renderer.tail(self, self._render_cells(taildata))
 
         # render table and return
         return self.renderer.table(self, head, body, tail)
@@ -142,11 +143,8 @@ class DataGrid(object):
                 for k, v in self.calculatedcolumns.iteritems())
 
         # append any calculated columns to our list of columns we have
-        if self._calculatedcolumns:
-            self._allcolumns = tuple(itertools.chain(self._rawcolumns, 
+        self._allcolumns = tuple(itertools.chain(self._rawcolumns, 
                 self._calculatedcolumns.keys()))
-        else: 
-            self._allcolumns = self._rawcolumns
         
         # alias for easier readability below
         idx = self._allcolumns.index        
@@ -217,6 +215,9 @@ class DataGrid(object):
                 rowdata = self._compile_aggregate_data(subdata, aggregate_row)
                 rowdata[idx] = value
 
+                # add calculated columns to data
+                rowdata = self._add_calculated_columns(rowdata)
+
                 # if details are suppressed, decrement out agg-level
                 if self.suppressdetail: 
                     rowargs['level'] -= 1
@@ -236,22 +237,16 @@ class DataGrid(object):
             output = multi_sorted(output, self.sortby, lambda c, d: d[0][c])
             return ''.join(row[1] for row in output)
         else:
+            # Find calculated column values and apply formatting for given row
+            data = [self._add_calculated_columns(row) for row in data]
+
             # sort data and display
             data = multi_sorted(data, self.sortby)
             return ''.join(self._render_row(row) for row in data)
     
+
     def _render_cells(self, data):
         """Render cell-block using given data"""
-        # Find calculated column values and apply formatting for given row
-        if self._calculatedcolumns:
-            data_dict = dict(zip(self._rawcolumns, data))
-
-            # calculated columns
-            if self._calculatedcolumns:
-                data_dict = calculatevalues(data_dict, self._calculatedcolumns)
-
-            data = [data_dict[k] for k in self._allcolumns]
-
         # formatted columns
         if self.formatters:
             data = list(data)
@@ -264,9 +259,19 @@ class DataGrid(object):
         return ''.join(self.renderer.cell(self, data[k], i) 
                 for i, k in enumerate(self._displaycolumns))
 
+
     def _render_row(self, data, **kargs):
         """Render table-row"""
         return self.renderer.row(self, self._render_cells(data), **kargs)
+
+
+    def _add_calculated_columns(self, row):
+        """Add Calculated Columns to row of data."""
+        row = calculatevalues(
+                dict(zip(self._rawcolumns, row)), 
+                self._calculatedcolumns)
+        return [row[k] for k in self._allcolumns]
+
 
     def _compile_aggregate_data(self, data, rowmodel=None):
         """Generate aggregate row summary data"""
