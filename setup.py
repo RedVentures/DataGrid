@@ -21,7 +21,7 @@
 """DataGrid setup-tools"""
 
 import sys
-from distutils.core import setup
+from setuptools import setup, find_packages
 from datagrid.distutils import phpdir
 from datagrid import about
 
@@ -43,7 +43,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'install':
 setup(
         name = about.NAME,
         version = about.VERSION,
-        packages = ['datagrid', 'datagrid.renderer'],
-        data_files = data_files
+        packages = find_packages(),
+        data_files = data_files,
      )
 
