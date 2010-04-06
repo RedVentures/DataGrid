@@ -1,7 +1,8 @@
-#!/bin/env python
+#!/usr/bin/env python
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009-2010 Adam Wagner <awagner@redventures.com>
+#                         Kenny Parnell <k.parnell@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published 

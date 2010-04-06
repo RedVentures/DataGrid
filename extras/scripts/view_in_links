@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 #------------------------------------------------------------------------#
 # DataGrid - Tabular Data Rendering Library
 # Copyright (C) 2009-2010 Adam Wagner <awagner@redventures.com>
