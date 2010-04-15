@@ -34,12 +34,12 @@ class Renderer(object):
         pass
 
     @abstractmethod
-    def row(self, config, level, name=None, value=None): 
+    def row(self, config, style, level, name=None, value=None): 
         """Generate table row"""
         pass
 
     @abstractmethod
-    def cell(self, config, data, column): 
+    def cell(self, config, style, data, column): 
         """Generate table cell"""
         pass
 

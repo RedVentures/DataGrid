@@ -107,3 +107,18 @@ def formula(calc_string):
     exec 'calc_method = lambda d: ' + calc_string  # pylint: disable-msg=W0122
     return calc_method
 
+def bool_formula(calc_string):
+    """Generate formula to run on given data
+
+    Example:
+    >>> f = bool_formula('{a} < {b}')
+    >>> f({'a': 1, 'b': 2})
+    True
+    """
+    # replace place-holders with dictionary refs
+    calc_string = calc_string.replace('{', 'd["').replace('}', '"]')
+
+    # create new function and return
+    calc_method = None
+    exec 'calc_method = lambda d: ' + calc_string  # pylint: disable-msg=W0122
+    return calc_method

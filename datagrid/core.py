@@ -23,7 +23,7 @@ import itertools
 from copy import copy
 from string import ascii_uppercase
 
-from datagrid.calctools import formula, calculatevalues
+from datagrid.calctools import bool_formula, formula, calculatevalues
 from datagrid.datatools import multi_sorted
 
 
@@ -53,7 +53,8 @@ class DataGrid(object):
 
     def __init__(self, data, labels=None, descriptions=None, groupby=None, 
             aggregate=None, suppressdetail=False, calculatedcolumns=None, 
-            sortby=None, columns=None, formatters=None):
+            sortby=None, columns=None, formatters=None, cellstyles=None,
+            rowstyles=None, columnstyles=None):
         """Receive incoming params and set instance defaults.
         
         Params:
@@ -68,6 +69,9 @@ class DataGrid(object):
             sortby: how we will sort the data for display
             columns: display columns to include in rendered output
             formatters: final-pass formatting of columns (ie: currency, percent)
+            cellstyles: Styles for a particular cell when it meets criteria
+            rowstyles: Styles for a particular row when it meets criteria
+            columnstyles: Styles for a particular column when it meets criteria
 
         Example:
         >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
@@ -86,6 +90,9 @@ class DataGrid(object):
         self.sortby = sortby or []
         self.columns = columns or []
         self.formatters = formatters or {}
+        self.cellstyles = cellstyles or []
+        self.rowstyles = rowstyles or []
+        self.columnstyles = columnstyles or []
         self.renderer = None
 
         # working 'private' vars
@@ -256,6 +263,21 @@ class DataGrid(object):
 
     def _render_cells(self, data):
         """Render cell-block using given data"""
+
+        cell_styles = ['' for x in self._allcolumns]
+
+        # Style column
+        if self.columnstyles:
+            for c, s in self.columnstyles:
+                cell_styles[self._allcolumns.index(c)] = s
+
+        # Style cells
+        if self.cellstyles:
+            for c, d, s in self.cellstyles:
+                f = bool_formula(d)
+                if f(dict(zip(self._allcolumns, data))):
+                    cell_styles[self._allcolumns.index(c)] += s
+
         # formatted columns
         if self.formatters:
             data = list(data)
@@ -265,13 +287,22 @@ class DataGrid(object):
 
         # Return block of rendered cells (use renderer.cell for actual 
         #   rendering)
-        return ''.join(self.renderer.cell(self, data[k], i) 
+        return ''.join(self.renderer.cell(self, cell_styles[k], data[k], i) 
                 for i, k in enumerate(self._displaycolumns))
 
 
     def _render_row(self, data, **kargs):
         """Render table-row"""
-        return self.renderer.row(self, self._render_cells(data), **kargs)
+        row_styles = []
+
+        # Style rows
+        if self.rowstyles:
+            for d, s in self.rowstyles:
+                f = bool_formula(d)
+                if f(dict(zip(self._allcolumns, data))):
+                    row_styles.append(s)
+
+        return self.renderer.row(self, ' '.join(row_styles), self._render_cells(data), **kargs)
 
 
     def _add_calculated_columns(self, row):
@@ -291,8 +322,8 @@ class DataGrid(object):
         if len(self.aggregate):
             column_values = zip(*data)
             for i, method in self.aggregate.iteritems():
-                rowdata[i] = str(method([v 
-                    for v in column_values[i] if v != '']))
+                rowdata[i] = method([v 
+                    for v in column_values[i] if v != ''])
         return rowdata
 
 

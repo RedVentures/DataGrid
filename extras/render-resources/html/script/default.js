@@ -81,8 +81,10 @@ var DataGrid = {
                     .paddingLeft = (((child_bucket.length - 1) * 2) + 1) + 'em';
 
                 // Set row color
-                var bg = window.DataGrid.generate_background(child_bucket.length);
-                row.style.backgroundColor = bg;
+                if (row.style.backgroundColor == '') {
+                    var bg = window.DataGrid.generate_background(child_bucket.length, table.id);
+                    row.style.backgroundColor = bg;
+                }
 
                 // Set onclick handler
                 window.DataGrid.register_event(row, 'click', window.DataGrid.toggle_row);
@@ -172,9 +174,20 @@ var DataGrid = {
     },
 
     // Generate aggregate row background color
-    generate_background : function (level) {
-        var shade = 100 + (level * 25);
-        return "rgb(" + shade + ", " + shade + ", " + shade + ")";
+    generate_background : function (level, id) {
+        if (typeof DataGrid.baseColor !== 'undefined') {
+            var span = Math.max.apply(Math, DataGrid.baseColor) - Math.min.apply(Math, DataGrid.baseColor);
+            var interval = span / (DataGrid_Config[id]['groupby'].length + 1);
+            var r = parseInt(DataGrid.baseColor[0], 10) + (level * interval);
+            var g = parseInt(DataGrid.baseColor[1], 10) + (level * interval);
+            var b = parseInt(DataGrid.baseColor[2], 10) + (level * interval);
+        } else {
+            var interval = 100 / (DataGrid_Config[id]['groupby'].length + 0);
+            var r = 100 + (level * interval);
+            var g = 100 + (level * interval);
+            var b = 100 + (level * interval);
+        }
+        return "rgb(" + r + ", " + g + ", " + b + ")";
     },
 
     // Set display style property on given rows

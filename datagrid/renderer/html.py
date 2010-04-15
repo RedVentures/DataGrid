@@ -51,33 +51,34 @@ class Renderer(datagrid.renderer.abstract.Renderer):
             'allcolumns': config._allcolumns})
 
 
-    def row(self, config, cells, level=0, name=None, value=None):
+    def row(self, config, style, cells, level=0, name=None, value=None):
         """Generate table row segment
         
         Example (flat table):
         >>> from collections import namedtuple
         >>> cfg = namedtuple('Cfg', 'groupby')([])
-        >>> row(cfg, '<td></td>')
+        >>> row(cfg, '', '<td></td>')
         '<tr><td></td></tr>'
         """
+        style = " style=\"%s\"" % style or ""
         if config.groupby:
             if name is None:
-                return "<tr class='l-%s'><td></td>%s</tr>" % (level, cells)
+                return "<tr class='l-%s'%s><td></td>%s</tr>" % (level, style, cells)
             else:
                 group_name = ("<span>%s</span>" * 2) % (name, value)
-                return "<tr class='l-%s'><td>%s</td>%s</tr>" % \
-                        (level, group_name, cells)
+                return "<tr class='l-%s'%s><td>%s</td>%s</tr>" % \
+                        (level, style, group_name, cells)
         else: return "<tr>%s</tr>" % cells
 
 
-    def cell(self, config, data, column): 
+    def cell(self, config, style, data, column): 
         """Generate table cell segment
 
         Example:
-        >>> cell(None,'foo',2)
-        '<td>foo</td>'
+        >>> cell(None,'foo','',2)
+        '<td style="%">foo</td>'
         """
-        return "<td>%s</td>" % data
+        return "<td style=\"%s\">%s</td>" % (style, data)
 
 
     def head(self, config):

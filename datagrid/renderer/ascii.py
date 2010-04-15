@@ -79,7 +79,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         self._currentrow = []
         return ''
 
-    def cell(self, config, data, column): 
+    def cell(self, config, style, data, column): 
         """Formatter that is called to render cell data
         for the ascii module, we simply capture this so we can output it
             once we've seen what the all cells look like"""
