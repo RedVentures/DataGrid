@@ -140,9 +140,18 @@ var DataGrid = {
             }
         }
 
-        xhr.open('GET', '/ajax/datagrid.php?id=' + table.id 
+        var req = '';
+        if (typeof DataGrid.url === 'function') {
+            req = DataGrid.url(table.id, DataGrid_Config[table.id], additional_params);
+        } else if (typeof DataGrid.url === 'string') {
+            req = DataGrid.url + 'id=' + table.id 
                 + '&config=' + escape(JSON.stringify(DataGrid_Config[table.id]))
-                + (additional_params ? '&' + additional_params : ''));
+                + (additional_params ? '&' + additional_params : '');
+        } else {
+            throw 'DataGrid.url not defined!';
+        }
+
+        xhr.open('GET', req);
         xhr.send(null);
     },
 
@@ -219,6 +228,7 @@ var DataGrid = {
         loadingBlock.style.position = 'absolute';
         loadingBlock.style.left = tablePos[0] + 'px';
         loadingBlock.style.top = tablePos[1] + 'px';
+        loadingBlock.style.zIndex = 1000;
         loadingBlock.innerHTML = 'Loading.  Please wait...';
 
         // Store ref so we can remove when finished
@@ -252,6 +262,62 @@ var DataGrid = {
     }
 
 };
+
+// Add sorting
+window.DataGrid.register_init(function (grid) {
+
+    // Fetch existing sort order
+    var sort_order = DataGrid_Config[grid.id]['sortby'] || [];
+
+    // Fetch the theads for the grid
+    var theads = grid.getElementsByTagName('th');
+
+    // Set classes for sorted columns
+    for (var i = 0; i < sort_order.length; i += 1) {
+        for (var j = 0; j < theads.length; j += 1) {
+            if (theads[j].innerHTML == sort_order[i][0]) {
+                theads[j].className = 'sorted_' + sort_order[i][1];
+            }
+        }
+    }
+
+    // Set onclick event
+    for (i = 0; i < theads.length; i += 1) {
+        // Skip the empty thead
+        if (theads[i].innerHTML == "") continue;
+
+        // Set the cursor style so the user knows they can click
+        theads[i].style.cursor = 'pointer';
+
+        // Attach the on click event
+        DataGrid.register_event(theads[i], 'click', function (e) {
+            var e = e || window.event;
+            if (e.shiftKey) {
+                var found = false;
+                for (j = 0; j < sort_order.length; j += 1) {
+                    if (sort_order[j][0] == this.innerHTML) {
+                        sort_order[j][1] = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    sort_order[sort_order.length] = [this.innerHTML, 'asc'];
+                }
+            } else {
+                var found = false;
+                for (j = 0; j < sort_order.length; j += 1) {
+                    if (sort_order[j][0] == this.innerHTML) {
+                        found = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                    }
+                }
+                sort_order = [[this.innerHTML,(found || 'asc')]];
+            }
+
+            DataGrid_Config[grid.id]['sortby'] = sort_order;
+            DataGrid.reload_table(grid);
+        });
+    }
+});
 
 // Setup after page loads
 DataGrid.register_event(window, 'load', DataGrid.init);
