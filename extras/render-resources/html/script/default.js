@@ -305,11 +305,15 @@ window.DataGrid.register_init(function (grid) {
         // Attach the on click event
         DataGrid.register_event(theads[i], 'click', function (e) {
             var e = e || window.event;
-            if (e.shiftKey) {
+            if (e.shiftKey || e.ctrlKey) {
                 var found = false;
                 for (j = 0; j < sort_order.length; j += 1) {
                     if (sort_order[j][0] == this.innerHTML) {
-                        sort_order[j][1] = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                        if (sort_order[j][1] == 'desc') {
+                            sort_order.splice(j,1);
+                        } else {
+                            sort_order[j][1] = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                        }
                         found = true;
                     }
                 }
@@ -320,10 +324,18 @@ window.DataGrid.register_init(function (grid) {
                 var found = false;
                 for (j = 0; j < sort_order.length; j += 1) {
                     if (sort_order[j][0] == this.innerHTML) {
-                        found = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                        if (sort_order[j][1] == 'desc') {
+                            found = 'delete'
+                        } else {
+                            found = (sort_order[j][1] == 'asc' ? 'desc' : 'asc');
+                        }
                     }
                 }
-                sort_order = [[this.innerHTML,(found || 'asc')]];
+                if (found == 'delete') {
+                    sort_order = [];
+                } else {
+                    sort_order = [[this.innerHTML,(found || 'asc')]];
+                }
             }
 
             DataGrid_Config[grid.id]['sortby'] = sort_order;
