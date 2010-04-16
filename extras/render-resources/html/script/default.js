@@ -88,6 +88,7 @@ var DataGrid = {
 
                 // Set onclick handler
                 window.DataGrid.register_event(row, 'click', window.DataGrid.toggle_row);
+                row.style.cursor = 'pointer';
 
                 // Update aggregation level pointer
                 current_level = aggregate_level;
@@ -173,20 +174,22 @@ var DataGrid = {
         return result;
     },
 
+    // Default baseColors
+    baseColors : [[100,100,100],[255,255,255]],
+
     // Generate aggregate row background color
     generate_background : function (level, id) {
-        if (typeof DataGrid.baseColor !== 'undefined') {
-            var span = Math.max.apply(Math, DataGrid.baseColor) - Math.min.apply(Math, DataGrid.baseColor);
-            var interval = span / (DataGrid_Config[id]['groupby'].length + 1);
-            var r = parseInt(DataGrid.baseColor[0], 10) + (level * interval);
-            var g = parseInt(DataGrid.baseColor[1], 10) + (level * interval);
-            var b = parseInt(DataGrid.baseColor[2], 10) + (level * interval);
-        } else {
-            var interval = 100 / (DataGrid_Config[id]['groupby'].length + 0);
-            var r = 100 + (level * interval);
-            var g = 100 + (level * interval);
-            var b = 100 + (level * interval);
-        }
+        var calcColors = function (idx) {
+            var max = Math.max(DataGrid.baseColors[0][idx], DataGrid.baseColors[1][idx]);
+            var min = Math.min(DataGrid.baseColors[0][idx], DataGrid.baseColors[1][idx]);
+            var interval = (max - min) / (DataGrid_Config[id]['groupby'].length + 1);
+            if (DataGrid.baseColors[0][idx] > DataGrid.baseColors[1][idx]) interval *= -1;
+            return parseInt(DataGrid.baseColors[0][idx] + (level * interval), 10);
+        };
+
+        var r = calcColors(0);
+        var g = calcColors(1);
+        var b = calcColors(2);
         return "rgb(" + r + ", " + g + ", " + b + ")";
     },
 
@@ -235,9 +238,9 @@ var DataGrid = {
         var tablePos = window.DataGrid.get_position(table);
         loadingBlock = document.createElement('div');
         loadingBlock.style.margin = '2em';
-        loadingBlock.style.background = '#aca';
+        loadingBlock.style.background = DataGrid.generate_background(DataGrid_Config[table.id]['groupby'].length, table.id);
         loadingBlock.style.padding = '.5em 2em';
-        loadingBlock.style.border = '2px solid #8a8';
+        loadingBlock.style.border = '2px solid ' + DataGrid.generate_background(0, table.id);
         loadingBlock.style.position = 'absolute';
         loadingBlock.style.left = tablePos[0] + 'px';
         loadingBlock.style.top = tablePos[1] + 'px';
