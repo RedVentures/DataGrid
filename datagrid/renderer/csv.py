@@ -34,12 +34,12 @@ class Renderer(datagrid.renderer.abstract.Renderer):
         """Generate CSV file from head/body csv chunks"""
         return ''.join([head, body, foot])
 
-    def row(self, config, cells, level=0, name=None, value=None):
+    def row(self, config, style, cells, level=0, name=None, value=None):
         """Generate CSV row from list of cell values"""
         rowdata, self.currentrow = self.currentrow, []
         return _makecsvrow(rowdata)
 
-    def cell(self, config, data, column):
+    def cell(self, config, style, data, column):
         """Echo value back to datagrid core"""
         self.currentrow.append(data)
         return ''
