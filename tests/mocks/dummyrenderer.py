@@ -21,10 +21,10 @@
 def table(config, head, body, tail):
     return ""
 
-def row(config, cells, level=0, name=None, value=None):
+def row(config, style, cells, level=0, name=None, value=None):
     return ""
 
-def cell(config, data, column): 
+def cell(config, style, data, column): 
     return ""
 
 def head(config):

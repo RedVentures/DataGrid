@@ -58,10 +58,10 @@ class EchoRenderer(object):
     def table(self, config, head, body, tail): 
         return "[t]" + head + body + tail + "[/t]"
 
-    def row(self, config, cells, level=0, name=None, value=None): 
+    def row(self, config, style, cells, level=0, name=None, value=None): 
         return "[r]" + cells + "[/r]"
 
-    def cell(self, config, data, column): 
+    def cell(self, config, style, data, column): 
         return "[c]%s[/c]" % data
 
     def head(self, config): 

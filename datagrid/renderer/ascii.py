@@ -117,7 +117,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
             # pylint: disable-msg=w0142
             yield self._row(cells, *args, **kargs)
 
-    def _row(self, cells, level=0, name=None, value=None):
+    def _row(self, cells, style, level=0, name=None, value=None):
         """Generate ASCII Table Row
 
         Example:
