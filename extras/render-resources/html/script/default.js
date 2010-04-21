@@ -3,6 +3,21 @@
  * plusplus: true, bitwise: true, regexp: true, strict: true, newcap: true, 
  * immed: true */
 "use strict";
+// Define foldl
+var foldl = function (arr, fun) {
+    for (var i = 0; i < arr.length; i += 1) {
+        fun(arr[i]);
+    }
+};
+
+// Fetch next element
+var next = function (elem) {
+    do {
+        elem = elem.nextSibling;
+    } while (elem && elem.nodeType !== 1);
+    return elem;
+};
+
 var DataGrid = {
     
     init_hooks : [],
@@ -346,6 +361,49 @@ window.DataGrid.register_init(function (grid) {
             DataGrid.reload_table(grid);
         });
     }
+});
+
+// Add Controls
+window.DataGrid.register_init(function (grid) {
+
+    // Return if we have nothing to do
+    if (typeof DataGrid_Controls !== 'object') return false;
+
+    // Create the controls node
+    var controls = document.getElementById(grid.id + 'Controls') || document.createElement('fieldset');
+    controls.id = grid.id + 'Controls';
+    controls.className = 'datagridControls';
+    controls.innerHTML = '<legend>+ Show Controls</legend>';
+
+    // Insert into the DOM
+    if (!document.getElementById(grid.id + 'Controls')) {
+        grid.parentNode.insertBefore(controls, grid);
+    }
+
+    // Inistantiate all of the controls
+    for (control in DataGrid_Controls) {
+        if (DataGrid_Controls.hasOwnProperty(control)) {
+            var ctl_props = DataGrid_Controls[control];
+            var wrapper = document.createElement('div');
+            wrapper.className = "datagridControl";
+            wrapper.style.display = "none";
+            var ctl = document.createElement(ctl_props.type);
+            ctl.innerHTML = ctl_props.html
+            ctl_props.prepare.call(ctl, grid);
+            wrapper.appendChild(ctl);
+            controls.insertBefore(wrapper, next(controls.lastChild));
+        }
+    }
+
+    // Attach the onclick to the controls
+    controls.getElementsByTagName('legend')[0].onclick = function () {
+        curr = next(this);
+        while (curr != null && curr != next(curr)) {
+            curr.style.display =  (curr.style.display == 'none') ? '' : 'none';
+            curr = next(curr);
+        }
+        this.innerHTML =  (next(this).style.display != 'none') ? '- Hide Controls' : '+ Show Controls';
+    };
 });
 
 // Setup after page loads
