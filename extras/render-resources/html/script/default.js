@@ -92,8 +92,10 @@ var DataGrid = {
                 row.aggregate_level = aggregate_level;
 
                 // Set row indent
-                row.childNodes[0].style
-                    .paddingLeft = (((child_bucket.length - 1) * 2) + 1) + 'em';
+                if (row.childNodes[0].nodeType === 1) {
+                    row.childNodes[0].style
+                        .paddingLeft = (((child_bucket.length - 1) * 2) + 1) + 'em';
+                }
 
                 // Set row color
                 if (row.style.backgroundColor == '') {
