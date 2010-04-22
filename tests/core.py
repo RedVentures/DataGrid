@@ -19,6 +19,8 @@
 """datagrid.core test module"""
 
 import unittest
+import __builtin__ 
+
 from datagrid.core import DataGrid
 from datagrid import format
 
@@ -155,6 +157,160 @@ class TestOutput(unittest.TestCase):
                 "[/t]")
         self.grid.sortby = [('one', 'desc')]
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
+
+    def testGroup(self):
+        self.grid.groupby = ['one']
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c][/c][c][/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c][/c][c][/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[f][c][/c][c][/c][c][/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigate(self):
+        self.grid.data = [[1, 2, 3], [4, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[f][c][/c][c]7[/c][c]9[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigateSort(self):
+        self.grid.data = [[1, 2, 3], [4, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('two', 'desc')]
+        expected = ("[t][h/]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c]7[/c][c]9[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigateSortDesc(self):
+        self.grid.data = [[1, 2, 3], [1, 2, 3], [1, 2, 3],  [4, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('two', 'desc')]
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigateSortAsc(self):
+        self.grid.data = [[1, 2, 3], [1, 2, 3], [1, 2, 3],  [4, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('two', 'asc')]
+        expected = ("[t][h/]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigateSortAscComplex(self):
+        self.grid.data = [[4, 2, 3], [4, 2, 3], [4, 2, 3],  [1, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('two', 'asc')]
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testGroupAggrigateSortDescComplex(self):
+        self.grid.data = [[4, 2, 3], [4, 2, 3], [4, 2, 3],  [1, 5, 6]]
+        self.grid.groupby = ['one']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('two', 'desc')]
+        expected = ("[t][h/]"
+                "[r][c]4[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testMultiGroupAggrigate(self):
+        self.grid.data = [[4, 2, 3], [4, 2, 3], [4, 2, 3],  [1, 5, 6]]
+        self.grid.groupby = ['one','two']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+    def testMultiGroupAggrigateSort(self):
+        self.grid.data = [[4, 2, 3], [4, 2, 3], [4, 2, 3],  [1, 5, 6]]
+        self.grid.groupby = ['one','two']
+        self.grid.aggregate['two'] = vars(__builtin__)['sum']
+        self.grid.aggregate['three'] = vars(__builtin__)['sum']
+        self.grid.sortby = [('three', 'asc')]
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]1[/c][c]5[/c][c]6[/c][/r]"
+                "[r][c]4[/c][c]6[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]9[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[r][c]4[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c]11[/c][c]15[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
 
 
 class TestCalculatedOutput(unittest.TestCase):
