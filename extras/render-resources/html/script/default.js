@@ -323,7 +323,7 @@ window.DataGrid.register_init(function (grid) {
         theads[i].style.cursor = 'pointer';
 
         // Attach the on click event
-        DataGrid.register_event(theads[i], 'click', function (e) {
+        theads[i].onclick = function (e) {
             var e = e || window.event;
             var theHTML = this.innerHTML.replace(/(<([^>]+)>)/ig,'');
             if (e.shiftKey || e.ctrlKey) {
@@ -361,7 +361,7 @@ window.DataGrid.register_init(function (grid) {
 
             DataGrid_Config[grid.id]['sortby'] = sort_order;
             DataGrid.reload_table(grid);
-        });
+        };
     }
 });
 
