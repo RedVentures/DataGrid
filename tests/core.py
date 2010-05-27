@@ -312,6 +312,16 @@ class TestOutput(unittest.TestCase):
         actual = self.grid.render(EchoRenderer())
         self.assertEquals(expected, actual)
 
+    def testFilter(self):
+        self.grid.data = [[1,2,3],[4,5,6]]
+        self.grid.filters = ["{one} == 1"]
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
+                "[f][c][/c][c][/c][c][/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
 
 class TestCalculatedOutput(unittest.TestCase):
 

@@ -73,6 +73,9 @@ def main():
                     'Example: --columndescription="c|Really helpful info."')
     datagroup.add_option('-s', '--sort', action='append', default=[],
             help='Set the sort column(s)')
+    datagroup.add_option('-F','--filter', action='append', default=[],
+            metavar='EXPRESSION', help='Filter out rows that return false for'
+            ' the given expression')
     datagroup.add_option('--suppressdetail', action='store_true',
             help='Suppress detail rows (requires aggregration)')
     datagroup.add_option('--type', action='append', default=[],
@@ -175,7 +178,7 @@ def main():
     # Create datagrid instance and render to stdout
     grid = DataGrid(data, columns, descriptions, options.groupby,
             aggregate, options.suppressdetail, calculations, sortby,
-            options.display, formatters)
+            options.display, formatters, filters=options.filter)
 
     try:
         if options.output:

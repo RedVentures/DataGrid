@@ -22,6 +22,7 @@
 import itertools
 from copy import copy
 from string import ascii_uppercase
+from itertools import ifilter
 
 from datagrid.calctools import bool_formula, formula, calculatevalues
 from datagrid.datatools import multi_sorted
@@ -54,7 +55,7 @@ class DataGrid(object):
     def __init__(self, data, labels=None, descriptions=None, groupby=None, 
             aggregate=None, suppressdetail=False, calculatedcolumns=None, 
             sortby=None, columns=None, formatters=None, cellstyles=None,
-            rowstyles=None, columnstyles=None):
+            rowstyles=None, columnstyles=None, filters=None):
         """Receive incoming params and set instance defaults.
         
         Params:
@@ -72,6 +73,7 @@ class DataGrid(object):
             cellstyles: Styles for a particular cell when it meets criteria
             rowstyles: Styles for a particular row when it meets criteria
             columnstyles: Styles for a particular column when it meets criteria
+            filters: Filter out rows for while the filter method returns false
 
         Example:
         >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
@@ -93,6 +95,7 @@ class DataGrid(object):
         self.cellstyles = cellstyles or []
         self.rowstyles = rowstyles or []
         self.columnstyles = columnstyles or []
+        self.filters = filters or []
         self.renderer = None
 
         # working 'private' vars
@@ -124,6 +127,19 @@ class DataGrid(object):
 
         # prepare for render
         self._normalize()
+
+        # Filter data
+        data = (dict(zip(self._rawcolumns, x)) for x in self.data)
+        if self.filters:
+            for d in self.filters:
+                f = bool_formula(d)
+                data = ifilter(f, data)
+            self.data = []
+            for r in data:
+                row = []
+                for c in self._rawcolumns:
+                    row.append(r[c])
+                self.data.append(row)
 
         # run renderer setup logic (if we have any)
         self.renderer = renderer
