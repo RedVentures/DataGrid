@@ -228,8 +228,20 @@ var DataGrid = {
         // toggle rows in bucket
         if (row.children_expanded) {
             window.DataGrid.set_row_display(row.child_rows, 'none');
+            var names = row.className.split(' ');
+            for (var i = 0; i < names.length; i++)
+                if (names[i] == 'expanded')
+                    names.splice(i,1);
+            names.push('collapsed');
+            row.className = names.join(' ');
         } else {
             window.DataGrid.set_row_display(row.child_rows_direct, '');
+            var names = row.className.split(' ');
+            for (var i = 0; i < names.length; i++)
+                if (names[i] == 'collapsed')
+                    names.splice(i,1);
+            names.push('expanded');
+            row.className = names.join(' ');
         }
 
         // Toggle expanded bit
