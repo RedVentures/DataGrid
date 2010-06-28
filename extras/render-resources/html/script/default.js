@@ -20,7 +20,7 @@ var next = function (elem) {
 
 var DataGrid = {
     
-    init_hooks : [],
+    init_hooks : {},
 
     init : function () {
         // Fetch all DataGrid instances to setup
@@ -32,8 +32,10 @@ var DataGrid = {
             window.DataGrid.init_table(tables[i]);
 
             // Fire all init hooks
-            for (var j = 0; j < window.DataGrid.init_hooks.length; j += 1) {
-                window.DataGrid.init_hooks[j](tables[i]);
+            for (var j in window.DataGrid.init_hooks) {
+                if (window.DataGrid.init_hooks.hasOwnProperty(j)) {
+                    window.DataGrid.init_hooks[j](tables[i]);
+                }
             }
         }
     },
@@ -235,8 +237,23 @@ var DataGrid = {
     },
 
     // Register event to fire on each datagrid everytime init is called
-    register_init : function (method) {
-        window.DataGrid.init_hooks[window.DataGrid.init_hooks.length] = method;
+    register_init : function (method, name) {
+        var slot = name || (function () {
+            var i = 0;
+            while (window.DataGrid.init_hooks.hasOwnProperty(i)) i += 1;
+            return i;
+        })();
+        window.DataGrid.init_hooks[slot] = method;
+    },
+
+    // Fetch the named event
+    fetch_init : function (name) {
+        return window.DataGrid.init_hooks[name];
+    },
+
+    // Remove a registered event
+    unregister_init : function (name) {
+        delete window.DataGrid.init_hooks[name];
     },
 
     // Universal event binder
@@ -363,7 +380,7 @@ window.DataGrid.register_init(function (grid) {
             DataGrid.reload_table(grid);
         };
     }
-});
+}, 'sorting');
 
 // Add Controls
 window.DataGrid.register_init(function (grid) {
@@ -406,7 +423,7 @@ window.DataGrid.register_init(function (grid) {
         }
         this.innerHTML =  (next(this).style.display != 'none') ? '- Hide Controls' : '+ Show Controls';
     };
-});
+}, 'controls');
 
 // Setup after page loads
 DataGrid.register_event(window, 'load', DataGrid.init);
