@@ -22,7 +22,6 @@
 
 import sys
 from setuptools import setup, find_packages
-from datagrid.distutils import phpdir
 from datagrid import about
 
 # Executables and bindings list
