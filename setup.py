@@ -28,17 +28,6 @@ from datagrid import about
 # Executables and bindings list
 data_files = [('bin', ['rendergrid'])]
 
-# if we are installing, do checks for extras installation
-if len(sys.argv) > 1 and sys.argv[1] == 'install':
-    # Check for existance of php and find share dir
-    print "Checking for PHP: ",
-    dir = phpdir()
-    if dir:
-        print "found, Installing PHP bindings in", dir
-        data_files.append((phpdir(), ['extras/bindings/datagrid.php']))
-    else:
-        print "not found, skipping install of php bindings"
-
 # Dispatch distutils setup magic
 setup(
         name = about.NAME,
