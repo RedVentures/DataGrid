@@ -45,5 +45,23 @@ setup(
         version = about.VERSION,
         packages = find_packages(),
         data_files = data_files,
+        author = 'Adam Wagner',
+        author_email = 'awagner83@gmail.com',
+        description = 'Tabular data rendering library',
+        maintainer = 'Kenny Parnell',
+        maintainer_email = 'k.parnell@gmail.com',
+        url = 'http://github.com/redventures-oss/DataGrid',
+        license = 'LGPL 3',
+        classifiers = [
+            'Development Status :: 5 - Production/Stable',
+            'Environment :: Web Environment',
+            'Environment :: Console',
+            'Programming Language :: Python',
+            'Programming Language :: JavaScript',
+            'Natural Language :: English',
+            'License :: OSI Approved',
+            'Intended Audience :: Developers',
+            'Topic :: Utilities',
+        ],
      )
 
