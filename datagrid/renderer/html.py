@@ -68,7 +68,7 @@ class Renderer(datagrid.renderer.abstract.Renderer):
                 group_name = ("<span>%s</span>" * 2) % (name, value)
                 return "<tr class='l-%s'%s><td>%s</td>%s</tr>" % \
                         (level, style, group_name, cells)
-        else: return "<tr>%s</tr>" % cells
+        else: return "<tr%s>%s</tr>" % (style, cells)
 
 
     def cell(self, config, style, data, column): 
