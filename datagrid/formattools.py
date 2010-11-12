@@ -35,17 +35,26 @@ def parse_options(formatters):
     for datagrid.core
 
     Example:
-    >>> formatters = parse_options(['colA|percent','colB|%.0f|percent'])
+    >>> formatters = parse_options(['colA|percent:1','colB|%.0f|percent:1'])
     >>> type(formatters['colA'])
-    <type 'functools.partial'>
+    <type 'function'>
     >>> type(formatters['colB'])
     <type 'function'>
+    >>> funcs = parse_options(['Score|percent:1', 'Z-Score|%0.2f'])
+
+    >>> funcs['Score'](0.99)
+    '99.0%'
     """
     # create dictionary from simple list, setting the first item in each list
     # as the dictionary key... the remaining values are set as the value at
     # that key
     formatters = dict((y[0], y[1:]) 
             for y in (x.split('|') for x in formatters))
+
+    def make_fun(fun, *params):
+        def ifun(x):
+            return fun(x, *params)
+        return ifun
 
     # generate/load format methods
     if len(formatters):
@@ -72,7 +81,7 @@ def parse_options(formatters):
                         parameters = [p.strip() for p in parameters.split(',')]
                         
                         # pass through params given on console
-                        methods[i] = lambda x: method(x, *parameters)
+                        methods[i] = make_fun(method, *parameters)
 
                     # no parameters were found with method
                     else:
