@@ -33,11 +33,9 @@ setup(
         version = about.VERSION,
         packages = find_packages(),
         data_files = data_files,
-        author = 'Adam Wagner',
-        author_email = 'awagner83@gmail.com',
+        author = 'Adam Wagner, Kenny Parnell',
+        author_email = 'awagner83@gmail.com, k.parnell@gmail.com',
         description = 'Tabular data rendering library',
-        maintainer = 'Kenny Parnell',
-        maintainer_email = 'k.parnell@gmail.com',
         url = 'http://github.com/redventures-oss/DataGrid',
         license = 'LGPL 3',
         classifiers = [
