@@ -32,6 +32,16 @@ def count(values):
             for x in sorted(set(values)))
 
 
+def distinct_len(values):
+    """Count Total Unique Values
+
+    Example:
+    >>> distinct_len(['red', 'green', 'red', 'blue'])
+    3
+    """
+    return len(set(values))
+
+
 def avg(values): 
     """Average Values
     
