@@ -55,7 +55,8 @@ class DataGrid(object):
     def __init__(self, data, labels=None, descriptions=None, groupby=None, 
             aggregate=None, suppressdetail=False, calculatedcolumns=None, 
             sortby=None, columns=None, formatters=None, cellstyles=None,
-            rowstyles=None, columnstyles=None, filters=None):
+            rowstyles=None, columnstyles=None, filters=None,
+            post_aggregate_filters=None):
         """Receive incoming params and set instance defaults.
         
         Params:
@@ -74,6 +75,8 @@ class DataGrid(object):
             rowstyles: Styles for a particular row when it meets criteria
             columnstyles: Styles for a particular column when it meets criteria
             filters: Filter out rows for while the filter method returns false
+            post_aggregate_filters: filter rows after being included in
+                aggregate
 
         Example:
         >>> d = DataGrid([[1,2,3],[4,5,6]], ['col-a', 'col-b', 'col-c'])
@@ -96,6 +99,7 @@ class DataGrid(object):
         self.rowstyles = rowstyles or []
         self.columnstyles = columnstyles or []
         self.filters = filters or []
+        self.post_aggregate_filters = post_aggregate_filters or []
         self.renderer = None
 
         # working 'private' vars
@@ -254,16 +258,23 @@ class DataGrid(object):
                 if self.suppressdetail: 
                     rowargs['level'] -= 1
 
+                # Do post aggregate filters
+                excluded = False
+                for f in self.post_aggregate_filters:
+                    if not bool_formula(f)(dict(zip(self._rawcolumns, rowdata))):
+                        excluded = True
+
                 # generate aggregate row
-                rowoutput = self._render_row(rowdata, **rowargs)
+                if not excluded:
+                    rowoutput = self._render_row(rowdata, **rowargs)
 
-                # render remainder of rows beneath aggregation level
-                if rowargs['level'] > 0:
-                    rowoutput += self._render_body(subdata, groupby[1:], 
-                            rowdata)
+                    # render remainder of rows beneath aggregation level
+                    if rowargs['level'] > 0:
+                        rowoutput += self._render_body(subdata, groupby[1:], 
+                                rowdata)
 
-                # append rendered data to output buffer
-                output.append((rowdata, rowoutput))
+                    # append rendered data to output buffer
+                    output.append((rowdata, rowoutput))
 
             # sort aggregate row sorting and return compiled string
             output = multi_sorted(output, self.sortby, lambda c, d: d[0][c])
@@ -271,6 +282,11 @@ class DataGrid(object):
         else:
             # Find calculated column values and apply formatting for given row
             data = [self._add_calculated_columns(row) for row in data]
+
+            if self.post_aggregate_filters:
+                for f in self.post_aggregate_filters:
+                    data = [r for r in data if bool_formula(f)(
+                        dict(zip(self._rawcolumns, r)))]
 
             # sort data and display
             data = multi_sorted(data, self.sortby)
