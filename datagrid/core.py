@@ -259,13 +259,15 @@ class DataGrid(object):
                     rowargs['level'] -= 1
 
                 # Do post aggregate filters
-                excluded = False
-                for f in self.post_aggregate_filters:
-                    if not bool_formula(f)(dict(zip(self._rawcolumns, rowdata))):
-                        excluded = True
+                def fun(row):
+                    formatted_row = dict(zip(self._rawcolumns, row))
+                    for f in self.post_aggregate_filters:
+                        if not bool_formula(f)(formatted_row):
+                            return False
+                    return True
 
-                # generate aggregate row
-                if not excluded:
+                if any(map(fun, subdata)):
+                    # generate aggregate row
                     rowoutput = self._render_row(rowdata, **rowargs)
 
                     # render remainder of rows beneath aggregation level

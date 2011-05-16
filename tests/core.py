@@ -323,13 +323,25 @@ class TestOutput(unittest.TestCase):
         self.assertEquals(expected, actual)
 
 
-    def testPostAggregateFIlter(self):
+    def testPostAggregateFilter(self):
         self.grid.data = [[1,2,3],[2,2,5], [4,5,6]]
         self.grid.aggregate['one'] = vars(__builtin__)['sum']
         self.grid.post_aggregate_filters = ['{two} == 2']
         expected = ("[t][h/]"
                 "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
                 "[r][c]2[/c][c]2[/c][c]5[/c][/r]"
+                "[f][c]7[/c][c][/c][c][/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
+
+    def testMultiPostAggregateFilter(self):
+        self.grid.data = [[1,2,3],[2,2,5], [4,5,6]]
+        self.grid.aggregate['one'] = vars(__builtin__)['sum']
+        self.grid.post_aggregate_filters = ['{two} == 2', '{three} == 3']
+        expected = ("[t][h/]"
+                "[r][c]1[/c][c]2[/c][c]3[/c][/r]"
                 "[f][c]7[/c][c][/c][c][/c][/f]"
                 "[/t]")
         actual = self.grid.render(EchoRenderer())
