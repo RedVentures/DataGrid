@@ -19,7 +19,7 @@
 """datagrid.core test module"""
 
 import unittest
-import __builtin__ 
+import __builtin__
 
 from datagrid.core import DataGrid
 from datagrid import format
@@ -57,19 +57,19 @@ class EchoRenderer(object):
     This renderer is used for basic output testing
     """
 
-    def table(self, config, head, body, tail): 
+    def table(self, config, head, body, tail):
         return "[t]" + head + body + tail + "[/t]"
 
-    def row(self, config, style, cells, level=0, name=None, value=None): 
+    def row(self, config, style, cells, level=0, name=None, value=None):
         return "[r]" + cells + "[/r]"
 
-    def cell(self, config, style, data, column): 
+    def cell(self, config, style, data, column):
         return "[c]%s[/c]" % data
 
-    def head(self, config): 
+    def head(self, config):
         return "[h/]"
 
-    def tail(self, config, cells): 
+    def tail(self, config, cells):
         return "[f]" + cells + "[/f]"
 
 
@@ -84,7 +84,7 @@ class TestRenderInteract(unittest.TestCase):
     def setUp(self):
         """Setup fixtures"""
         self.grid = DataGrid(testData, testCols)
-    
+
     def tearDown(self):
         """Cleanup and prep for next run"""
         StackTestRenderer.callLog = []
@@ -118,7 +118,7 @@ class TestRenderInteract(unittest.TestCase):
 
 
 class TestOutput(unittest.TestCase):
-    
+
     # Grid fixture
     grid = None
 
@@ -126,13 +126,13 @@ class TestOutput(unittest.TestCase):
         """Setup for all tests in class"""
         self.grid = DataGrid(testData, testCols)
 
-    def testBasicRender(self): 
+    def testBasicRender(self):
         # Output of test run should look like this
         expected = "[t][h/][r][c]1[/c][c]2[/c][c]3[/c][/r]" \
                 "[r][c]4[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
-    def testHideColumn(self): 
+    def testHideColumn(self):
         # Output of test run should look like this
         expected = "[t][h/][r][c]1[/c][c]2[/c][/r]" \
                 "[r][c]4[/c][c]5[/c][/r][f][c][/c][c][/c][/f][/t]"
@@ -141,14 +141,14 @@ class TestOutput(unittest.TestCase):
         self.grid.columns = ('one', 'two')
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
-    def testFormattedRender(self): 
+    def testFormattedRender(self):
         # Output of test run should look like this
         expected = "[t][h/][r][c]01[/c][c]2[/c][c]3[/c][/r]" \
                 "[r][c]04[/c][c]5[/c][c]6[/c][/r][f][c][/c][c][/c][c][/c][/f][/t]"
-        self.grid.formatters = {'one': lambda x: x.zfill(2)} 
+        self.grid.formatters = {'one': lambda x: x.zfill(2)}
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
-    def testSortByRender(self): 
+    def testSortByRender(self):
         # Output of test run should look like this
         expected = ("[t][h/]"
                 "[r][c]4[/c][c]5[/c][c]6[/c][/r]"
@@ -361,7 +361,7 @@ class TestCalculatedOutput(unittest.TestCase):
     def testBasicRender(self):
         # Output of test run should look like this
         expected = ("[t][h/]"
-                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]" 
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]"
                 "[r][c]4[/c][c]5[/c][c]6[/c][c]11.0[/c][/r]"
                 "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
                 "[/t]")
@@ -370,24 +370,24 @@ class TestCalculatedOutput(unittest.TestCase):
     def testFormattedRender(self):
        # Output of test run should look like this
         expected = ("[t][h/]"
-                "[r][c]1[/c][c]2[/c][c]3[/c][c]5[/c][/r]" 
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5[/c][/r]"
                 "[r][c]4[/c][c]5[/c][c]6[/c][c]11[/c][/r]"
                 "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
                 "[/t]")
         self.grid.formatters = {'four': format.number}
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
-    def testSortByRender(self): 
+    def testSortByRender(self):
         # Output of test run should look like this
         expected = ("[t][h/]"
                 "[r][c]4[/c][c]5[/c][c]6[/c][c]11.0[/c][/r]"
-                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]" 
+                "[r][c]1[/c][c]2[/c][c]3[/c][c]5.0[/c][/r]"
                 "[f][c][/c][c][/c][c][/c][c]--[/c][/f]"
                 "[/t]")
         self.grid.sortby = [('four', 'desc')]
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
-        
+
 # Run tests if called from console
 if __name__ == '__main__':
     unittest.main()
