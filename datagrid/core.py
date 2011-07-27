@@ -288,7 +288,7 @@ class DataGrid(object):
             if self.post_aggregate_filters:
                 for f in self.post_aggregate_filters:
                     data = [r for r in data if bool_formula(f)(
-                        dict(zip(self._rawcolumns, r)))]
+                        dict(zip(self._allcolumns, r)))]
 
             # sort data and display
             data = multi_sorted(data, self.sortby)

@@ -387,6 +387,18 @@ class TestCalculatedOutput(unittest.TestCase):
         self.grid.sortby = [('four', 'desc')]
         self.assertEquals(expected, self.grid.render(EchoRenderer()))
 
+    def testPostAggregateFilter(self):
+        self.grid.data = [[1,2,3],[2,2,5],[4,5,2]]
+        self.grid.aggregate['one'] = vars(__builtin__)['sum']
+        self.grid.post_aggregate_filters = ['{four} == 7']
+        expected = ("[t][h/]"
+                "[r][c]2[/c][c]2[/c][c]5[/c][c]7.0[/c][/r]"
+                "[r][c]4[/c][c]5[/c][c]2[/c][c]7.0[/c][/r]"
+                "[f][c]7[/c][c][/c][c][/c][c]--[/c][/f]"
+                "[/t]")
+        actual = self.grid.render(EchoRenderer())
+        self.assertEquals(expected, actual)
+
 
 # Run tests if called from console
 if __name__ == '__main__':
