@@ -18,6 +18,7 @@
 
 """Format Method Library"""
 
+from decimal import Decimal, ROUND_UP, InvalidOperation
 from functools import partial
 
 
@@ -55,6 +56,8 @@ def number(value, precision=0, delim=','):
     Example:
     >>> number(1000.5)
     '1,000'
+    >>> number(0.25, 1)
+    '0.3'
     >>> number(10000.123, 2)
     '10,000.12'
     >>> number('100')
@@ -65,8 +68,15 @@ def number(value, precision=0, delim=','):
     # Return empty values with no change
     if value == '':
         return ''
-    value = reversed(list(("%." + str(precision) + "f") % float(value)))
+
+    try:
+        d = '.' + ('1' * int(precision))
+        value = Decimal(value).quantize(Decimal(d), rounding=ROUND_UP)
+    except (TypeError, InvalidOperation):
+        value = int(value)
     
+    value = reversed(list(str(value)))
+
     # Rewrite decimal portion
     new_value = []
     if precision:
