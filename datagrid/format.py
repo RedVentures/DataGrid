@@ -18,20 +18,21 @@
 
 """Format Method Library"""
 
-from decimal import Decimal, ROUND_UP, InvalidOperation
-from functools import partial
+from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
+from functools import partial, wraps
 
 
 def _handle_format_error(method):
     """Decorator to handle various exceptions we receive from formatting"""
-    def new_method(method, *args, **kargs):
+    @wraps(method)
+    def new_method(*args, **kargs):
         try:
             return method(*args, **kargs)
         except TypeError:
             return '--'
         except ValueError:
             return '--'
-    return partial(new_method, method)
+    return new_method
 
 
 @_handle_format_error
@@ -55,13 +56,17 @@ def number(value, precision=0, delim=','):
 
     Example:
     >>> number(1000.5)
-    '1,000'
+    '1,001'
     >>> number(0.25, 1)
     '0.3'
     >>> number(10000.123, 2)
     '10,000.12'
     >>> number('100')
     '100'
+    >>> number(0.75, 1)
+    '0.8'
+    >>> number(0.75, 0)
+    '1'
     >>> number('--')
     '--'
     """
@@ -70,10 +75,15 @@ def number(value, precision=0, delim=','):
         return ''
 
     try:
+        float(value)
+    except ValueError:
+        return value
+
+    try:
         d = '.' + ('1' * int(precision))
-        value = Decimal(value).quantize(Decimal(d), rounding=ROUND_UP)
+        value = Decimal(str(value)).quantize(Decimal(d), rounding=ROUND_HALF_UP)
     except (TypeError, InvalidOperation):
-        value = int(value)
+        value = Decimal(str(value)).quantize(Decimal('1.'), rounding=ROUND_HALF_UP)
     
     value = reversed(list(str(value)))
 
@@ -103,7 +113,7 @@ def percent(value, precision=0):
     >>> percent(0.125, 1)
     '12.5%'
     >>> percent(0.125)
-    '12%'
+    '13%'
     >>> percent(0.125, 2)
     '12.50%'
     >>> percent('--')
